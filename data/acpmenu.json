@@ -1,0 +1,11 @@
+{
+    "tickets": {
+        "tickets": {
+            "tab": "vssupport",
+            "controller": "tickets",
+            "do": "",
+            "restriction": "tickets_manage",
+            "subcontrollers": ""
+        }
+    }
+}

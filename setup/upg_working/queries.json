@@ -1,0 +1,272 @@
+[
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_tickets",
+            "id",
+            {
+                "name": "id",
+                "type": "BIGINT",
+                "length": "20",
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": true
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "user_name",
+                "type": "TINYTEXT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "status",
+                "type": "TINYINT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "assigned_to",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": true,
+                "default": "",
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_tickets",
+            "assigned_to",
+            {
+                "name": "assigned_to",
+                "type": "INT",
+                "length": 11,
+                "decimals": null,
+                "values": [],
+                "allow_null": true,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "created",
+                "type": "DATETIME",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": "CURRENT_TIMESTAMP",
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "last_update_by",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "user_email",
+                "type": "TINYTEXT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "subject",
+                "type": "TINYTEXT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "createTable",
+        "params": [
+            {
+                "name": "vssupport_messages",
+                "columns": {
+                    "id": {
+                        "name": "id",
+                        "type": "BIGINT",
+                        "length": "20",
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": false,
+                        "default": 0,
+                        "comment": "",
+                        "unsigned": true,
+                        "auto_increment": true
+                    },
+                    "ticket": {
+                        "name": "ticket",
+                        "type": "INT",
+                        "length": null,
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": false,
+                        "default": 0,
+                        "comment": "",
+                        "unsigned": true,
+                        "auto_increment": false
+                    },
+                    "text": {
+                        "name": "text",
+                        "type": "TEXT",
+                        "length": null,
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": false,
+                        "default": null,
+                        "comment": "",
+                        "unsigned": false,
+                        "auto_increment": false
+                    },
+                    "text_searchable": {
+                        "name": "text_searchable",
+                        "type": "TEXT",
+                        "length": null,
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": false,
+                        "default": null,
+                        "comment": "",
+                        "unsigned": false,
+                        "auto_increment": false
+                    },
+                    "user_name": {
+                        "name": "user_name",
+                        "type": "TINYTEXT",
+                        "length": null,
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": false,
+                        "default": null,
+                        "comment": "",
+                        "unsigned": false,
+                        "auto_increment": false
+                    },
+                    "created": {
+                        "name": "created",
+                        "type": "DATETIME",
+                        "length": null,
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": false,
+                        "default": "CURRENT_TIMESTAMP",
+                        "comment": "",
+                        "unsigned": false,
+                        "auto_increment": false
+                    },
+                    "flags": {
+                        "name": "flags",
+                        "type": "TINYINT",
+                        "length": null,
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": false,
+                        "default": 0,
+                        "comment": "",
+                        "unsigned": true,
+                        "auto_increment": false
+                    }
+                },
+                "indexes": {
+                    "PRIMARY": {
+                        "type": "primary",
+                        "name": "PRIMARY",
+                        "columns": [
+                            "id"
+                        ],
+                        "length": [
+                            null
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+]
