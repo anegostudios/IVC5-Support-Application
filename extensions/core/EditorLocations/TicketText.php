@@ -73,7 +73,6 @@ class TicketText extends EditorLocationsAbstract
 	 */
 	public function attachmentLookup( ?int $id1=NULL, ?int $id2=NULL, ?string $id3=NULL ): Model|ContentClass|Url|MemberClass|null
 	{
-	    return NULL;
-		// return Url::internal( ... );
+		return Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$id1);
 	}
 }

@@ -63,7 +63,7 @@ class tickets extends Controller
 			'app'         => 'vssupport',
 			'key'         => 'TicketText',
 			'autoSaveKey' => 'new-ticket',
-			'attachIds'   => [null],
+			'attachIds'   => null,
 		]));
 
 		if($values = $form->values()) {

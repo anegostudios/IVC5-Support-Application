@@ -164,7 +164,7 @@ class tickets extends Controller
 				'flags'           => $flags,
 			]);
 
-			File::claimAttachments('ticket-message', $ticketId, $messageId);
+			File::claimAttachments(static::_formatEditorKey($ticketId), $ticketId, $messageId);
 
 			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId));
 		}
@@ -197,10 +197,12 @@ class tickets extends Controller
 		$form->add(new Form\Editor('text', required: true, options: [
 			'app' => 'vssupport',
 			'key' => 'TicketText',
-			'autoSaveKey' => 'ticket-message',
-			'attachIds' => [$ticketId, null],
+			'autoSaveKey' => static::_formatEditorKey($ticketId),
+			'attachIds' => null,
 		]));
 
 		return $form;
 	}
+
+	static function _formatEditorKey(int $ticketId) : string { return 'ticket-message-'.$ticketId; }
 }
