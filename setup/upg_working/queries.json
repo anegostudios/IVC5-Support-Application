@@ -330,5 +330,23 @@
                 "auto_increment": false
             }
         ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "priority",
+                "type": "TINYINT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
     }
 ]

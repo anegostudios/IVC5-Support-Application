@@ -1,0 +1,28 @@
+/* TODO(Rennorb) @visual: [data-ips-scheme="light"] / dark .. */
+:root {
+	--ticket-prio-bg--2: #444;
+	--ticket-prio-fg--2: #999;
+	--ticket-prio-bg--1: #444;
+	--ticket-prio-fg--1: #999;
+	--ticket-prio-bg-0: #444;
+	--ticket-prio-fg-0: #999;
+	--ticket-prio-bg-1: #faa;
+	--ticket-prio-fg-1: #999;
+	--ticket-prio-bg-2: #f44;
+	--ticket-prio-fg-2: #fdd;
+}
+
+.prio--2 { --ticket-prio-bg: var(--ticket-prio-bg--2); --ticket-prio-fg: var(--ticket-prio-fg--2); }
+.prio--1 { --ticket-prio-bg: var(--ticket-prio-bg--1); --ticket-prio-fg: var(--ticket-prio-fg--1); }
+.prio-0 { --ticket-prio-bg: var(--ticket-prio-bg-0); --ticket-prio-fg: var(--ticket-prio-fg-0); }
+.prio-1 { --ticket-prio-bg: var(--ticket-prio-bg-1); --ticket-prio-fg: var(--ticket-prio-fg-1); }
+.prio-2 { --ticket-prio-bg: var(--ticket-prio-bg-2); --ticket-prio-fg: var(--i-color_hard); }
+.prio-label {
+	display: inline-block;
+	padding: 0 .25em;
+  height: 1.2em;
+  line-height: 1;
+  border-radius: .125em;
+	background-color: var(--ticket-prio-bg);
+	color: var(--ticket-prio-fg);
+}

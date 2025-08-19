@@ -19,7 +19,6 @@ use IPS\Session;
 use IPS\vssupport\MessageFlags;
 
 use function defined;
-use function IPS\vssupport\add_raw_into_html_tag;
 use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
@@ -36,6 +35,8 @@ class tickets extends Controller
 	// Tell IVC that we handle csrf prot internally. @copypasta
 	public static bool $csrfProtected = TRUE;
 
+	const PRIORITY_DONT_CHANGE = 999; // Special priority value that indicates we don't want to change the priority.
+
 	public function execute() : void
 	{
 		\IPS\Dispatcher::i()->checkAcpPermission( 'tickets_manage' );
@@ -47,6 +48,7 @@ class tickets extends Controller
 	{
 		$lang = Member::loggedIn()->language();
 		$output = Output::i();
+		$theme = Theme::i();
 
 		/* Some advanced search links may bring us here */
 		$output->bypassCsrfKeyCheck = true;
@@ -55,7 +57,7 @@ class tickets extends Controller
 		//$table->langPrefix = 'ticket_';
 		$table->keyField = 'id';
 
-		$table->include = ['created', 'subject', 'category', 'status', 'user_name', 'user_email', 'assigned_to', 'last_update_at', 'last_update_by'];
+		$table->include = ['created', 'priority', 'subject', 'category', 'status', 'user_name', 'user_email', 'assigned_to', 'last_update_at', 'last_update_by'];
 		$table->mainColumn = 'created';
 
 		$table->joins[] = [
@@ -75,6 +77,14 @@ class tickets extends Controller
 		$table->parsers['category'] = function($val, $row) {
 			return Member::loggedIn()->language()->addToStack("ticket_cat_name_$val");
 		};
+
+		$table->parsers['priority'] = function($val, $row) {
+			$text = Member::loggedIn()->language()->addToStack("ticket_prio_name_$val");
+			return "<span class='prio-label prio-$val'>$text</span>";
+		};
+
+		$table->primarySortBy = 'priority';
+		$table->primarySortDirection = 'desc';
 
 		$table->sortBy = $table->sortBy ?: 'created';
 		$table->sortDirection = $table->sortDirection ?: 'desc';
@@ -101,7 +111,8 @@ class tickets extends Controller
 		$output->title = $lang->addToStack('tickets');
 		$output->breadcrumb[] = [null, $lang->addToStack('tickets')];
 		// No way to make the wide table work properly via classes, so this template just wraps it in overflow auto.
-		$output->output = Theme::i()->getTemplate('tickets')->list($table);
+		$output->output = $theme->getTemplate('tickets')->list($table);
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('colors.css', location: 'global'));
 	}
 
 	public function view() : void
@@ -125,9 +136,9 @@ class tickets extends Controller
 
 		$categories = query_all_assoc($db->select("id, name_key", 'vssupport_ticket_categories'));
 		foreach($categories as &$cat) {
-			$cat = $lang->addToStack('ticket_cat_name_'.$cat);
+			$cat = htmlspecialchars($lang->addToStack('ticket_cat_name_'.$cat), ENT_DISALLOWED, 'UTF-8', FALSE);
 		}
-		$categories = [0 => $lang->addToStack('dont_change')] + $categories;
+		$categories = [0 => $lang->addToStack('dont_change')] + $categories; // Don't unshift here, would reindex the array!
 		unset($cat);
 
 		$form = static::_createMessageForm($ticketId, $categories, Url::internal('app=vssupport&module=tickets&controller=tickets&do=reply'));
@@ -138,7 +149,7 @@ class tickets extends Controller
 		$bc[] = [null, $ticket['subject']];
 		$output->showTitle = false;
 		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages, $form);
-		$output->cssFiles = array_merge($output->cssFiles, $theme->css('ticket.css'));
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('colors.css', location: 'global'), $theme->css('ticket.css'));
 	}
 
 	public function reply() : void
@@ -146,20 +157,27 @@ class tickets extends Controller
 		$member = Member::loggedIn();
 		$request = Request::i();
 		$output = Output::i();
+		$db = Db::i();
 
 		$ticketId = intval($request->replyTo);
 		$form = static::_createMessageForm($ticketId, [/* doesn't matter */]);
 		
 		if($values = $form->values()) {
-			$newCategory = intval($request->moveToCategory);
-			if($newCategory) {
-				Db::i()->update('vssupport_tickets', [ 'category' => $newCategory ]);
+			$ticketUpdates = [];
+			if($newCategory = intval($request->moveToCategory)) {
+				$ticketUpdates['category'] = $newCategory;
+			}
+			if(($newPriority = intval($request->moveToPriority)) !== static::PRIORITY_DONT_CHANGE) {
+				$ticketUpdates['priority'] = $newPriority;
+			}
+			if($ticketUpdates) {
+				$db->update('vssupport_tickets', $ticketUpdates, 'id = '.$ticketId);
 			}
 
 			$flags = 0;
 			if($request->submit === 'internal')   $flags |= MessageFlags::Internal;
 
-			$messageId = Db::i()->insert('vssupport_messages', [
+			$messageId = $db->insert('vssupport_messages', [
 				'ticket'          => $ticketId,
 				'text'            => $values['text'],
 				'text_searchable' => strip_tags($values['text']),
@@ -191,17 +209,29 @@ class tickets extends Controller
 		// Do the buttons manually because we want more than a simple submit:
 		if($categories) {
 			$lang = Member::loggedIn()->language();
-
-			$select = $theme->getTemplate('forms', 'core')
-				->select('moveToCategory', '', false, $categories, class: 'ipsInput--auto');
-			$title = $lang->addToStack('category');
-			$form->actionButtons[] = "<span title='$title'>$select</span>";
+			{
+				$select = $theme->getTemplate('forms', 'core')
+					->select('moveToCategory', '', false, $categories, class: 'ipsInput--auto');
+				$title = htmlspecialchars($lang->addToStack('category'), ENT_DISALLOWED, 'UTF-8', FALSE);
+				$form->actionButtons[] = "<span title='$title'>$select</span>";
+			}
+			{
+				$options = [static::PRIORITY_DONT_CHANGE => $lang->addToStack('dont_change')];
+				for($i = -2; $i <= 2; $i++) {
+					$options[$i] = htmlspecialchars($lang->addToStack('ticket_prio_name_'.$i), ENT_DISALLOWED, 'UTF-8', FALSE);
+				}
+				$select = $theme->getTemplate('forms', 'core')
+					->select('moveToPriority', '', false, $options, class: 'ipsInput--auto');
+				$title = htmlspecialchars($lang->addToStack('priority'), ENT_DISALLOWED, 'UTF-8', FALSE);
+				$form->actionButtons[] = "<span title='$title'>$select</span>";
+			}
+			$form->actionButtons[] = '<span class="i-flex_91"></span>'; // spacer
+			$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
+				->button('respond_internal', 'submit', null, 'ipsButton ipsButton--secondary', ['tabindex' => '3', 'accesskey' => 's', 'name' => 'submit', 'value' => 'internal'] );
+			$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
+				->button('respond_public', 'submit', null, 'ipsButton ipsButton--primary', ['tabindex' => '2', 'accesskey' => 's', 'name' => 'submit', 'value' => 'public'] );
 		}
-		$form->actionButtons[] = '<span class="i-flex_91"></span>'; // spacer
-		$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
-			->button('respond_internal', 'submit', null, 'ipsButton ipsButton--secondary', ['tabindex' => '3', 'accesskey' => 's', 'name' => 'submit', 'value' => 'internal'] );
-		$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
-			->button('respond_public', 'submit', null, 'ipsButton ipsButton--primary', ['tabindex' => '2', 'accesskey' => 's', 'name' => 'submit', 'value' => 'public'] );
+
 
 		$form->add(new Form\Editor('text', required: true, options: [
 			'app' => 'vssupport',

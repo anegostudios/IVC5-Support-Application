@@ -103,7 +103,6 @@ class tickets extends Controller
 	public function view() : void
 	{
 		$output = Output::i();
-		$lang = Member::loggedIn()->language();
 		$db =  Db::i();
 
 		$ticketId = intval(Request::i()->id); // TODO permissions
@@ -116,12 +115,16 @@ class tickets extends Controller
 			return;
 		}
 
+		$lang = Member::loggedIn()->language();
+		$theme = Theme::i();
+
 		$messages = query_all($db->select('*', 'vssupport_messages', 'ticket = '.$ticketId.' AND !(flags & '.MessageFlags::Internal.')'));
 
 		$output->title = $lang->addToStack('ticket').' #'.$ticketId.' - '.$ticket['subject'];
 		$bc = &$output->breadcrumb;
 		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets'), $lang->addToStack('my_tickets')];
 		$bc[] = [null, $ticket['subject']];
-		$output->output = Theme::i()->getTemplate('tickets')->ticket($ticket, $messages);
+		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages);
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('colors.css', location: 'global'));
 	}
 }
