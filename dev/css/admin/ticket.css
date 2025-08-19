@@ -1,0 +1,30 @@
+.internal-note {
+	--i-box--ba-co: hsl(30, 18%, 30%);
+	--i-boxHeader--ba-co: var(--i-box--ba-co);
+}
+
+.message-time {
+	text-align: right;
+}
+
+
+.ipsSubmitRow {
+	display: flex;
+	flex-direction: row;
+	gap: .5em;
+}
+
+.ipsSubmitRow>* {
+	margin-top: 1.25em;
+}
+
+.ipsSubmitRow>[title] {
+	position: relative;
+}
+
+.ipsSubmitRow>[title]::before {
+	content: attr(title);
+	position: absolute;
+	bottom: calc(100% + .25em);
+	left: 1ch;
+}

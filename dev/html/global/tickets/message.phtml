@@ -1,6 +1,6 @@
 <ips:template parameters="$message"/>
-<div class="ipsBox" {{if $message['flags'] & \IPS\vssupport\MessageFlags::Internal}}style="--i-box--ba-co:hsl(30, 18%, 30%);--i-boxHeader--ba-co:var(--i-box--ba-co);"{{endif}}>
+<div class="ipsBox{{if $message['flags'] & \IPS\vssupport\MessageFlags::Internal}} internal-note{{endif}}">
 	<div class="ipsBox__header">{$message['user_name']}</div>
 	<div class="i-padding_2">{$message['text']|raw}</div>
-	<div class="i-font-size_-2 i-color_soft i-padding_2 i-padding-top_0" style="text-align: right"><i class="fa-solid fa-clock"></i>&nbsp;{$message['created']}</div>
+	<div class="i-font-size_-2 i-color_soft i-padding_2 i-padding-top_0 message-time"><i class="fa-solid fa-clock"></i>&nbsp;{$message['created']}</div>
 </div>

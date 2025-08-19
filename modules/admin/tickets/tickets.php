@@ -19,6 +19,7 @@ use IPS\Session;
 use IPS\vssupport\MessageFlags;
 
 use function defined;
+use function IPS\vssupport\add_raw_into_html_tag;
 use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
@@ -106,6 +107,7 @@ class tickets extends Controller
 	public function view() : void
 	{
 		$output = Output::i();
+		$theme = Theme::i();
 		$lang = Member::loggedIn()->language();
 		$db =  Db::i();
 
@@ -135,7 +137,8 @@ class tickets extends Controller
 		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets'), $lang->addToStack('tickets')];
 		$bc[] = [null, $ticket['subject']];
 		$output->showTitle = false;
-		$output->output = Theme::i()->getTemplate('tickets')->ticket($ticket, $messages, $form);
+		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages, $form);
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('ticket.css'));
 	}
 
 	public function reply() : void
@@ -177,6 +180,8 @@ class tickets extends Controller
 	 * @param string[] $categories id to translatable strings map
 	 */
 	static function _createMessageForm(int $ticketId, array $categories, Url $action = null) : Form {
+		$theme = Theme::i();
+
 		// submitLang = null disables builtin button
 		$form = new Form(submitLang: null, action: $action);
 		// Prevent the label being placed to the side. We want full width.
@@ -185,13 +190,17 @@ class tickets extends Controller
 
 		// Do the buttons manually because we want more than a simple submit:
 		if($categories) {
-			$form->actionButtons[] = Theme::i()->getTemplate('forms', 'core')
+			$lang = Member::loggedIn()->language();
+
+			$select = $theme->getTemplate('forms', 'core')
 				->select('moveToCategory', '', false, $categories, class: 'ipsInput--auto');
+			$title = $lang->addToStack('category');
+			$form->actionButtons[] = "<span title='$title'>$select</span>";
 		}
 		$form->actionButtons[] = '<span class="i-flex_91"></span>'; // spacer
-		$form->actionButtons[] = Theme::i()->getTemplate('forms', 'core', 'global')
+		$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
 			->button('respond_internal', 'submit', null, 'ipsButton ipsButton--secondary', ['tabindex' => '3', 'accesskey' => 's', 'name' => 'submit', 'value' => 'internal'] );
-		$form->actionButtons[] = Theme::i()->getTemplate('forms', 'core', 'global')
+		$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
 			->button('respond_public', 'submit', null, 'ipsButton ipsButton--primary', ['tabindex' => '2', 'accesskey' => 's', 'name' => 'submit', 'value' => 'public'] );
 
 		$form->add(new Form\Editor('text', required: true, options: [
