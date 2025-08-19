@@ -1,5 +1,5 @@
 <ips:template parameters="$ticket, $messages, $form"/>
-<h2 class="ipsTitle ipsTitle--h2">{$ticket['subject']}</h2>
+<h2 class="ipsTitle ipsTitle--h2">{lang="ticket"} #{$ticket['id']} - {lang="ticket_cat_name_{$ticket['category']}"} - {$ticket['subject']}</h2>
 <h3 class="ipsTitle">{$ticket['user_name']} - {$ticket['user_email']} <span class="i-color_soft">started <i class="fa-solid fa-clock"></i>&nbsp;{$ticket['created']}</span></h3>
 <div style="display: flex; flex-direction: column; gap: 1em;">
 	{{foreach $messages as $message}}

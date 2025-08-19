@@ -97,6 +97,18 @@
                 "comment": "",
                 "unsigned": false,
                 "auto_increment": false
+            },
+            "category": {
+                "name": "category",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
             }
         },
         "indexes": {
@@ -121,7 +133,8 @@
                 "created": "0000-00-00",
                 "last_update_by": "0",
                 "user_email": "needs.support@local.local",
-                "subject": "Need support"
+                "subject": "Need support",
+                "category": "1"
             }
         ]
     },
@@ -234,6 +247,55 @@
                 "text_searchable": "Halp tag test ",
                 "user_name": "support user",
                 "created": "000-00-00"
+            }
+        ]
+    },
+    "vssupport_ticket_categories": {
+        "name": "vssupport_ticket_categories",
+        "columns": {
+            "id": {
+                "name": "id",
+                "type": "BIGINT",
+                "length": "20",
+                "unsigned": true,
+                "allow_null": false,
+                "default": null,
+                "auto_increment": true,
+                "comment": "ID Number"
+            },
+            "name_key": {
+                "name": "name_key",
+                "type": "TINYTEXT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        },
+        "indexes": {
+            "PRIMARY": {
+                "type": "primary",
+                "name": "PRIMARY",
+                "columns": [
+                    "id"
+                ],
+                "length": [
+                    null
+                ]
+            }
+        },
+        "inserts": [
+            {
+                "id": "1",
+                "name_key": "cat1"
+            },
+            {
+                "id": "2",
+                "name_key": "cat2"
             }
         ]
     }

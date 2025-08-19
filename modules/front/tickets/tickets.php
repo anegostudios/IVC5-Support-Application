@@ -15,6 +15,9 @@ use IPS\Request;
 use IPS\vssupport\MessageFlags;
 
 use function defined;
+use function IPS\vssupport\query_all;
+use function IPS\vssupport\query_all_assoc;
+use function IPS\vssupport\query_one;
 
 /* To prevent PHP errors (extending class does not exist) revealing path */
 if ( !defined( '\IPS\SUITE_UNIQUE_KEY' ) )
@@ -45,18 +48,22 @@ class tickets extends Controller
 		$member = Member::loggedIn();
 		$lang = $member->language();
 		$output = Output::i();
+		$db = Db::i();
 
-		$form = new Form();
+		$categories = query_all_assoc($db->select("id, CONCAT('ticket_cat_name_', name_key)", 'vssupport_ticket_categories'));
+
+		$form = new Form(submitLang: 'ticket_submit');
 		if(!$member->member_id) {
-			$form->add(new Form\Text('name', required: true, options: [ 'maxLength' => 256 ]));	
-			$form->add(new Form\Email('email', required: true, options: [ 'maxLength' => 256 ]));	
+			$form->add(new Form\Text('name', required: true, options: [ 'maxLength' => 256 ]));
+			$form->add(new Form\Email('email', required: true, options: [ 'maxLength' => 256 ]));
 		}
+		$form->add(new Form\Select('category', required: true, options: [ 'options' => $categories ]));
 		$form->add(new Form\Text('subject', required: true, options: [ 'maxLength' => 256 ]));
 		$form->add(new Form\Editor('text', required: true, options: [
-			'app' => 'vssupport',
-			'key' => 'TicketText',
+			'app'         => 'vssupport',
+			'key'         => 'TicketText',
 			'autoSaveKey' => 'new-ticket',
-			'attachIds' => [null],
+			'attachIds'   => [null],
 		]));
 
 		if($values = $form->values()) {
@@ -70,9 +77,10 @@ class tickets extends Controller
 			}
 
 			$ticketId = Db::i()->insert('vssupport_tickets', [
-				'user_name' => $name,
+				'user_name'  => $name,
 				'user_email' => $email,
-				'subject' => $values['subject'],
+				'category'   => $values['category'],
+				'subject'    => $values['subject'],
 			]);
 			$messageId = Db::i()->insert('vssupport_messages', [
 				'ticket'          => $ticketId,
@@ -100,23 +108,19 @@ class tickets extends Controller
 
 		$ticketId = intval(Request::i()->id); // TODO permissions
 
-		$r = $db->select('*', 'vssupport_tickets', 'id = '.$ticketId);
-		$r->rewind();
-		if(!$r->valid()) {
+		$r = $db->select('*, vssupport_tickets.id, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.id = '.$ticketId)
+			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
+		$ticket = query_one($r);
+		if(!$ticket) {
 			$output->error('node_error', '2C114/O', 404, '');
 			return;
 		}
-		$ticket = $r->current();
 
-		$messages = [];
-		$r = $db->select('*', 'vssupport_messages', 'ticket = '.$ticketId.' AND !(flags & '.MessageFlags::Internal.')');
-		for($r->rewind(); $r->valid(); $r->next()) {
-			$messages[] = $r->current();
-		}
+		$messages = query_all($db->select('*', 'vssupport_messages', 'ticket = '.$ticketId.' AND !(flags & '.MessageFlags::Internal.')'));
 
 		$output->title = $lang->addToStack('ticket').' #'.$ticketId.' - '.$ticket['subject'];
 		$bc = &$output->breadcrumb;
-		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets'), $lang->addToStack('tickets')];
+		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets'), $lang->addToStack('my_tickets')];
 		$bc[] = [null, $ticket['subject']];
 		$output->output = Theme::i()->getTemplate('tickets')->ticket($ticket, $messages);
 	}
