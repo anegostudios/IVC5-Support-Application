@@ -1,10 +1,6 @@
-<?php
-
-
-namespace IPS\vssupport\modules\admin\tickets;
+<?php namespace IPS\vssupport\modules\admin\tickets;
 
 use IPS\Db;
-use IPS\Db\Select;
 use IPS\Dispatcher\Controller;
 use IPS\File;
 use IPS\Member;
@@ -14,7 +10,6 @@ use IPS\Helpers;
 use IPS\Helpers\Form;
 use IPS\Http\Url;
 use IPS\Request;
-use IPS\Session;
 
 use IPS\vssupport\MessageFlags;
 
@@ -23,9 +18,9 @@ use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
 
-if ( !defined( '\IPS\SUITE_UNIQUE_KEY' ) )
+if(!defined('\IPS\SUITE_UNIQUE_KEY'))
 {
-	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' 403 Forbidden' );
+	header(($_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0').' 403 Forbidden');
 	exit;
 }
 
@@ -94,10 +89,7 @@ class tickets extends Controller
 
 		//TODO(Rennorb) @completeness: $table->advancedSearch
 
-		//TODO(Rennorb) @completeness: $table->parsers
-
-		$table->rowButtons = function($row)
-		{
+		$table->rowButtons = function($row) {
 			return [
 				'view' => [
 					'icon'  => 'search',

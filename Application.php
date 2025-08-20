@@ -49,7 +49,4 @@ function query_all_assoc(Select $query) : array
 	return $data;
 }
 
-class Application extends SystemApplication
-{
-	
-}
+class Application extends SystemApplication { }

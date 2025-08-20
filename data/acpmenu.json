@@ -6,6 +6,13 @@
             "do": "",
             "restriction": "tickets_manage",
             "subcontrollers": ""
+        },
+        "categories": {
+            "tab": "vssupport",
+            "controller": "categories",
+            "do": "",
+            "restriction": "manage_categories",
+            "subcontrollers": ""
         }
     }
 }

@@ -1,7 +1,4 @@
-<?php
-
-
-namespace IPS\vssupport\modules\front\tickets;
+<?php namespace IPS\vssupport\modules\front\tickets;
 
 use IPS\Db;
 use IPS\Dispatcher\Controller;
@@ -19,9 +16,9 @@ use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
 
-if ( !defined( '\IPS\SUITE_UNIQUE_KEY' ) )
+if(!defined('\IPS\SUITE_UNIQUE_KEY'))
 {
-	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' 403 Forbidden' );
+	header(($_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0').' 403 Forbidden');
 	exit;
 }
 

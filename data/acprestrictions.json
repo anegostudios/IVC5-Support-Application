@@ -1,7 +1,8 @@
 {
     "tickets": {
         "tickets": {
-            "tickets_manage": "tickets_manage"
+            "tickets_manage": "tickets_manage",
+            "manage_categories": "manage_categories"
         }
     }
 }
