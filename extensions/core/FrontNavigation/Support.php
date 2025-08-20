@@ -39,7 +39,7 @@ class Support extends FrontNavigationAbstract
 
 	public function link(): Url
 	{
-		return Url::internal('app=vssupport&controller=tickets');
+		return Url::internal('app=vssupport&module=tickets&controller=tickets', seoTemplate: 'tickets_list');
 	}
 
 	public function active(): bool

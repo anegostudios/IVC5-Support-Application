@@ -44,7 +44,7 @@ class tickets extends Controller
 			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
 		$tickets = query_all($q);
 
-		$createLink = Url::internal('app=vssupport&controller=tickets&do=create');
+		$createLink = Url::internal('app=vssupport&controller=tickets&do=create', seoTemplate: 'tickets_create');
 
 		$output->title = $lang->addToStack('tickets');
 		$output->breadcrumb[] = [null, $lang->addToStack('my_tickets')];
@@ -101,7 +101,7 @@ class tickets extends Controller
 
 			File::claimAttachments('new-ticket', $ticketId, $messageId);
 
-			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId));
+			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId, seoTemplate: 'tickets_view'));
 			return;
 		}
 
@@ -132,7 +132,7 @@ class tickets extends Controller
 
 		$output->title = $lang->addToStack('ticket').' #'.$ticketId.' - '.$ticket['subject'];
 		$bc = &$output->breadcrumb;
-		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets'), $lang->addToStack('my_tickets')];
+		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets', seoTemplate: 'tickets_list'), $lang->addToStack('my_tickets')];
 		$bc[] = [null, $ticket['subject']];
 		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages);
 		$output->cssFiles = array_merge($output->cssFiles, $theme->css('colors.css', location: 'global'));

@@ -102,7 +102,7 @@ class tickets extends Controller
 				'view' => [
 					'icon'  => 'search',
 					'title' => 'view',
-					'link'  => URl::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$row['id']),
+					'link'  => URl::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$row['id'], seoTemplate: 'tickets_view'),
 				],
 			];
 		};
@@ -144,7 +144,7 @@ class tickets extends Controller
 
 		$output->title = $lang->addToStack('ticket').' #'.$ticketId.' - '.$ticket['subject'];
 		$bc = &$output->breadcrumb;
-		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets'), $lang->addToStack('tickets')];
+		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets', seoTemplate: 'tickets_list'), $lang->addToStack('tickets')];
 		$bc[] = [null, $ticket['subject']];
 		$output->showTitle = false;
 		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages, $form);
@@ -186,7 +186,7 @@ class tickets extends Controller
 
 			File::claimAttachments(static::_formatEditorKey($ticketId), $ticketId, $messageId);
 
-			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId));
+			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId, seoTemplate: 'tickets_view'));
 		}
 		else {
 			$output->error('', '', 400, '');

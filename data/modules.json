@@ -8,7 +8,7 @@
     },
     "front": {
         "tickets": {
-            "default_controller": "",
+            "default_controller": "tickets",
             "protected": false,
             "default": 0
         }
