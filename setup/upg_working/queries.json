@@ -348,5 +348,23 @@
                 "auto_increment": false
             }
         ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "member_id",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": true,
+                "default": null,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
     }
 ]

@@ -1,8 +1,8 @@
 <?php
 /**
  * @brief		VS Support Application Class
- * @author		<a href=''>Rennorb</a>
- * @copyright	(c) 2025 Rennorb
+ * @author		Rennorb
+ * @copyright	(c) 2025 Anego Studios
  * @package		Invision Community
  * @subpackage	VS Support
  * @since		18 Aug 2025

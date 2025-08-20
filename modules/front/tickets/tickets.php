@@ -19,7 +19,6 @@ use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
 
-/* To prevent PHP errors (extending class does not exist) revealing path */
 if ( !defined( '\IPS\SUITE_UNIQUE_KEY' ) )
 {
 	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' 403 Forbidden' );
@@ -35,12 +34,22 @@ class tickets extends Controller
 
 	protected function manage() : void
 	{
-		$lang = Member::loggedIn()->language();
+		$member = Member::loggedIn();
+		$lang = $member->language();
 		$output = Output::i();
+		$db = Db::i();
+		$theme = Theme::i();
+
+		$q = $db->select('*, vssupport_tickets.id, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.member_id = '.$member->member_id)
+			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
+		$tickets = query_all($q);
+
+		$createLink = Url::internal('app=vssupport&controller=tickets&do=create');
 
 		$output->title = $lang->addToStack('tickets');
-		$output->breadcrumb[] = [null, $lang->addToStack('tickets')];
-		$output->output = Theme::i()->getTemplate('tickets')->list();
+		$output->breadcrumb[] = [null, $lang->addToStack('my_tickets')];
+		$output->output = $theme->getTemplate('tickets')->list($tickets, $createLink);
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('colors.css', location: 'global'));
 	}
 
 	public function create() : void
@@ -81,6 +90,7 @@ class tickets extends Controller
 				'user_email' => $email,
 				'category'   => $values['category'],
 				'subject'    => $values['subject'],
+				'member_id'  => $member->member_id,
 			]);
 			$messageId = Db::i()->insert('vssupport_messages', [
 				'ticket'          => $ticketId,

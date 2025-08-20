@@ -7,6 +7,7 @@ $lang = array(
 	'menu__vssupport_tickets' => 'Tickets',
 	'menu__vssupport_tickets_tickets' => 'Ticket List',
 	'module__vssupport_tickets' => 'Tickets',
+	'frontnavigation_vssupport' => 'Support',
 	'tickets' => 'Tickets',
 	'ticket' => 'Ticket',
 	'ticket_submit' => 'Submit Ticket',

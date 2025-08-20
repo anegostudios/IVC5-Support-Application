@@ -121,6 +121,18 @@
                 "comment": "",
                 "unsigned": false,
                 "auto_increment": false
+            },
+            "member_id": {
+                "name": "member_id",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": true,
+                "default": null,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
             }
         },
         "indexes": {
@@ -146,7 +158,9 @@
                 "last_update_by": "0",
                 "user_email": "needs.support@local.local",
                 "subject": "Need support",
-                "category": "1"
+                "category": "1",
+                "priority": "0",
+                "member_id": "1"
             }
         ]
     },

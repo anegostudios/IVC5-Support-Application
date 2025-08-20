@@ -23,7 +23,6 @@ use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
 
-/* To prevent PHP errors (extending class does not exist) revealing path */
 if ( !defined( '\IPS\SUITE_UNIQUE_KEY' ) )
 {
 	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' 403 Forbidden' );

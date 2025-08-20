@@ -2,6 +2,9 @@
     "core": {
         "EditorLocations": {
             "TicketText": "IPS\\vssupport\\extensions\\core\\EditorLocations\\TicketText"
+        },
+        "FrontNavigation": {
+            "Support": "IPS\\vssupport\\extensions\\core\\FrontNavigation\\Support"
         }
     }
 }

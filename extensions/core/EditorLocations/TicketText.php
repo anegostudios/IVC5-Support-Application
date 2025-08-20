@@ -1,17 +1,14 @@
 <?php
 /**
  * @brief		Editor Extension: TicketText
- * @author		<a href='https://www.invisioncommunity.com'>Invision Power Services, Inc.</a>
- * @copyright	(c) Invision Power Services, Inc.
- * @license		https://www.invisioncommunity.com/legal/standards/
+ * @author		Rennorb
+ * @copyright	(c) 2025 Anego Studios
  * @package		Invision Community
  * @subpackage	VS Support
  * @since		18 Aug 2025
  */
 
 namespace IPS\vssupport\extensions\core\EditorLocations;
-
-/* To prevent PHP errors (extending class does not exist) revealing path */
 
 use IPS\Content as ContentClass;
 use IPS\Extensions\EditorLocationsAbstract;
@@ -28,9 +25,6 @@ if ( !defined( '\IPS\SUITE_UNIQUE_KEY' ) )
 	exit;
 }
 
-/**
- * Editor Extension: TicketText
- */
 class TicketText extends EditorLocationsAbstract
 {
 	/**
