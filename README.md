@@ -20,7 +20,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 	- Frontend module
 		- Create new tickets (also possible as guest)
 		- Inspect individual tickets
-			- Add more messages / Reply to the ticket
+			- Add more messages / Reply to the ticket if it is not locked
 		- List of tickets created by current member
 	- Admin module
 		- View all tickets
@@ -28,6 +28,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 			- Reply or add Internal Note and
 				- Change Category
 				- Change Priority
+				- Lock to staff members
 		- Create / Edit / Delete Categories 
 			- Preview translated names
 
@@ -39,7 +40,6 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 - GitHub linking
 - GitLab linking
 - Sales linking
-- Ticket Locking
 - Proper ticket assignment
 - More filter options
 	-	by assignment
