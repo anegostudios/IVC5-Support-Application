@@ -1,9 +1,13 @@
 <ips:template parameters="$ticket, $messages, $form"/>
-<h2 class="ipsTitle ipsTitle--h2">{lang="ticket"} #{$ticket['id']} - {lang="ticket_cat_name_{$ticket['category']}"} - <span class="prio-label prio-{$ticket['priority']}">{lang="ticket_prio_name_{$ticket['priority']}"}</span> {$ticket['subject']}</h2>
-<h3 class="ipsTitle">{$ticket['user_name']} <span class="i-color_soft">started <i class="fa-solid fa-clock"></i>&nbsp;{$ticket['created']}</span></h3>
+<h2 class="ipsTitle ipsTitle--h2">{lang="ticket"} #{$ticket['id']} - {$ticket['subject']}</h2>
+<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_cat_name_{$ticket['category']}"} <span class="prio-label prio-{$ticket['priority']}">{lang="ticket_prio_name_{$ticket['priority']}"}</span>{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}} {lang="locked"}{{endif}} <small class="i-color_soft i-font-size_-1">started <i class="fa-solid fa-clock"></i>&nbsp;{$ticket['created']}</small></h3>
 <div style="display: flex; flex-direction: column; gap: 1em;">
 	{{foreach $messages as $message}}
 		{template="message" location="global" group="tickets" params="$message"}
 	{{endforeach}}
-	{$form|raw}
+	{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}
+		<div class="ipsBox i-padding_2 i-text-align_center i-background_moderated">{lang="ticket_locked"}</div>
+	{{else}}
+		{$form|raw}
+	{{endif}}
 </div>

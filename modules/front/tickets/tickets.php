@@ -10,6 +10,7 @@ use IPS\Helpers\Form;
 use IPS\Http\Url;
 use IPS\Request;
 use IPS\vssupport\MessageFlags;
+use IPS\vssupport\TicketFlags;
 
 use function defined;
 use function IPS\vssupport\query_all;
@@ -129,7 +130,7 @@ class tickets extends Controller
 		}
 
 		$form = null;
-		if(true) { // TODO message locking
+		if(!($ticket['flags'] & TicketFlags::Locked)) {
 			$form = new Form(submitLang: 'message_add');
 			// Prevent the label being placed to the side. We want full width.
 			//$form->class = 'ipsForm--vertical';

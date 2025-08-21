@@ -133,6 +133,18 @@
                 "comment": "",
                 "unsigned": true,
                 "auto_increment": false
+            },
+            "flags": {
+                "name": "flags",
+                "type": "TINYINT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
             }
         },
         "indexes": {

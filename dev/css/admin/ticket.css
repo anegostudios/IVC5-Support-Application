@@ -23,3 +23,7 @@
 	bottom: calc(100% + .25em);
 	left: 1ch;
 }
+
+.ipsSubmitRow .ipsSwitch:before {
+	left: 0; /* fix bug in core */
+}

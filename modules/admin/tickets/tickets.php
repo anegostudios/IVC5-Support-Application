@@ -12,6 +12,7 @@ use IPS\Http\Url;
 use IPS\Request;
 
 use IPS\vssupport\MessageFlags;
+use IPS\vssupport\TicketFlags;
 
 use function defined;
 use function IPS\vssupport\query_all;
@@ -161,8 +162,11 @@ class tickets extends Controller
 			if(($newPriority = intval($request->moveToPriority)) !== static::PRIORITY_DONT_CHANGE) {
 				$ticketUpdates['priority'] = $newPriority;
 			}
+			if($request->lock) {
+				$ticketUpdates['flags'] = '`flags` | '.TicketFlags::Locked;
+			}
 			if($ticketUpdates) {
-				$db->update('vssupport_tickets', $ticketUpdates, 'id = '.$ticketId);
+				$db->update('vssupport_tickets', $ticketUpdates, 'id = '.$ticketId, flags: Db::ALLOW_INCDEC_VALUES);
 			}
 
 			$flags = 0;
@@ -215,6 +219,11 @@ class tickets extends Controller
 					->select('moveToPriority', '', false, $options, class: 'ipsInput--auto');
 				$title = htmlspecialchars($lang->addToStack('priority'), ENT_DISALLOWED, 'UTF-8', FALSE);
 				$form->actionButtons[] = "<span title='$title'>$select</span>";
+			}
+			{
+				$lockEl = $theme->getTemplate('forms', 'core', 'global')
+					->checkbox('lock', label: 'ticket_lock', fancyToggle: true, tooltip: $lang->addToStack('ticket_lock_desc'));
+				$form->actionButtons[] = "<span style='user-select: none'>$lockEl</span>";
 			}
 			$form->actionButtons[] = '<span class="i-flex_91"></span>'; // spacer
 			$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')

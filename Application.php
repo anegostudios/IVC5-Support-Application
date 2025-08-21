@@ -18,6 +18,10 @@ class MessageFlags {
 	public const Internal = 1 << 0;
 }
 
+class TicketFlags {
+	public const Locked = 1 << 0;
+}
+
 /**
  * @return mixed Returns null in case of no result.
  */
