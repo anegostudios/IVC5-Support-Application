@@ -32,6 +32,20 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- Create / Edit / Delete Categories 
 			- Preview translated names
 
+### Screenshots
+
+![img](.doc/ticket_create.jpg)  
+Creating a ticket in the frontend.
+
+![img](.doc/ticket_admin_list.jpg)  
+Listing tickets in the backend (some features are WIP).
+
+![img](.doc/ticket_admin_view.jpg)  
+Viewing and responding to a ticket in the backend.
+
+![img](.doc/ticket_view.jpg)  
+Viewing and responding to a ticket from the frontend.
+
 ## TODO
 
 - Email egress

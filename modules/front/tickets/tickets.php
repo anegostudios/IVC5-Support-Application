@@ -38,7 +38,7 @@ class tickets extends Controller
 		$db = Db::i();
 		$theme = Theme::i();
 
-		$q = $db->select('*, vssupport_tickets.id, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.member_id = '.$member->member_id)
+		$q = $db->select('*, vssupport_tickets.id, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.member_id = '.($member->member_id ?? 0))
 			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
 		$tickets = query_all($q);
 
@@ -83,14 +83,16 @@ class tickets extends Controller
 				$email = $member->email;
 			}
 
-			$ticketId = Db::i()->insert('vssupport_tickets', [
+			$ticketId = $db->insert('vssupport_tickets', [
 				'user_name'  => $name,
 				'user_email' => $email,
 				'category'   => $values['category'],
 				'subject'    => $values['subject'],
 				'member_id'  => $member->member_id,
+				//'hash'       => md5(uniqid()),
 			]);
-			$messageId = Db::i()->insert('vssupport_messages', [
+			//$this->preparedQuery($query[0], $query[1]);
+			$messageId = $db->insert('vssupport_messages', [
 				'ticket'          => $ticketId,
 				'text'            => $values['text'],
 				'text_searchable' => strip_tags($values['text']),
