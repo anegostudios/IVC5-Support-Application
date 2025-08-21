@@ -11,6 +11,7 @@
 namespace IPS\vssupport\extensions\core\EditorLocations;
 
 use IPS\Content as ContentClass;
+use IPS\Db;
 use IPS\Extensions\EditorLocationsAbstract;
 use IPS\Helpers\Form\Editor;
 use IPS\Http\Url;
@@ -18,6 +19,7 @@ use IPS\Member as MemberClass;
 use IPS\Node\Model;
 use LogicException;
 use function defined;
+use function IPS\vssupport\query_one;
 
 if(!defined('\IPS\SUITE_UNIQUE_KEY'))
 {
@@ -52,8 +54,8 @@ class TicketText extends EditorLocationsAbstract
 	 */
 	public function attachmentPermissionCheck( MemberClass $member, ?int $id1, ?int $id2, ?string $id3, array $attachment, bool $viewOnly=FALSE ): bool
 	{
-	    /* Make sure that you add a relevant permission check to prevent attachments being accessed via ID enumeration. */
-		return TRUE;
+		$memberId = query_one(Db::i()->select('member_id', 'vssupport_tickets', ['id' => $id1]));
+		return $member->member_id == $memberId || $member->isModerator();
 	}
 	
 	/**

@@ -103,7 +103,7 @@ class tickets extends Controller
 		$output->breadcrumb[] = [null, $lang->addToStack('tickets')];
 		// No way to make the wide table work properly via classes, so this template just wraps it in overflow auto.
 		$output->output = $theme->getTemplate('tickets')->list($table);
-		$output->cssFiles = array_merge($output->cssFiles, $theme->css('colors.css', location: 'global'));
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'));
 	}
 
 	public function view() : void
@@ -140,7 +140,7 @@ class tickets extends Controller
 		$bc[] = [null, $ticket['subject']];
 		$output->showTitle = false;
 		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages, $form);
-		$output->cssFiles = array_merge($output->cssFiles, $theme->css('colors.css', location: 'global'), $theme->css('ticket.css'));
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'), $theme->css('ticket.css'));
 	}
 
 	public function reply() : void

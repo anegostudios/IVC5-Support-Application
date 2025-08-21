@@ -46,7 +46,7 @@ class tickets extends Controller
 		$output->title = $lang->addToStack('tickets');
 		$output->breadcrumb[] = [null, $lang->addToStack('my_tickets')];
 		$output->output = $theme->getTemplate('tickets')->list($tickets, $createLink);
-		$output->cssFiles = array_merge($output->cssFiles, $theme->css('colors.css', location: 'global'));
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'));
 	}
 
 	public function create() : void
@@ -110,9 +110,10 @@ class tickets extends Controller
 	public function view() : void
 	{
 		$output = Output::i();
+		$member = Member::loggedIn();
 		$db =  Db::i();
 
-		$ticketId = intval(Request::i()->id); // TODO permissions
+		$ticketId = intval(Request::i()->id);
 
 		$r = $db->select('*, vssupport_tickets.id, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.id = '.$ticketId)
 			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
@@ -122,7 +123,41 @@ class tickets extends Controller
 			return;
 		}
 
-		$lang = Member::loggedIn()->language();
+		if($ticket['member_id'] != $member->member_id && !$member->isAdmin()) {
+			$output->error('node_error', '2C114/O', 404, '');
+			return;
+		}
+
+		$form = null;
+		if(true) { // TODO message locking
+			$form = new Form(submitLang: 'message_add');
+			// Prevent the label being placed to the side. We want full width.
+			//$form->class = 'ipsForm--vertical';
+
+			$autoSaveKey = 'ticket-message-'.$ticketId;
+			$form->add(new Form\Editor('text', required: true, options: [
+				'app'         => 'vssupport',
+				'key'         => 'TicketText',
+				'autoSaveKey' => $autoSaveKey,
+				'attachIds'   => null,
+			]));
+
+			if($values = $form->values()) {
+				$messageId = $db->insert('vssupport_messages', [
+					'ticket'          => $ticketId,
+					'text'            => $values['text'],
+					'text_searchable' => strip_tags($values['text']),
+					'user_name'       => $member->get_name(),
+				]);
+	
+				File::claimAttachments($autoSaveKey, $ticketId, $messageId);
+	
+				$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId, seoTemplate: 'tickets_view'));
+				return;
+			}
+		}
+
+		$lang = $member->language();
 		$theme = Theme::i();
 
 		$messages = query_all($db->select('*', 'vssupport_messages', 'ticket = '.$ticketId.' AND !(flags & '.MessageFlags::Internal.')'));
@@ -131,7 +166,7 @@ class tickets extends Controller
 		$bc = &$output->breadcrumb;
 		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets', seoTemplate: 'tickets_list'), $lang->addToStack('my_tickets')];
 		$bc[] = [null, $ticket['subject']];
-		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages);
-		$output->cssFiles = array_merge($output->cssFiles, $theme->css('colors.css', location: 'global'));
+		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages, $form);
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'));
 	}
 }

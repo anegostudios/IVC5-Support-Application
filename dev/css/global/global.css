@@ -1,3 +1,4 @@
+/* Prio labels */
 /* TODO(Rennorb) @visual: [data-ips-scheme="light"] / dark .. */
 :root {
 	--ticket-prio-bg--2: #444;
@@ -25,4 +26,10 @@
   border-radius: .125em;
 	background-color: var(--ticket-prio-bg);
 	color: var(--ticket-prio-fg);
+}
+
+
+/* Messages */
+.message-time {
+	text-align: right;
 }

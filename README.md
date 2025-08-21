@@ -20,6 +20,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 	- Frontend module
 		- Create new tickets (also possible as guest)
 		- Inspect individual tickets
+			- Add more messages / Reply to the ticket
 		- List of tickets created by current member
 	- Admin module
 		- View all tickets
@@ -50,4 +51,3 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 - Hashes instead of ids for tickets
 - Captcha on frontend
 - Action tracking
-- Frontend message submission

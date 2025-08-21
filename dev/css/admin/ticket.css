@@ -3,11 +3,6 @@
 	--i-boxHeader--ba-co: var(--i-box--ba-co);
 }
 
-.message-time {
-	text-align: right;
-}
-
-
 .ipsSubmitRow {
 	display: flex;
 	flex-direction: row;

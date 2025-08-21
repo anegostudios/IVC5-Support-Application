@@ -13,6 +13,7 @@ $lang = array(
 	'ticket_submit' => 'Submit Ticket',
 	'ticket_create' => 'Create Ticket',
 	'my_tickets' => 'My Tickets',
+	'message_add' => 'Add Message',
 	'menu__vssupport_tickets_categories' => 'Manage Categories',
 	'category' => 'Category',
 	'category_add' => 'Add new Category',
