@@ -384,5 +384,39 @@
                 "auto_increment": false
             }
         ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_tickets",
+            {
+                "name": "hash",
+                "type": "BINARY",
+                "length": 16,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addIndex",
+        "params": [
+            "vssupport_tickets",
+            {
+                "type": "unique",
+                "name": "hash",
+                "columns": [
+                    "hash"
+                ],
+                "length": [
+                    null
+                ]
+            }
+        ]
     }
 ]

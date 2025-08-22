@@ -38,11 +38,11 @@ class tickets extends Controller
 		$db = Db::i();
 		$theme = Theme::i();
 
-		$q = $db->select('*, vssupport_tickets.id, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.member_id = '.($member->member_id ?? 0))
+		$q = $db->select('*, vssupport_tickets.id, HEX(hash) AS hash, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.member_id = '.($member->member_id ?? 0))
 			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
 		$tickets = query_all($q);
 
-		$createLink = Url::internal('app=vssupport&controller=tickets&do=create', seoTemplate: 'tickets_create');
+		$createLink = Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');
 
 		$output->title = $lang->addToStack('tickets');
 		$output->breadcrumb[] = [null, $lang->addToStack('my_tickets')];
@@ -83,15 +83,14 @@ class tickets extends Controller
 				$email = $member->email;
 			}
 
-			$ticketId = $db->insert('vssupport_tickets', [
-				'user_name'  => $name,
-				'user_email' => $email,
-				'category'   => $values['category'],
-				'subject'    => $values['subject'],
-				'member_id'  => $member->member_id,
-				//'hash'       => md5(uniqid()),
-			]);
-			//$this->preparedQuery($query[0], $query[1]);
+			// manual query construction to allow usage of UNHEX
+			$ticketHash = md5(uniqid()); //TODO(Rennorb) @correctness: Tn theory insertion could fail in case of a collision;
+			$ticketId = $db->preparedQuery(<<<SQL
+					INSERT INTO {$db->prefix}vssupport_tickets (user_name, user_email, category, subject, member_id, hash)
+					VALUES(?, ?, ?, ?, ?, UNHEX(?))
+				SQL,
+				[$name, $email, $values['category'], $values['subject'], $member->member_id, $ticketHash]
+			)->insert_id;
 			$messageId = $db->insert('vssupport_messages', [
 				'ticket'          => $ticketId,
 				'text'            => $values['text'],
@@ -101,7 +100,7 @@ class tickets extends Controller
 
 			File::claimAttachments('new-ticket', $ticketId, $messageId);
 
-			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId, seoTemplate: 'tickets_view'));
+			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&hash='.$ticketHash, seoTemplate: 'tickets_view_hash'));
 			return;
 		}
 
@@ -115,10 +114,9 @@ class tickets extends Controller
 		$output = Output::i();
 		$member = Member::loggedIn();
 		$db =  Db::i();
+		$request = Request::i();
 
-		$ticketId = intval(Request::i()->id);
-
-		$r = $db->select('*, vssupport_tickets.id, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.id = '.$ticketId)
+		$r = $db->select('*, vssupport_tickets.id, HEX(hash) AS hash, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', ['hash = UNHEX(?)', $request->hash])
 			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
 		$ticket = query_one($r);
 		if(!$ticket) {
@@ -137,7 +135,7 @@ class tickets extends Controller
 			// Prevent the label being placed to the side. We want full width.
 			//$form->class = 'ipsForm--vertical';
 
-			$autoSaveKey = 'ticket-message-'.$ticketId;
+			$autoSaveKey = 'ticket-message-'.$ticket['id'];
 			$form->add(new Form\Editor('text', required: true, options: [
 				'app'         => 'vssupport',
 				'key'         => 'TicketText',
@@ -147,15 +145,15 @@ class tickets extends Controller
 
 			if($values = $form->values()) {
 				$messageId = $db->insert('vssupport_messages', [
-					'ticket'          => $ticketId,
+					'ticket'          => $ticket['id'],
 					'text'            => $values['text'],
 					'text_searchable' => strip_tags($values['text']),
 					'user_name'       => $member->get_name(),
 				]);
 	
-				File::claimAttachments($autoSaveKey, $ticketId, $messageId);
+				File::claimAttachments($autoSaveKey, $ticket['id'], $messageId);
 	
-				$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId, seoTemplate: 'tickets_view'));
+				$output->redirect($request->url());
 				return;
 			}
 		}
@@ -163,9 +161,9 @@ class tickets extends Controller
 		$lang = $member->language();
 		$theme = Theme::i();
 
-		$messages = query_all($db->select('*', 'vssupport_messages', 'ticket = '.$ticketId.' AND !(flags & '.MessageFlags::Internal.')'));
+		$messages = query_all($db->select('*', 'vssupport_messages', 'ticket = '.$ticket['id'].' AND !(flags & '.MessageFlags::Internal.')'));
 
-		$output->title = $lang->addToStack('ticket').' #'.$ticketId.' - '.$ticket['subject'];
+		$output->title = $lang->addToStack('ticket').' #'.$ticket['id'].' - '.$ticket['subject'];
 		$bc = &$output->breadcrumb;
 		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets', seoTemplate: 'tickets_list'), $lang->addToStack('my_tickets')];
 		$bc[] = [null, $ticket['subject']];

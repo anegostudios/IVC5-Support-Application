@@ -1,13 +1,13 @@
 {
     "topLevel": "support",
     "pages": {
-        "tickets_view": {
-            "friendly": "tickets\/{#id}",
-            "real": "app=vssupport&module=tickets&controller=tickets&do=view"
-        },
         "tickets_create": {
             "friendly": "tickets\/create",
             "real": "app=vssupport&module=tickets&controller=tickets&do=create"
+        },
+        "tickets_view_hash": {
+            "friendly": "tickets\/{@hash}",
+            "real": "app=vssupport&module=tickets&controller=tickets&do=view"
         },
         "tickets_list": {
             "friendly": "tickets",

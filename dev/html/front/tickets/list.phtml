@@ -4,7 +4,7 @@
 </div>
 <div class="i-flex i-flex-direction_column i-gap_1">
 	{{foreach $tickets as $ticket}}
-		<a class="ipsBox i-padding_2" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&id={$ticket['id']}" seoTemplate="tickets_view"}">
+		<a class="ipsBox i-padding_2" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&hash={$ticket['hash']}" seoTemplate="tickets_view_hash"}">
 			<h3><span class="prio-label prio-{$ticket['priority']}">{lang="ticket_prio_name_{$ticket['priority']}"}</span> {$ticket['subject']}</h3>
 			<h3>{$ticket['created']}</h3>
 		</a>

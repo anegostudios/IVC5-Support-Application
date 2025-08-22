@@ -145,6 +145,18 @@
                 "comment": "",
                 "unsigned": true,
                 "auto_increment": false
+            },
+            "hash": {
+                "name": "hash",
+                "type": "BINARY",
+                "length": 16,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
             }
         },
         "indexes": {
@@ -156,6 +168,16 @@
                 ],
                 "columns": [
                     "id"
+                ]
+            },
+            "hash": {
+                "type": "unique",
+                "name": "hash",
+                "columns": [
+                    "hash"
+                ],
+                "length": [
+                    null
                 ]
             }
         },

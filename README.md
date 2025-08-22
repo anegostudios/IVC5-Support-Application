@@ -22,6 +22,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- Inspect individual tickets
 			- Add more messages / Reply to the ticket if it is not locked
 		- List of tickets created by current member
+		- Tickets are not enumerable
 	- Admin module
 		- View all tickets
 		- View individual ticket
@@ -62,6 +63,5 @@ Viewing and responding to a ticket from the frontend.
 - Admin ticket view
 	- Quick actions
 - Admin bulk actions
-- Hashes instead of ids for tickets
 - Captcha on frontend
 - Action tracking
