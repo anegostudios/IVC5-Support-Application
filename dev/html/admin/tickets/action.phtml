@@ -1,0 +1,21 @@
+<ips:template parameters="$action"/>
+{{if $action['kind'] === \IPS\vssupport\ActionKind::Message}}
+	<div class="ipsBox{{if $action['flags'] & \IPS\vssupport\MessageFlags::Internal}} internal-note{{endif}}">
+		<div class="ipsBox__header">{$action['initiator']}</div>
+		<div class="i-padding_2">{$action['text']|raw}</div>
+		<div class="i-font-size_-2 i-color_soft i-padding_2 i-padding-top_0 message-time"><i class="fa-solid fa-clock"></i>&nbsp;{$action['created']}</div>
+	</div>
+{{else}}
+	<div class="ipsBox i-padding_2">
+	{{if $action['kind'] === \IPS\vssupport\ActionKind::PriorityChange}}
+		{lang="priority_changed_to"}&nbsp;{template="priorityLabel" location="global" group="tickets" params="$action['reference_id']"}
+	{{elseif $action['kind'] === \IPS\vssupport\ActionKind::CategoryChange}}
+		{lang="category_changed_to"}&nbsp;{lang="ticket_cat_name_{$action['name_key']}"}
+	{{elseif $action['kind'] === \IPS\vssupport\ActionKind::LockedChange}}
+		{lang="locked_changed_to_{$action['reference_id']}"}
+	{{else}}
+		Action: {$action['kind']} {$action['reference_id']}
+	{{endif}}
+		<span class="i-font-size_-2 i-color_soft i-float_end">{$action['initiator']} - <i class="fa-solid fa-clock"></i>&nbsp;{$action['created']}</span>
+	</div>
+{{endif}}

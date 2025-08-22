@@ -249,30 +249,6 @@
                 "unsigned": false,
                 "values": []
             },
-            "user_name": {
-                "allow_null": false,
-                "auto_increment": false,
-                "comment": "",
-                "decimals": null,
-                "default": null,
-                "length": 0,
-                "name": "user_name",
-                "type": "TINYTEXT",
-                "unsigned": false,
-                "values": []
-            },
-            "created": {
-                "allow_null": false,
-                "auto_increment": false,
-                "comment": "",
-                "decimals": null,
-                "default": "current_timestamp()",
-                "length": 0,
-                "name": "created",
-                "type": "DATETIME",
-                "unsigned": false,
-                "values": []
-            },
             "flags": {
                 "name": "flags",
                 "type": "TINYINT",
@@ -295,6 +271,16 @@
                 ],
                 "columns": [
                     "id"
+                ]
+            },
+            "ticket": {
+                "type": "key",
+                "name": "ticket",
+                "columns": [
+                    "ticket"
+                ],
+                "length": [
+                    null
                 ]
             }
         },
@@ -356,6 +342,116 @@
             {
                 "id": "2",
                 "name_key": "cat2"
+            }
+        ]
+    },
+    "vssupport_ticket_action_history": {
+        "name": "vssupport_ticket_action_history",
+        "columns": {
+            "id": {
+                "allow_null": false,
+                "auto_increment": true,
+                "comment": "ID Number",
+                "decimals": null,
+                "default": null,
+                "length": 20,
+                "name": "id",
+                "type": "BIGINT",
+                "unsigned": true,
+                "values": []
+            },
+            "ticket": {
+                "allow_null": false,
+                "auto_increment": false,
+                "comment": "",
+                "decimals": null,
+                "default": "0",
+                "length": 10,
+                "name": "ticket",
+                "type": "INT",
+                "unsigned": true,
+                "values": []
+            },
+            "created": {
+                "allow_null": false,
+                "auto_increment": false,
+                "comment": "",
+                "decimals": null,
+                "default": "current_timestamp()",
+                "length": 0,
+                "name": "created",
+                "type": "DATETIME",
+                "unsigned": false,
+                "values": []
+            },
+            "kind": {
+                "allow_null": false,
+                "auto_increment": false,
+                "comment": "",
+                "decimals": null,
+                "default": "0",
+                "length": 3,
+                "name": "kind",
+                "type": "TINYINT",
+                "unsigned": true,
+                "values": []
+            },
+            "reference_id": {
+                "allow_null": true,
+                "auto_increment": false,
+                "comment": "",
+                "decimals": null,
+                "default": null,
+                "length": 10,
+                "name": "reference_id",
+                "type": "INT",
+                "unsigned": true,
+                "values": []
+            },
+            "initiator": {
+                "allow_null": false,
+                "auto_increment": false,
+                "comment": "",
+                "decimals": null,
+                "default": "0",
+                "length": 10,
+                "name": "initiator",
+                "type": "INT",
+                "unsigned": true,
+                "values": []
+            }
+        },
+        "indexes": {
+            "PRIMARY": {
+                "type": "primary",
+                "name": "PRIMARY",
+                "length": [
+                    null
+                ],
+                "columns": [
+                    "id"
+                ]
+            },
+            "ticket": {
+                "type": "key",
+                "name": "ticket",
+                "length": [
+                    null
+                ],
+                "columns": [
+                    "ticket"
+                ]
+            }
+        },
+        "collation": "utf8mb4_unicode_ci",
+        "inserts": [
+            {
+                "id": "1",
+                "ticket": "1",
+                "created": "000-00-00",
+                "kind": "1",
+                "reference_id": "1",
+                "initiator": "1"
             }
         ]
     }

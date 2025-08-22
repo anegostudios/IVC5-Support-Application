@@ -9,10 +9,12 @@ use IPS\Theme;
 use IPS\Helpers\Form;
 use IPS\Http\Url;
 use IPS\Request;
+use IPS\vssupport\ActionKind;
 use IPS\vssupport\MessageFlags;
 use IPS\vssupport\TicketFlags;
 
 use function defined;
+use function IPS\vssupport\log_ticket_action;
 use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
@@ -38,15 +40,14 @@ class tickets extends Controller
 		$db = Db::i();
 		$theme = Theme::i();
 
-		$q = $db->select('*, vssupport_tickets.id, HEX(hash) AS hash, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.member_id = '.($member->member_id ?? 0))
-			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
-		$tickets = query_all($q);
-
-		$createLink = Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');
+		$tickets = query_all(
+			$db->select('t.id, t.subject, t.priority, t.created, HEX(t.hash) AS hash, c.name_key as category', ['vssupport_tickets', 't'], 't.member_id = '.($member->member_id ?? 0))
+			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
+		);
 
 		$output->title = $lang->addToStack('tickets');
 		$output->breadcrumb[] = [null, $lang->addToStack('my_tickets')];
-		$output->output = $theme->getTemplate('tickets')->list($tickets, $createLink);
+		$output->output = $theme->getTemplate('tickets')->list($tickets);
 		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'));
 	}
 
@@ -96,8 +97,8 @@ class tickets extends Controller
 				'ticket'          => $ticketId,
 				'text'            => $values['text'],
 				'text_searchable' => strip_tags($values['text']),
-				'user_name'       => $name,
 			]);
+			log_ticket_action($db, $ticketId, ActionKind::Message, $member->member_id, $messageId);
 
 			File::claimAttachments('new-ticket', $ticketId, $messageId);
 
@@ -117,9 +118,10 @@ class tickets extends Controller
 		$db =  Db::i();
 		$request = Request::i();
 
-		$r = $db->select('*, vssupport_tickets.id, HEX(hash) AS hash, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', ['hash = UNHEX(?)', $request->hash])
-			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
-		$ticket = query_one($r);
+		$ticket = query_one(
+			$db->select('*, t.id, HEX(hash) AS hash, c.name_key as category', ['vssupport_tickets', 't'], ['hash = UNHEX(?)', $request->hash])
+			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
+		);
 		if(!$ticket) {
 			$output->error('node_error', '2C114/O', 404, '');
 			return;
@@ -149,8 +151,8 @@ class tickets extends Controller
 					'ticket'          => $ticket['id'],
 					'text'            => $values['text'],
 					'text_searchable' => strip_tags($values['text']),
-					'user_name'       => $member->get_name(),
 				]);
+				log_ticket_action($db, $ticket['id'], ActionKind::Message, $member->member_id, $messageId);
 	
 				File::claimAttachments($autoSaveKey, $ticket['id'], $messageId);
 	
@@ -162,13 +164,23 @@ class tickets extends Controller
 		$lang = $member->language();
 		$theme = Theme::i();
 
-		$messages = query_all($db->select('*', 'vssupport_messages', 'ticket = '.$ticket['id'].' AND !(flags & '.MessageFlags::Internal.')'));
+		$actions = query_all(
+			$db->select('a.created, a.kind, a.reference_id, u.name as initiator, m.text, m.flags, c.name_key', ['vssupport_ticket_action_history', 'a'],
+				where: 'a.ticket = '.$ticket['id'].' AND !(IFNULL(m.flags, 0) & '.MessageFlags::Internal.')', order: 'a.created ASC')
+			->join(['core_members', 'u'], 'u.member_id = a.initiator')
+			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
+			->join(['vssupport_ticket_categories', 'c'], 'c.id = a.reference_id AND a.kind = '.ActionKind::CategoryChange)
+		);
+		foreach($actions as &$action) {
+			if(!$action['initiator']) $action['initiator'] = $ticket['user_name'];
+		}
+		unset($action);
 
 		$output->title = $lang->addToStack('ticket').' #'.$ticket['id'].' - '.$ticket['subject'];
 		$bc = &$output->breadcrumb;
 		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets', seoTemplate: 'tickets_list'), $lang->addToStack('my_tickets')];
 		$bc[] = [null, $ticket['subject']];
-		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages, $form);
+		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $actions, $form);
 		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'));
 	}
 }

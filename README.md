@@ -17,6 +17,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- Arbitrary Categories (translatable)
 		- Timestamps on tickets and messages
 		- Friendly urls (mostly, tickets are still referenced by id)
+		- Action tracking (history of attribute changes)
 	- Frontend module
 		- Create new tickets (also possible as guest)
 		- Inspect individual tickets
@@ -64,4 +65,5 @@ Viewing and responding to a ticket from the frontend.
 - Admin ticket view
 	- Quick actions
 - Admin bulk actions
-- Action tracking
+- member merge listener
+- Add lock icons to ticket lists

@@ -10,7 +10,7 @@ use IPS\Helpers;
 use IPS\Helpers\Form;
 use IPS\Http\Url;
 use IPS\Request;
-
+use IPS\vssupport\ActionKind;
 use IPS\vssupport\MessageFlags;
 use IPS\vssupport\TicketFlags;
 
@@ -116,15 +116,25 @@ class tickets extends Controller
 
 		$ticketId = intval(Request::i()->id);
 
-		$r = $db->select('*, vssupport_tickets.id, vssupport_ticket_categories.name_key as category', 'vssupport_tickets', 'vssupport_tickets.id = '.$ticketId)
-			->join('vssupport_ticket_categories', 'vssupport_ticket_categories.id = vssupport_tickets.category');
-		$ticket = query_one($r);
+		$ticket = query_one(
+			$db->select('*, t.id, c.name_key as category', ['vssupport_tickets', 't'], 't.id = '.$ticketId)
+			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
+		);
 		if(!$ticket) {
 			$output->error('node_error', '2C114/O', 404, '');
 			return;
 		}
 
-		$messages = query_all($db->select('*', 'vssupport_messages', 'ticket = '.$ticketId));
+		$actions = query_all(
+			$db->select('a.created, a.kind, a.reference_id, u.name as initiator, m.text, m.flags, c.name_key', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
+			->join(['core_members', 'u'], 'u.member_id = a.initiator')
+			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
+			->join(['vssupport_ticket_categories', 'c'], 'c.id = a.reference_id AND a.kind = '.ActionKind::CategoryChange)
+		);
+		foreach($actions as &$action) {
+			if(!$action['initiator']) $action['initiator'] = $ticket['user_name'];
+		}
+		unset($action);
 
 		$categories = query_all_assoc($db->select("id, name_key", 'vssupport_ticket_categories'));
 		foreach($categories as &$cat) {
@@ -140,7 +150,7 @@ class tickets extends Controller
 		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets', seoTemplate: 'tickets_list'), $lang->addToStack('tickets')];
 		$bc[] = [null, $ticket['subject']];
 		$output->showTitle = false;
-		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $messages, $form);
+		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $actions, $form);
 		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'), $theme->css('ticket.css'));
 	}
 
@@ -156,14 +166,18 @@ class tickets extends Controller
 		
 		if($values = $form->values()) {
 			$ticketUpdates = [];
+			$actions = [];
 			if($newCategory = intval($request->moveToCategory)) {
 				$ticketUpdates['category'] = $newCategory;
+				$actions[] = ['kind' => ActionKind::CategoryChange, 'reference_id' => $newCategory];
 			}
 			if(($newPriority = intval($request->moveToPriority)) !== static::PRIORITY_DONT_CHANGE) {
 				$ticketUpdates['priority'] = $newPriority;
+				$actions[] = ['kind' => ActionKind::PriorityChange, 'reference_id' => $newPriority];
 			}
 			if($request->lock) {
 				$ticketUpdates['flags'] = '`flags` | '.TicketFlags::Locked;
+				$actions[] = ['kind' => ActionKind::LockedChange, 'reference_id' => 1];
 			}
 			if($ticketUpdates) {
 				$db->update('vssupport_tickets', $ticketUpdates, 'id = '.$ticketId, flags: Db::ALLOW_INCDEC_VALUES);
@@ -176,9 +190,16 @@ class tickets extends Controller
 				'ticket'          => $ticketId,
 				'text'            => $values['text'],
 				'text_searchable' => strip_tags($values['text']),
-				'user_name'       => $member->get_name(),
 				'flags'           => $flags,
 			]);
+			$actions[] = ['kind' => ActionKind::Message, 'reference_id' => $messageId];
+
+			foreach($actions as &$action) {
+				$action['ticket'] = $ticketId;
+				$action['initiator'] = $member->member_id;
+			}
+			unset($action);
+			$db->insert('vssupport_ticket_action_history', $actions);
 
 			File::claimAttachments(static::_formatEditorKey($ticketId), $ticketId, $messageId);
 

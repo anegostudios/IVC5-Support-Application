@@ -12,6 +12,7 @@
 namespace IPS\vssupport;
 
 use IPS\Application as SystemApplication;
+use IPS\Db;
 use IPS\Db\Select;
 
 class MessageFlags {
@@ -51,6 +52,25 @@ function query_all_assoc(Select $query) : array
 		$data[reset($r)] = next($r);
 	}
 	return $data;
+}
+
+class ActionKind {
+	public const Message        = 1;
+	public const StatusChange   = 2;
+	public const PriorityChange = 3;
+	public const CategoryChange = 4;
+	public const Assigned       = 5;
+	public const LockedChange   = 6;
+}
+
+function log_ticket_action(Db $db, int $ticketId, int $actionKind, int $initiatorMemberId, int $referenceId = null) : void
+{
+	$db->insert('vssupport_ticket_action_history', [
+		'ticket'       => $ticketId,
+		'kind'         => $actionKind,
+		'reference_id' => $referenceId,
+		'initiator'    => $initiatorMemberId,
+	]);
 }
 
 class Application extends SystemApplication { }

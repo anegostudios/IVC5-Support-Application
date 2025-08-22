@@ -1,5 +1,6 @@
-<ips:template parameters="$tickets, $createLink"/>
+<ips:template parameters="$tickets"/>
 <div style="text-align: right">
+	{{$createLink = \IPS\Http\Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');}}
 	{template="button" app="core" group="forms" location="global" params="'ticket_create', 'link', $createLink, 'ipsButton ipsButton--primary', ['tabindex' => 1, 'accesskey' => 'c']"}
 </div>
 <div class="i-flex i-flex-direction_column i-gap_1">
