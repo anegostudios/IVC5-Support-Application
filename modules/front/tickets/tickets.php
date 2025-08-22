@@ -72,6 +72,7 @@ class tickets extends Controller
 			'autoSaveKey' => 'new-ticket',
 			'attachIds'   => null,
 		]));
+		$form->add(new Form\Captcha());
 
 		if($values = $form->values()) {
 			if(!$member->member_id) {
