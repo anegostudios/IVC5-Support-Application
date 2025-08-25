@@ -66,3 +66,7 @@ Viewing and responding to a ticket from the frontend.
 	- Quick actions
 - Admin bulk actions
 - member merge listener
+
+## License
+
+The code and other files in this repository are provided under the MIT license unless specified otherwise.
