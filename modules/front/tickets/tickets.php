@@ -165,11 +165,12 @@ class tickets extends Controller
 		$theme = Theme::i();
 
 		$actions = query_all(
-			$db->select('a.created, a.kind, a.reference_id, u.name as initiator, m.text, m.flags, c.name_key', ['vssupport_ticket_action_history', 'a'],
+			$db->select('a.created, a.kind, a.reference_id, u.name as initiator, m.text, m.flags, c.name_key, as.name as assigned_to_name', ['vssupport_ticket_action_history', 'a'],
 				where: 'a.ticket = '.$ticket['id'].' AND !(IFNULL(m.flags, 0) & '.MessageFlags::Internal.')', order: 'a.created ASC')
 			->join(['core_members', 'u'], 'u.member_id = a.initiator')
 			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
 			->join(['vssupport_ticket_categories', 'c'], 'c.id = a.reference_id AND a.kind = '.ActionKind::CategoryChange)
+			->join(['core_members', 'as'], 'as.member_id = a.reference_id AND a.kind = '.ActionKind::Assigned)
 		);
 		foreach($actions as &$action) {
 			if(!$action['initiator']) $action['initiator'] = $ticket['user_name'];

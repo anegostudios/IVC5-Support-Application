@@ -30,8 +30,6 @@ class tickets extends Controller
 	// Tell IVC that we handle csrf prot internally. @copypasta
 	public static bool $csrfProtected = TRUE;
 
-	const PRIORITY_DONT_CHANGE = 999; // Special priority value that indicates we don't want to change the priority.
-
 	public function execute() : void
 	{
 		\IPS\Dispatcher::i()->checkAcpPermission( 'tickets_manage' );
@@ -52,7 +50,7 @@ class tickets extends Controller
 		//$table->langPrefix = 'ticket_';
 		$table->keyField = 'id';
 
-		$table->include = ['created', 'priority', 'subject', 'category', 'status', 'user_name', 'user_email', 'assigned_to', 'last_update_at', 'last_update_by'];
+		$table->include = ['id', 'created', 'priority', 'subject', 'category', 'status', 'user_name', 'user_email', 'assigned_to', 'last_update_at', 'last_update_by'];
 		$table->mainColumn = 'created';
 
 		$table->joins[] = [
@@ -117,8 +115,9 @@ class tickets extends Controller
 		$ticketId = intval(Request::i()->id);
 
 		$ticket = query_one(
-			$db->select('*, t.id, c.name_key as category', ['vssupport_tickets', 't'], 't.id = '.$ticketId)
+			$db->select('t.*, c.name_key as category_name, u.name as assigned_to_name', ['vssupport_tickets', 't'], 't.id = '.$ticketId)
 			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
+			->join(['core_members', 'u'], 'u.member_id = t.assigned_to')
 		);
 		if(!$ticket) {
 			$output->error('node_error', '2C114/O', 404, '');
@@ -126,10 +125,11 @@ class tickets extends Controller
 		}
 
 		$actions = query_all(
-			$db->select('a.created, a.kind, a.reference_id, u.name as initiator, m.text, m.flags, c.name_key', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
+			$db->select('a.created, a.kind, a.reference_id, u.name as initiator, m.text, m.flags, c.name_key, as.name as assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
 			->join(['core_members', 'u'], 'u.member_id = a.initiator')
 			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
 			->join(['vssupport_ticket_categories', 'c'], 'c.id = a.reference_id AND a.kind = '.ActionKind::CategoryChange)
+			->join(['core_members', 'as'], 'as.member_id = a.reference_id AND a.kind = '.ActionKind::Assigned)
 		);
 		foreach($actions as &$action) {
 			if(!$action['initiator']) $action['initiator'] = $ticket['user_name'];
@@ -137,13 +137,13 @@ class tickets extends Controller
 		unset($action);
 
 		$categories = query_all_assoc($db->select("id, name_key", 'vssupport_ticket_categories'));
-		foreach($categories as &$cat) {
+		foreach($categories as $catId => &$cat) {
 			$cat = htmlspecialchars($lang->addToStack('ticket_cat_name_'.$cat), ENT_DISALLOWED, 'UTF-8', FALSE);
+			if($catId === $ticket['category'])  $cat .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
 		}
-		$categories = [0 => $lang->addToStack('dont_change')] + $categories; // Don't unshift here, would reindex the array!
 		unset($cat);
 
-		$form = static::_createMessageForm($ticketId, $categories, Url::internal('app=vssupport&module=tickets&controller=tickets&do=reply'));
+		$form = static::_createMessageForm($ticketId, $categories, $ticket, Url::internal('app=vssupport&module=tickets&controller=tickets&do=reply'));
 
 		$output->title = $lang->addToStack('ticket').' #'.$ticketId.' - '.$ticket['subject'];
 		$bc = &$output->breadcrumb;
@@ -162,23 +162,35 @@ class tickets extends Controller
 		$db = Db::i();
 
 		$ticketId = intval($request->replyTo);
-		$form = static::_createMessageForm($ticketId, [/* doesn't matter */]);
+		$form = static::_createMessageForm($ticketId, null, null);
 		
 		if($values = $form->values()) {
+			$ticket = query_one($db->select('*', 'vssupport_tickets', 'id = '.$ticketId));
+
 			$ticketUpdates = [];
 			$actions = [];
-			if($newCategory = intval($request->moveToCategory)) {
+			if(($newCategory = intval($request->moveToCategory)) !== $ticket['category']) {
 				$ticketUpdates['category'] = $newCategory;
 				$actions[] = ['kind' => ActionKind::CategoryChange, 'reference_id' => $newCategory];
 			}
-			if(($newPriority = intval($request->moveToPriority)) !== static::PRIORITY_DONT_CHANGE) {
+			if(($newPriority = intval($request->moveToPriority)) !== $ticket['priority']) {
 				$ticketUpdates['priority'] = $newPriority;
 				$actions[] = ['kind' => ActionKind::PriorityChange, 'reference_id' => $newPriority];
 			}
-			if($request->lock) {
-				$ticketUpdates['flags'] = '`flags` | '.TicketFlags::Locked;
-				$actions[] = ['kind' => ActionKind::LockedChange, 'reference_id' => 1];
+			if(($newLockState = !!$request->lock) !== !!($ticket['flags'] & TicketFlags::Locked)) {
+				$ticketUpdates['flags'] = $newLockState ? ('`flags` | '.TicketFlags::Locked) : ('`flags` & ~'.TicketFlags::Locked);
+				$actions[] = ['kind' => ActionKind::LockedChange, 'reference_id' => intval($newLockState)];
 			}
+			{
+				//TODO(Rennorb) @cleanup: This is stupid. Find a way to get back the member id, not the member name...
+				$newAssignment = query_one($db->select('member_id', 'core_members', ['name = ?', $request->assignTo]));
+				//NOTE(Rennorb): Coercing comparison here, because assignment = null should be treated as assignment = 0.
+				if($newAssignment != $ticket['assigned_to']) {
+					$ticketUpdates['assigned_to'] = $newAssignment;
+					$actions[] = ['kind' => ActionKind::Assigned, 'reference_id' => $newAssignment ?: null];
+				}
+			}
+			
 			if($ticketUpdates) {
 				$db->update('vssupport_tickets', $ticketUpdates, 'id = '.$ticketId, flags: Db::ALLOW_INCDEC_VALUES);
 			}
@@ -206,14 +218,14 @@ class tickets extends Controller
 			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId));
 		}
 		else {
-			$output->error('', '', 400, '');
+			$output->error('missing_values', '', 400, $form->error);
 		}
 	}
 
 	/**
 	 * @param string[] $categories id to translatable strings map
 	 */
-	static function _createMessageForm(int $ticketId, array $categories, Url $action = null) : Form {
+	static function _createMessageForm(int $ticketId, array|null $categories, array|null $ticket, Url $action = null) : Form {
 		$theme = Theme::i();
 
 		// submitLang = null disables builtin button
@@ -227,23 +239,41 @@ class tickets extends Controller
 			$lang = Member::loggedIn()->language();
 			{
 				$select = $theme->getTemplate('forms', 'core')
-					->select('moveToCategory', '', false, $categories, class: 'ipsInput--auto');
+					->select('moveToCategory', $ticket['category'], false, $categories, class: 'ipsInput--auto');
 				$title = htmlspecialchars($lang->addToStack('category'), ENT_DISALLOWED, 'UTF-8', FALSE);
 				$form->actionButtons[] = "<span title='$title'>$select</span>";
 			}
 			{
-				$options = [static::PRIORITY_DONT_CHANGE => $lang->addToStack('dont_change')];
 				for($i = -2; $i <= 2; $i++) {
 					$options[$i] = htmlspecialchars($lang->addToStack('ticket_prio_name_'.$i), ENT_DISALLOWED, 'UTF-8', FALSE);
+					if($i === $ticket['priority'])  $options[$i] .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
 				}
 				$select = $theme->getTemplate('forms', 'core')
-					->select('moveToPriority', '', false, $options, class: 'ipsInput--auto');
+					->select('moveToPriority', $ticket['priority'], false, $options, class: 'ipsInput--auto');
 				$title = htmlspecialchars($lang->addToStack('priority'), ENT_DISALLOWED, 'UTF-8', FALSE);
 				$form->actionButtons[] = "<span title='$title'>$select</span>";
 			}
 			{
+				$select = (new Form\Member('assignTo', $ticket['assigned_to_name'], options: [
+					// Copy pasted from the original, just with the additional &type=mod.
+					'autocomplete' => [
+						'source'               => 'app=core&module=system&controller=ajax&do=findMember&type=mod',
+						'resultItemTemplate'   => 'core.autocomplete.memberItem',
+						'commaTrigger'         => false,
+						'unique'               => true,
+						'minAjaxLength'        => 3,
+						'disallowedCharacters' => [],
+						'lang'                 => 'mem_optional',
+						'suggestionsOnly'      => true,
+					],
+					'placeholder' => 'dont_change',
+				]))->html();
+				$title = htmlspecialchars($lang->addToStack('assigned_to'), ENT_DISALLOWED, 'UTF-8', FALSE);
+				$form->actionButtons[] = "<span title='$title'>$select</span>";
+			}
+			{
 				$lockEl = $theme->getTemplate('forms', 'core', 'global')
-					->checkbox('lock', label: 'ticket_lock', fancyToggle: true, tooltip: $lang->addToStack('ticket_lock_desc'));
+					->checkbox('lock', $ticket['flags'] & TicketFlags::Locked, label: 'ticket_lock', fancyToggle: true, tooltip: $lang->addToStack('ticket_lock_desc'));
 				$form->actionButtons[] = "<span style='user-select: none'>$lockEl</span>";
 			}
 			$form->actionButtons[] = '<span class="i-flex_91"></span>'; // spacer

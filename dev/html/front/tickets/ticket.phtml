@@ -4,7 +4,7 @@
 <h3 class="ipsTitle ipsTitle--h3">{lang="ticket_cat_name_{$ticket['category']}"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}} <small class="i-color_soft i-font-size_-1">started <i class="fa-solid fa-clock"></i>&nbsp;{$ticket['created']}</small></h3>
 <div style="display: flex; flex-direction: column; gap: 1em;">
 	{{foreach $actions as $action}}
-		{template="action" group="tickets" params="$action"}
+		{template="action" location="global" group="tickets" params="$action"}
 	{{endforeach}}
 	{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}
 		<div class="ipsBox i-padding_2 i-text-align_center i-background_moderated">{lang="ticket_locked"}</div>

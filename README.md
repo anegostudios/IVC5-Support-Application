@@ -32,7 +32,8 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 				- Change Category
 				- Change Priority
 				- Lock to staff members
-		- Create / Edit / Delete Categories 
+				- Assign to specific staff member
+		- Create / Edit / Delete Categories
 			- Preview translated names
 
 ### Screenshots
@@ -57,7 +58,6 @@ Viewing and responding to a ticket from the frontend.
 - GitHub linking
 - GitLab linking
 - Sales linking
-- Proper ticket assignment
 - More filter options
 	-	by assignment
 	- by user
