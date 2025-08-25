@@ -1,6 +1,6 @@
 <ips:template parameters="$ticket, $actions, $form"/>
 <h2 class="ipsTitle ipsTitle--h2">{lang="ticket"} #{$ticket['id']} - {$ticket['subject']}</h2>
-<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_cat_name_{$ticket['category_name']}"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"} {{if $ticket['assigned_to']}}{lang="assigned_to"}:&nbsp;{$ticket['assigned_to_name']}{{endif}}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}}</h3>
+<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_cat_name_{$ticket['category_name']}"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}{{if $ticket['assigned_to']}} {lang="assigned_to"}:&nbsp;{$ticket['assigned_to_name']}{{endif}}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}}</h3>
 <h4 class="ipsTitle ipsTitle--h4">{$ticket['user_name']} - {$ticket['user_email']} <span class="i-color_soft">started <i class="fa-solid fa-clock"></i>&nbsp;{$ticket['created']}</span></h4>
 <div style="display: flex; flex-direction: column; gap: 1em;">
 	{{foreach $actions as $action}}

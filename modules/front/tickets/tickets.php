@@ -41,7 +41,7 @@ class tickets extends Controller
 		$theme = Theme::i();
 
 		$tickets = query_all(
-			$db->select('t.id, t.subject, t.priority, t.created, HEX(t.hash) AS hash, c.name_key as category', ['vssupport_tickets', 't'], 't.member_id = '.($member->member_id ?? 0))
+			$db->select('t.id, t.subject, t.priority, t.created, t.flags, HEX(t.hash) AS hash, c.name_key as category', ['vssupport_tickets', 't'], 't.member_id = '.($member->member_id ?? 0))
 			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
 		);
 

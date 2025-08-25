@@ -1,4 +1,20 @@
 <ips:template parameters="$table"/>
-<div style="overflow-y: auto;">
+<div id="ticket-list-wrapper" style="overflow-y: auto;">
 	{$table|raw}
 </div>
+<script>
+	// middle click to open in new tab
+	document.getElementById('ticket-list-wrapper').getElementsByTagName('table')[0].addEventListener("mousedown", e => {
+		if(e.which !== 2) return;
+		e.preventDefault();
+
+		let row = e.target;
+		while(row.nodeName !== 'TR') {
+			row = row.parentElement;
+			if(!row) return;
+		}
+
+		const anchorEl = row.lastElementChild.getElementsByTagName('a')[0];
+		open(anchorEl.href, '_blank', 'noopener');
+	})
+</script>

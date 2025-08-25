@@ -66,4 +66,3 @@ Viewing and responding to a ticket from the frontend.
 	- Quick actions
 - Admin bulk actions
 - member merge listener
-- Add lock icons to ticket lists
