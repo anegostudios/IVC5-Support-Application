@@ -1,0 +1,10 @@
+<ips:template parameters="$purchase, $description, $buttons" />
+<div class="i-flex i-gap_1 i-padding_2 ">
+	<span class="ipsTree__icon i-align-self_center"><i class="fa-solid fa-{$purchase->getIcon()}"></i></span>
+	<div>
+		<h3 class="ipsList__label">{$purchase->name}</h3>
+		<p>$description</p>
+	</div>
+	<div class="i-flex_91"></div>
+	<div>{template="controlStrip" group="global" app="core" params="$buttons"}</div>
+</div>

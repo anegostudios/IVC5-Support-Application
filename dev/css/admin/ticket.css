@@ -1,3 +1,10 @@
+/* TODO(Rennorb) @ui: horizontal layout for wide */
+#tick-main-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
 .internal-note {
 	--i-box--ba-co: hsl(30, 18%, 30%);
 	--i-boxHeader--ba-co: var(--i-box--ba-co);

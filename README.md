@@ -57,7 +57,6 @@ Viewing and responding to a ticket from the frontend.
 - Email ingest
 - GitHub linking
 - GitLab linking
-- Sales linking
 - More filter options
 	-	by assignment
 	- by user
@@ -66,6 +65,7 @@ Viewing and responding to a ticket from the frontend.
 	- Quick actions
 - Admin bulk actions
 - member merge listener
+- migration from ivc4 builtin tickets
 
 ## License
 

@@ -1,0 +1,20 @@
+<ips:template parameters="$customer, $tabs, $activeTabKey, $activeTabContents" />
+<div class='ipsBox' data-ips-template="purchases">
+	<h2 class="ipsBox__header">{lang="purchases"}</h2>
+	<i-tabs class='ipsTabs ipsTabs--stretch' id='ipsTabs_purchases' data-ipsTabBar data-ipsTabBar-contentArea='#ipsTabs_purchases_content' data-ipsTabBar-updateUrl="false">
+		<div role='tablist'>
+			{{foreach $tabs as $k => $tab}}
+				<a href='{$tab["url"]}' class='ipsTabs__tab' role="tab" id='ipsTabs_purchases_{$k}' aria-controls="ipsTabs_purchases_{$k}_panel" aria-selected="{{if $activeTabKey == $k}}true{{else}}false{{endif}}">
+				{lang="purchase_tab_{$k}"}
+				({$tab['count']})
+				</a>
+			{{endforeach}}
+		</div>
+		{template="tabScrollers" app="core" group="global" location="global"}
+	</i-tabs>
+	<div id='ipsTabs_purchases_content' class='ipsTabs__panels acpFormTabContent'>
+		<div id='ipsTabs_purchases_{$activeTabKey}_panel' class='ipsTabs__panel' role="tabpanel" aria-labelledby='ipsTabs_purchases_{$activeTabKey}'>
+			{$activeTabContents|raw}
+		</div>
+	</div>
+</div>
