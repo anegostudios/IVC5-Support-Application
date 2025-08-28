@@ -65,7 +65,9 @@ class purchases extends Controller
 				return;
 		}
 
-		$output->sendOutput(static::_getPurchasesTab($targetMemberId, $request->tab, $request->url()));
+		$ticketId = intval($request->__tid);
+		$baseUrl = Url::internal("app=vssupport&module=tickets&controller=purchases&__tid={$ticketId}");
+		$output->sendOutput(static::_getPurchasesTab($targetMemberId, $request->tab, $baseUrl));
 		exit();
 	}
 
