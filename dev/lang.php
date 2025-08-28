@@ -40,6 +40,10 @@ $lang = array(
 	'users_invoices' => "%s's Invoices",
 	'users_purchases' => "%s's Purchases",
 
+	'r__tickets' => 'Can access Tickets?',
+	'r__tickets_manage' => 'Can manage Tickets?',
+	'r__categories_manage' => 'Can manage Categories?',
+
 	'ticket_prio_name_-2' => 'Backlog',
 	'ticket_prio_name_-1' => 'Below Average',
 	'ticket_prio_name_0'  => 'Normal',

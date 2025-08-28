@@ -11,7 +11,7 @@
             "tab": "vssupport",
             "controller": "categories",
             "do": "",
-            "restriction": "manage_categories",
+            "restriction": "categories_manage",
             "subcontrollers": ""
         }
     }

@@ -26,7 +26,7 @@ class categories extends Controller
 
 	public function execute() : void
 	{
-		Dispatcher::i()->checkAcpPermission('manage_categories');
+		Dispatcher::i()->checkAcpPermission('categories_manage');
 		parent::execute();
 	}
 
