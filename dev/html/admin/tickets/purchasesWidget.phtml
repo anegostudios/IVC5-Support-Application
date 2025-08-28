@@ -1,6 +1,6 @@
-<ips:template parameters="$customer, $tabs, $activeTabKey, $activeTabContents" />
+<ips:template parameters="$targetUserName, $tabs, $activeTabKey, $activeTabContents" />
 <div class='ipsBox' data-ips-template="purchases">
-	<h2 class="ipsBox__header">{lang="purchases"}</h2>
+	<h2 class="ipsBox__header">{lang="users_purchases" sprintf="$targetUserName"}</h2>
 	<i-tabs class='ipsTabs ipsTabs--stretch' id='ipsTabs_purchases' data-ipsTabBar data-ipsTabBar-contentArea='#ipsTabs_purchases_content' data-ipsTabBar-updateUrl="false">
 		<div role='tablist'>
 			{{foreach $tabs as $k => $tab}}

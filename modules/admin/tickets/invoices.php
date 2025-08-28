@@ -96,15 +96,15 @@ class invoices extends Controller
 
 		switch($request->__do) {
 			case 'view': case 'paid': case 'resend': case 'track': case 'unpaid': case 'delete': {
-				$dispatcher = Dispatcher::i();
-				// OVerwrite this value because nexus doesn't always use the full path to load templates and tries loading a template from us if we don't swap this.
-				$dispatcher->application->directory = 'nexus';
+				// Overwrite this value because nexus doesn't always use the full path to load templates and tries loading a template from us if we don't swap this. :ApplicationDirectoryHack
+				Dispatcher::i()->application->directory = 'nexus';
 
 				$controller = new InvoicesOverride();
 				$controller->ticketId = intval($request->__tid);
-				$controller->initialize($output);
-				// @security: The base invoices controller does permission checks on its methods.
-				$controller->_call_internal($request->__do);
+
+				// After we received the request, we change the 'do' parameter so the base execute method dispatches to the correct method.
+				$request->do = $request->__do;
+				$controller->execute();
 			} break;
 
 			// Remaining functions we don't handle. See formatBlock as to why.
@@ -118,14 +118,6 @@ class invoices extends Controller
 
 class InvoicesOverride extends \IPS\nexus\modules\admin\payments\invoices { // :InvoicesRelay
 	public int $ticketId;
-
-	function initialize(Output $output) : void // emulate execute without the routing
-	{
-		Dispatcher::i()->checkAcpPermission('invoices_manage', 'nexus', 'invoices');
-		$output->cssFiles = array_merge($output->cssFiles, Theme::i()->css('invoice.css', 'nexus', 'admin'));
-	}
-
-	function _call_internal(string $name) { $this->$name(); }
 
 	function _redirect(Invoice $invoice) : void
 	{

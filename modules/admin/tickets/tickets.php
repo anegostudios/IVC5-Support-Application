@@ -152,7 +152,7 @@ class tickets extends Controller
 		if($ticket['member_id']) {
 			$dispatcher = Dispatcher::i();
 			if($dispatcher->checkAcpPermission('purchases_view', 'nexus', 'customers', true)) {
-				$extraBlocks[] = purchases::formatPurchasesBlock($ticketId, $ticket['member_id']);
+				$extraBlocks[] = purchases::formatBlock($ticketId, $ticket['member_id']);
 			}
 			if($dispatcher->checkAcpPermission('invoices_manage', 'nexus', 'invoices', true)) {
 				$extraBlocks[] = invoices::formatBlock($ticketId, $ticket['member_id'], $ticket['user_name']);

@@ -185,7 +185,7 @@
         "inserts": [
             {
                 "id": "1",
-                "user_name": "support user",
+                "user_name": "admin",
                 "status": "0",
                 "assigned_to": "0",
                 "created": "0000-00-00",
@@ -194,7 +194,9 @@
                 "subject": "Need support",
                 "category": "1",
                 "priority": "0",
-                "member_id": "1"
+                "member_id": "1",
+                "flags": "0",
+                "hash": ""
             }
         ]
     },

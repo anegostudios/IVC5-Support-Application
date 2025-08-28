@@ -26,23 +26,13 @@ if(!defined('\IPS\SUITE_UNIQUE_KEY'))
 
 class purchases extends Controller
 {
-	public function execute() : void
-	{
-		
-		parent::execute();
-	}
-
-	protected function manage() : void
-	{
-	}
-
-	static function formatPurchasesTab(int $ticketId, int $targetMemberId) : string
+	static function formatBlock(int $ticketId, int $targetMemberId) : string
 	{
 		$targetMember = Member::load($targetMemberId);
 
-		$baseUrl = Url::internal("app=vssupport&module=tickets&controller=purchases&do=getPurchasesTab&id={$ticketId}");
+		$baseUrl = Url::internal("app=vssupport&module=tickets&controller=purchases&__tid={$ticketId}");
 		
-		$getTabUrl = $baseUrl->setQueryString('mid', $targetMemberId);
+		$getTabUrl = $baseUrl->setQueryString(['do' => 'getTab__', '__mid' => $targetMemberId]);
 		$counts = query_one(Db::i()->select(<<<SQL
 			COUNT(IF(ps_show AND ps_active                             , 1, null)) as `active`,
 			COUNT(IF(!ps_active AND !ps_cancelled AND ps_expire < NOW(), 1, null)) as `expired`,
@@ -56,17 +46,17 @@ class purchases extends Controller
 
 		$purchases = static::_getPurchasesTab($targetMemberId, 'active', $baseUrl);
 
-		return (string) Theme::i()->getTemplate('tickets')->purchasesWidget($targetMember, $tabs, 'active', $purchases);
+		return (string) Theme::i()->getTemplate('tickets')->purchasesWidget($targetMember->name, $tabs, 'active', $purchases);
 	}
 
-	public function getPurchasesTab() : void
+	public function getTab__() : void
 	{
 		\IPS\Session::i()->csrfCheck();
 		Dispatcher::i()->checkAcpPermission('purchases_view', 'nexus', 'customers');
 		$request = Request::i();
 		$output = Output::i();
 
-		$targetMemberId = intval($request->mid);
+		$targetMemberId = intval($request->__mid);
 
 		switch($request->tab) {
 			case 'active': case 'expired': case 'canceled': /* ok */ break;
@@ -112,10 +102,7 @@ class purchases extends Controller
 			];
 
 			if((!$purchase->billing_agreement || $purchase->billing_agreement->canceled) && $member->hasAcpRestriction('nexus', 'customers', 'purchases_cancel')) {
-				$relayUrl = $url->setQueryString([
-					'do'  => 'purchasesRelay',
-					'pid' => $purchase->id,
-				]);
+				$relayUrl = $url->setQueryString('id', $purchase->id);
 
 				$extension = null;
 				try {
@@ -132,7 +119,7 @@ class purchases extends Controller
 						$buttons['reactivate'] = array(
 							'icon'	=> 'check',
 							'title'	=> 'reactivate',
-							'link'	=> $relayUrl->setQueryString('pdo', 'reactivate')->csrf(),
+							'link'	=> $relayUrl->setQueryString('__do', 'reactivate')->csrf(),
 							'data'	=> ['confirm' => '']
 						);
 					}
@@ -142,7 +129,7 @@ class purchases extends Controller
 					$buttons['cancel'] = array(
 						'icon'	=> 'times',
 						'title'	=> 'cancel',
-						'link'	=> $relayUrl->setQueryString('pdo', 'cancel'),
+						'link'	=> $relayUrl->setQueryString('__do', 'cancel'),
 						'data'	=> ['ipsDialog' => '', 'ipsDialog-title' => $language->addToStack('cancel')]
 					);
 				}
@@ -154,16 +141,21 @@ class purchases extends Controller
 		return $html ?: '<div class="i-padding_2 i-text-align_center">Empty</div>';
 	}
 
-	public function purchasesRelay() : void // :PurchaseRelay
+	public function manage() : void // :PurchaseRelay
 	{
 		$request = Request::i();
 		$output  = Output::i();
-		switch($request->pdo) {
+		switch($request->__do) {
 			case 'cancel': case 'reactivate': {
+				// It's not really required for what we do here, but just in case we are symmetrical about it here in purchases. :ApplicationDirectoryHack
+				Dispatcher::i()->application->directory = 'nexus';
+
 				$controller = new PurchasesOverride();
-				$controller->ticketId = intval($request->id);
-				$controller->initialize($output, intval($request->pid));
-				$controller->_call_internal($request->pdo);
+				$controller->ticketId = intval($request->__tid);
+				
+				// After we received the request, we change the 'do' parameter so the base execute method dispatches to the correct method.
+				$request->do = $request->__do;
+				$controller->execute();
 			} break;
 
 			default:
@@ -174,26 +166,6 @@ class purchases extends Controller
 
 class PurchasesOverride extends \IPS\nexus\modules\admin\customers\purchases { // :PurchaseRelay
 	public int $ticketId;
-
-	function initialize(Output $output, int $id) : void // emulate execute without the routing
-	{
-		Dispatcher::i()->checkAcpPermission('purchases_view', 'nexus', 'customers');
-
-		try
-		{
-			$this->purchase = \IPS\nexus\Purchase::load($id);
-		}
-		catch(\OutOfRangeException)
-		{
-			$output->error( 'node_error', '2X195/2', 404, '' );
-		}
-
-		$output->title = $this->purchase->name . " (#{$this->purchase->id})";
-		
-		$output->cssFiles = array_merge($output->cssFiles, Theme::i()->css('purchases.css', 'nexus', 'admin'));
-	}
-
-	function _call_internal(string $name) { $this->$name(); }
 
 	function _redirect() : void
 	{
