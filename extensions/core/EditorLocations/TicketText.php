@@ -1,14 +1,4 @@
-<?php
-/**
- * @brief		Editor Extension: TicketText
- * @author		Rennorb
- * @copyright	(c) 2025 Anego Studios
- * @package		Invision Community
- * @subpackage	VS Support
- * @since		18 Aug 2025
- */
-
-namespace IPS\vssupport\extensions\core\EditorLocations;
+<?php namespace IPS\vssupport\extensions\core\EditorLocations;
 
 use IPS\Content as ContentClass;
 use IPS\Db;

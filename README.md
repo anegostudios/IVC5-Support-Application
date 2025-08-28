@@ -64,7 +64,9 @@ Without leaving the ticket for most actions.
 ## TODO
 
 - Email egress
-	- Daily digest
+	- Daily digest for moderators
+	- Response notifications for users
+		- Notification settings
 - Email ingest
 - GitHub linking
 - GitLab linking
@@ -75,8 +77,11 @@ Without leaving the ticket for most actions.
 - Admin ticket view
 	- Quick actions
 - Admin bulk actions
-- member merge listener
-- migration from ivc4 builtin tickets
+- Migration from ivc4 builtin tickets
+- Option to delete open tickets when issuer gets deleted.
+- Link from user profile to their tickets.
+- Better user change tracking
+	- User name change tracking is flaky
 
 ## License
 

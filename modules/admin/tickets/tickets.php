@@ -106,6 +106,15 @@ class tickets extends Controller
 		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'));
 	}
 
+	static ?string $unknown = null;
+	static function _unknownName($lang) : string
+	{
+		if(static::$unknown === null) {
+			static::$unknown = $lang->addToStack('unknown');
+		}
+		return static::$unknown;
+	}
+
 	public function view() : void
 	{
 		$output = Output::i();
@@ -127,14 +136,17 @@ class tickets extends Controller
 		}
 
 		$actions = query_all(
-			$db->select('a.created, a.kind, a.reference_id, u.name as initiator, m.text, m.flags, c.name_key, as.name as assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
+			$db->select('a.created, a.kind, a.reference_id, a.initiator as initiator_id, u.name as initiator, m.text, m.flags, c.name_key, as.name as assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
 			->join(['core_members', 'u'], 'u.member_id = a.initiator')
 			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
 			->join(['vssupport_ticket_categories', 'c'], 'c.id = a.reference_id AND a.kind = '.ActionKind::CategoryChange)
 			->join(['core_members', 'as'], 'as.member_id = a.reference_id AND a.kind = '.ActionKind::Assigned)
 		);
+		
 		foreach($actions as &$action) {
-			if(!$action['initiator']) $action['initiator'] = $ticket['user_name'];
+			// The null checks are here in case users get deleted. We cant really do much about it, but we can at least think about that case.
+			if(!$action['initiator']) $action['initiator'] = $action['initiator_id'] === 0 ? $ticket['user_name'] : static::_unknownName($lang);
+			if($action['kind'] === ActionKind::Assigned && !$action['assigned_to_name']) $action['assigned_to_name'] = static::_unknownName($lang);
 		}
 		unset($action);
 

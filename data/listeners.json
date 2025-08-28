@@ -1,0 +1,7 @@
+{
+    "MemberListener": {
+        "type": "MemberListenerType",
+        "classname": "IPS\\vssupport\\listeners\\MemberListener",
+        "extends": "IPS\\Member"
+    }
+}

@@ -7,21 +7,31 @@
 	</div>
 {{else}}
 	<div class="ipsBox i-padding_2">
-	{{if $action['kind'] === \IPS\vssupport\ActionKind::PriorityChange}}
+	{{switch($action['kind']): case \IPS\vssupport\ActionKind::PriorityChange:}}
 		{lang="priority_changed_to"}&nbsp;{template="priorityLabel" location="global" group="tickets" params="$action['reference_id']"}
-	{{elseif $action['kind'] === \IPS\vssupport\ActionKind::CategoryChange}}
+	{{break; case \IPS\vssupport\ActionKind::CategoryChange:}}
 		{lang="category_changed_to"}&nbsp;{lang="ticket_cat_name_{$action['name_key']}"}
-	{{elseif $action['kind'] === \IPS\vssupport\ActionKind::Assigned}}
+	{{break; case \IPS\vssupport\ActionKind::Assigned:}}
 		{{if $action['reference_id']}}
 			{lang="ticket_assigned_to"}&nbsp;{$action['assigned_to_name']}
 		{{else}}
 			{lang="ticket_unassigned"}
 		{{endif}}
-	{{elseif $action['kind'] === \IPS\vssupport\ActionKind::LockedChange}}
+	{{break; case \IPS\vssupport\ActionKind::LockedChange:}}
 		{lang="locked_changed_to_{$action['reference_id']}"}
-	{{else}}
+	{{break; case \IPS\vssupport\ActionKind::UserDeleted:}}
+		{lang="ticket_issuer_deleted"}
+	{{break; case \IPS\vssupport\ActionKind::UserMerged:}}
+		{lang="ticket_issuer_merged"}
+	{{break; case \IPS\vssupport\ActionKind::UserValidated:}}
+		{lang="ticket_issuer_validated"}
+	{{break; case \IPS\vssupport\ActionKind::UserEmailChanged:}}
+		{lang="ticket_issuer_email_changed"}
+	{{break; case \IPS\vssupport\ActionKind::UserNameChanged:}}
+		{lang="ticket_issuer_name_changed"}
+	{{break; default:}}
 		Action: {$action['kind']} {$action['reference_id']}
-	{{endif}}
+	{{endswitch}}
 		{template="actionContextInfo" group="tickets" params="$action"}
 	</div>
 {{endif}}

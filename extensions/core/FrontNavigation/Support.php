@@ -1,14 +1,4 @@
-<?php
-/**
- * @brief		Front Navigation Extension: Support
- * @author		Rennorb
- * @copyright	(c) 2025 Anego Studios
- * @package		Invision Community
- * @subpackage	VS Support
- * @since		20 Aug 2025
- */
-
-namespace IPS\vssupport\extensions\core\FrontNavigation;
+<?php namespace IPS\vssupport\extensions\core\FrontNavigation;
 
 use IPS\core\FrontNavigation\FrontNavigationAbstract;
 use IPS\Dispatcher;

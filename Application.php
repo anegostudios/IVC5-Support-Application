@@ -55,12 +55,17 @@ function query_all_assoc(Select $query) : array
 }
 
 class ActionKind {
-	public const Message        = 1;
-	public const StatusChange   = 2;
-	public const PriorityChange = 3;
-	public const CategoryChange = 4;
-	public const Assigned       = 5;
-	public const LockedChange   = 6;
+	public const Message          =  1;
+	public const StatusChange     =  2;
+	public const PriorityChange   =  3;
+	public const CategoryChange   =  4;
+	public const Assigned         =  5;
+	public const LockedChange     =  6;
+	public const UserDeleted      =  7;
+	public const UserEmailChanged =  8;
+	public const UserMerged       =  9;
+	public const UserValidated    = 10;
+	public const UserNameChanged  = 11;
 }
 
 function log_ticket_action(Db $db, int $ticketId, int $actionKind, int $initiatorMemberId, int $referenceId = null) : void
