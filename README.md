@@ -33,6 +33,11 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 				- Change Priority
 				- Lock to staff members
 				- Assign to specific staff member
+			- Manage Customer Purchases without leaving the ticket
+				- Inspect or Cancel / Reinstate
+			- Manage Customer Invoices largely without leaving the ticket
+				- Inspect, Track, Cancel, Refund, Resend or Delete
+				- opens in new tab: Edit or Print
 		- Create / Edit / Delete Categories
 			- Preview translated names
 
@@ -49,6 +54,12 @@ Viewing and responding to a ticket in the backend.
 
 ![img](.doc/ticket_view.jpg)  
 Viewing and responding to a ticket from the frontend.
+
+![img](.doc/ticket_admin_view_purchases.jpg)  
+Managing purchase information of affected customer.
+
+![img](.doc/ticket_admin_view_purchases_overlay.jpg)  
+Without leaving the ticket for most actions.
 
 ## TODO
 
