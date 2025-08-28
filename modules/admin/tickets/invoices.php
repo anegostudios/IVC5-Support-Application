@@ -116,8 +116,39 @@ class invoices extends Controller
 	}
 }
 
+/**
+ * Class that can be installed to manually force a redirect to go to a different address than the call tells it to.
+ */
+class RedirectOverrideOutput extends Output {
+	public static ?Output $underlying;
+	public static ?Url $forcedRedirectTarget;
+
+	static function install(Url $forcedRedirectTarget) : void
+	{
+		static::$underlying = Output::i();
+		static::$forcedRedirectTarget = $forcedRedirectTarget;
+		Output::$instance = new self();
+	}
+
+	public function redirect(Url|string $url, ?string $message = '', int $httpStatusCode = 301, bool $forceScreen = FALSE) : void
+	{
+		parent::redirect(static::$forcedRedirectTarget);
+	}
+
+	public function __call($name, $arguments)
+	{
+		static::$underlying->$name(...$arguments);
+	}
+}
+
 class InvoicesOverride extends \IPS\nexus\modules\admin\payments\invoices { // :InvoicesRelay
 	public int $ticketId;
+
+	function delete() : void // For some reason this doesn't go though _redirect in the base ...
+	{
+		RedirectOverrideOutput::install(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$this->ticketId));
+		parent::delete();
+	}
 
 	function _redirect(Invoice $invoice) : void
 	{
