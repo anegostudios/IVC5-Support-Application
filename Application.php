@@ -73,4 +73,17 @@ function log_ticket_action(Db $db, int $ticketId, int $actionKind, int $initiato
 	]);
 }
 
+class UrlReflection {
+	static ?\ReflectionMethod $reconstructUrlFromData = null;
+	static function reconstructUrlFromData(\IPS\Http\Url $url)
+	{
+		if(!static::$reconstructUrlFromData) {
+			static::$reconstructUrlFromData = new \ReflectionMethod('IPS\Http\Url', 'reconstructUrlFromData');
+			static::$reconstructUrlFromData->setAccessible(true);
+		}
+		static::$reconstructUrlFromData->invoke($url);
+	}
+}
+
+
 class Application extends SystemApplication { }

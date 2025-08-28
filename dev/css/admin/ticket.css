@@ -34,3 +34,9 @@
 .ipsSubmitRow .ipsSwitch:before {
 	left: 0; /* fix bug in core */
 }
+
+#extra-blocks-container {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}

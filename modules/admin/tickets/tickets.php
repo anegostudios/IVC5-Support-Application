@@ -10,7 +10,6 @@ use IPS\Theme;
 use IPS\Helpers;
 use IPS\Helpers\Form;
 use IPS\Http\Url;
-use IPS\Patterns\ActiveRecordIterator;
 use IPS\Request;
 use IPS\vssupport\ActionKind;
 use IPS\vssupport\MessageFlags;
@@ -150,8 +149,14 @@ class tickets extends Controller
 
 		$extraBlocks = [];
 
-		if($ticket['member_id'] && Dispatcher::i()->checkAcpPermission('purchases_view', 'nexus', 'customers', true)) {
-			$extraBlocks[] = purchases::formatPurchasesTab($ticketId, $ticket['member_id']);
+		if($ticket['member_id']) {
+			$dispatcher = Dispatcher::i();
+			if($dispatcher->checkAcpPermission('purchases_view', 'nexus', 'customers', true)) {
+				$extraBlocks[] = purchases::formatPurchasesBlock($ticketId, $ticket['member_id']);
+			}
+			if($dispatcher->checkAcpPermission('invoices_manage', 'nexus', 'invoices', true)) {
+				$extraBlocks[] = invoices::formatBlock($ticketId, $ticket['member_id'], $ticket['user_name']);
+			}
 		}
 
 		$output->title = $lang->addToStack('ticket').' #'.$ticketId.' - '.$ticket['subject'];

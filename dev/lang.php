@@ -37,6 +37,8 @@ $lang = array(
 	'respond_public' => 'Respond',
 	'dont_change' => "Don't change",
 	'current' => 'Current',
+	'users_invoices' => "%s's Invoices",
+	'users_purchases' => "%s's Purchases",
 
 	'ticket_prio_name_-2' => 'Backlog',
 	'ticket_prio_name_-1' => 'Below Average',
