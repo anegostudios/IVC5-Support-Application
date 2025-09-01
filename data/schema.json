@@ -14,18 +14,6 @@
                 "unsigned": true,
                 "values": []
             },
-            "user_name": {
-                "allow_null": false,
-                "auto_increment": false,
-                "comment": "",
-                "decimals": null,
-                "default": null,
-                "length": 0,
-                "name": "user_name",
-                "type": "TINYTEXT",
-                "unsigned": false,
-                "values": []
-            },
             "status": {
                 "allow_null": false,
                 "auto_increment": false,
@@ -74,18 +62,6 @@
                 "unsigned": false,
                 "auto_increment": false
             },
-            "user_email": {
-                "name": "user_email",
-                "type": "TINYTEXT",
-                "length": null,
-                "decimals": null,
-                "values": null,
-                "allow_null": false,
-                "default": null,
-                "comment": "",
-                "unsigned": false,
-                "auto_increment": false
-            },
             "subject": {
                 "name": "subject",
                 "type": "TINYTEXT",
@@ -122,18 +98,6 @@
                 "unsigned": false,
                 "auto_increment": false
             },
-            "member_id": {
-                "name": "member_id",
-                "type": "INT",
-                "length": null,
-                "decimals": null,
-                "values": null,
-                "allow_null": true,
-                "default": null,
-                "comment": "",
-                "unsigned": true,
-                "auto_increment": false
-            },
             "flags": {
                 "name": "flags",
                 "type": "TINYINT",
@@ -156,6 +120,42 @@
                 "default": null,
                 "comment": "",
                 "unsigned": false,
+                "auto_increment": false
+            },
+            "issuer_name": {
+                "name": "issuer_name",
+                "type": "TINYTEXT",
+                "length": 0,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            },
+            "issuer_email": {
+                "name": "issuer_email",
+                "type": "TINYTEXT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            },
+            "issuer_id": {
+                "name": "issuer_id",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": true,
+                "default": null,
+                "comment": "",
+                "unsigned": true,
                 "auto_increment": false
             }
         },
@@ -185,18 +185,18 @@
         "inserts": [
             {
                 "id": "1",
-                "user_name": "admin",
                 "status": "0",
                 "assigned_to": "0",
                 "created": "0000-00-00",
                 "last_update_by": "0",
-                "user_email": "needs.support@local.local",
                 "subject": "Need support",
                 "category": "1",
                 "priority": "0",
-                "member_id": "1",
                 "flags": "0",
-                "hash": ""
+                "hash": "",
+                "issuer_name": "admin",
+                "issuer_email": "needs.support@local.local",
+                "issuer_id": "1"
             }
         ]
     },

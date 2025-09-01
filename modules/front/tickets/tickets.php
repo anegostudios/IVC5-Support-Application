@@ -41,7 +41,7 @@ class tickets extends Controller
 		$theme = Theme::i();
 
 		$tickets = query_all(
-			$db->select('t.id, t.subject, t.priority, t.created, t.flags, HEX(t.hash) AS hash, c.name_key as category', ['vssupport_tickets', 't'], 't.member_id = '.($member->member_id ?? 0))
+			$db->select('t.id, t.subject, t.priority, t.created, t.flags, HEX(t.hash) AS hash, c.name_key as category', ['vssupport_tickets', 't'], 't.issuer_id = '.($member->member_id ?? 0))
 			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
 		);
 
@@ -88,7 +88,7 @@ class tickets extends Controller
 			// manual query construction to allow usage of UNHEX
 			$ticketHash = md5(uniqid()); //TODO(Rennorb) @correctness: Tn theory insertion could fail in case of a collision;
 			$ticketId = $db->preparedQuery(<<<SQL
-					INSERT INTO {$db->prefix}vssupport_tickets (user_name, user_email, category, subject, member_id, hash)
+					INSERT INTO {$db->prefix}vssupport_tickets (issuer_name, issuer_email, category, subject, issuer_id, hash)
 					VALUES(?, ?, ?, ?, ?, UNHEX(?))
 				SQL,
 				[$name, $email, $values['category'], $values['subject'], $member->member_id, $ticketHash]
@@ -127,7 +127,7 @@ class tickets extends Controller
 			return;
 		}
 
-		if($ticket['member_id'] != $member->member_id && !$member->isAdmin()) {
+		if($ticket['issuer_id'] != $member->member_id && !$member->isAdmin()) {
 			$output->error('node_error', '2C114/O', 404, '');
 			return;
 		}
@@ -173,7 +173,7 @@ class tickets extends Controller
 			->join(['core_members', 'as'], 'as.member_id = a.reference_id AND a.kind = '.ActionKind::Assigned)
 		);
 		foreach($actions as &$action) {
-			if(!$action['initiator']) $action['initiator'] = $ticket['user_name'];
+			if(!$action['initiator']) $action['initiator'] = $ticket['issuer_name'];
 		}
 		unset($action);
 

@@ -44,7 +44,7 @@ class TicketText extends EditorLocationsAbstract
 	 */
 	public function attachmentPermissionCheck( MemberClass $member, ?int $id1, ?int $id2, ?string $id3, array $attachment, bool $viewOnly=FALSE ): bool
 	{
-		$memberId = query_one(Db::i()->select('member_id', 'vssupport_tickets', ['id' => $id1]));
+		$memberId = query_one(Db::i()->select('issuer_id', 'vssupport_tickets', ['id' => $id1]));
 		return $member->member_id == $memberId || $member->isModerator();
 	}
 	

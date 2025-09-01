@@ -506,5 +506,62 @@
                 }
             }
         ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_tickets",
+            "user_name",
+            {
+                "name": "issuer_name",
+                "type": "TINYTEXT",
+                "length": 0,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_tickets",
+            "user_email",
+            {
+                "name": "issuer_email",
+                "type": "TINYTEXT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_tickets",
+            "member_id",
+            {
+                "name": "issuer_id",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": true,
+                "default": null,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
     }
 ]

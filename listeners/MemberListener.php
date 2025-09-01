@@ -24,13 +24,13 @@ class MemberListener extends MemberListenerType
 			INSERT INTO vssupport_ticket_action_history (ticket, kind, `initiator`)
 			SELECT id, $kind, $initiator
 			FROM vssupport_tickets
-			WHERE member_id = 0 AND user_email = ?
+			WHERE issuer_id = 0 AND issuer_email = ?
 		SQL, [$member->email]);
 		if($query->affected_rows) {
 			$db->update('vssupport_tickets', [
-				'member_id' => $member->member_id,
-				'user_name' => $member->name,
-			], ['member_id = 0 AND member_email = ?', $member->email]);
+				'issuer_id' => $member->member_id,
+				'issuer_name' => $member->name,
+			], ['issuer_id = 0 AND member_email = ?', $member->email]);
 		}
 	}
 
@@ -47,14 +47,14 @@ class MemberListener extends MemberListenerType
 			INSERT INTO vssupport_ticket_action_history (ticket, kind, `initiator`)
 			SELECT id, $kind, $initiator
 			FROM vssupport_tickets
-			WHERE member_id = ?
+			WHERE issuer_id = ?
 		SQL, [$fromId]);
 		if($query->affected_rows) {
 			$db->update('vssupport_tickets', [
-				'member_id'  => $toId,
-				'user_name'  => $memberToKeep->name,
-				'user_email' => $memberToKeep->email,
-			], ['member_id = ?', $fromId]);
+				'issuer_id'  => $toId,
+				'issuer_name'  => $memberToKeep->name,
+				'issuer_email' => $memberToKeep->email,
+			], ['issuer_id = ?', $fromId]);
 		}
 
 		static::reassignTickets($db, $toId, $fromId, $initiator);
@@ -72,10 +72,10 @@ class MemberListener extends MemberListenerType
 			INSERT INTO vssupport_ticket_action_history (ticket, kind, `initiator`)
 			SELECT id, $kind, $initiator
 			FROM vssupport_tickets
-			WHERE member_id = ?
+			WHERE issuer_id = ?
 		SQL, [$member->member_id]);
 		if($query->affected_rows) {
-			$db->update('vssupport_tickets', 'member_id = 0', ['member_id = ?', $member->member_id]);
+			$db->update('vssupport_tickets', 'issuer_id = 0', ['issuer_id = ?', $member->member_id]);
 		}
 
 		static::reassignTickets($db, null, intval($member->member_id), $initiator);
@@ -91,10 +91,10 @@ class MemberListener extends MemberListenerType
 			INSERT INTO vssupport_ticket_action_history (ticket, kind, `initiator`)
 			SELECT id, $kind, $initiator
 			FROM vssupport_tickets
-			WHERE member_id != 0 AND user_email = ?
+			WHERE issuer_id != 0 AND issuer_email = ?
 		SQL, [$old]); // Lets only change emails for actual users. If the ticket is not from an account, lets not move it.
 		if($query->affected_rows) {
-			$db->update('vssupport_tickets', ['user_email' => $new], ['user_email = ?', $old]);
+			$db->update('vssupport_tickets', ['issuer_email' => $new], ['issuer_email = ?', $old]);
 		}
 	}
 
@@ -115,10 +115,10 @@ class MemberListener extends MemberListenerType
 			INSERT INTO vssupport_ticket_action_history (ticket, kind, `initiator`)
 			SELECT id, $kind, $initiator
 			FROM vssupport_tickets
-			WHERE member_id != 0 AND user_name = ?
+			WHERE issuer_id != 0 AND issuer_name = ?
 		SQL, [$previousName]); // Lets only change names for actual users. If the ticket is not from an account, lets not move it.
 		if($query->affected_rows) {
-			$db->update('vssupport_tickets', ['user_name ' => $changes['name']], ['user_name = ?', $previousName]);
+			$db->update('vssupport_tickets', ['issuer_name ' => $changes['name']], ['issuer_name = ?', $previousName]);
 		}
 	}
 

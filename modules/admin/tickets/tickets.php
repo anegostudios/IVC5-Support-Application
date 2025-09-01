@@ -51,7 +51,7 @@ class tickets extends Controller
 		//$table->langPrefix = 'ticket_';
 		$table->keyField = 'id';
 
-		$table->include = ['id', 'created', 'priority', 'subject', 'category', 'status', 'user_name', 'user_email', 'assigned_to', 'last_update_at', 'last_update_by'];
+		$table->include = ['id', 'created', 'priority', 'subject', 'category', 'status', 'issuer_name', 'issuer_email', 'assigned_to', 'last_update_at', 'last_update_by'];
 		$table->mainColumn = 'created';
 
 		$table->joins[] = [
@@ -145,7 +145,7 @@ class tickets extends Controller
 		
 		foreach($actions as &$action) {
 			// The null checks are here in case users get deleted. We cant really do much about it, but we can at least think about that case.
-			if(!$action['initiator']) $action['initiator'] = $action['initiator_id'] === 0 ? $ticket['user_name'] : static::_unknownName($lang);
+			if(!$action['initiator']) $action['initiator'] = $action['initiator_id'] === 0 ? $ticket['issuer_name'] : static::_unknownName($lang);
 			if($action['kind'] === ActionKind::Assigned && !$action['assigned_to_name']) $action['assigned_to_name'] = static::_unknownName($lang);
 		}
 		unset($action);
@@ -161,13 +161,13 @@ class tickets extends Controller
 
 		$extraBlocks = [];
 
-		if($ticket['member_id']) {
+		if($ticket['issuer_id']) {
 			$dispatcher = Dispatcher::i();
 			if($dispatcher->checkAcpPermission('purchases_view', 'nexus', 'customers', true)) {
-				$extraBlocks[] = purchases::formatBlock($ticketId, $ticket['member_id']);
+				$extraBlocks[] = purchases::formatBlock($ticketId, $ticket['issuer_id']);
 			}
 			if($dispatcher->checkAcpPermission('invoices_manage', 'nexus', 'invoices', true)) {
-				$extraBlocks[] = invoices::formatBlock($ticketId, $ticket['member_id'], $ticket['user_name']);
+				$extraBlocks[] = invoices::formatBlock($ticketId, $ticket['issuer_id'], $ticket['issuer_name']);
 			}
 		}
 
@@ -189,38 +189,38 @@ class tickets extends Controller
 
 		$ticketId = intval($request->replyTo);
 		$form = static::_createMessageForm($ticketId, null, null);
+
+		$ticket = query_one($db->select('*', 'vssupport_tickets', 'id = '.$ticketId));
+
+		$ticketUpdates = [];
+		$actions = [];
+		if(($newCategory = intval($request->moveToCategory)) !== $ticket['category']) {
+			$ticketUpdates['category'] = $newCategory;
+			$actions[] = ['kind' => ActionKind::CategoryChange, 'reference_id' => $newCategory];
+		}
+		if(($newPriority = intval($request->moveToPriority)) !== $ticket['priority']) {
+			$ticketUpdates['priority'] = $newPriority;
+			$actions[] = ['kind' => ActionKind::PriorityChange, 'reference_id' => $newPriority];
+		}
+		if(($newLockState = !!$request->lock) !== !!($ticket['flags'] & TicketFlags::Locked)) {
+			$ticketUpdates['flags'] = $newLockState ? ('`flags` | '.TicketFlags::Locked) : ('`flags` & ~'.TicketFlags::Locked);
+			$actions[] = ['kind' => ActionKind::LockedChange, 'reference_id' => intval($newLockState)];
+		}
+		{
+			//TODO(Rennorb) @cleanup: This is stupid. Find a way to get back the member id, not the member name...
+			$newAssignment = query_one($db->select('member_id', 'core_members', ['name = ?', $request->assignTo]));
+			//NOTE(Rennorb): Coercing comparison here, because assignment = null should be treated as assignment = 0.
+			if($newAssignment != $ticket['assigned_to']) {
+				$ticketUpdates['assigned_to'] = $newAssignment;
+				$actions[] = ['kind' => ActionKind::Assigned, 'reference_id' => $newAssignment ?: null];
+			}
+		}
 		
-		if($values = $form->values()) {
-			$ticket = query_one($db->select('*', 'vssupport_tickets', 'id = '.$ticketId));
+		if($ticketUpdates) {
+			$db->update('vssupport_tickets', $ticketUpdates, 'id = '.$ticketId, flags: Db::ALLOW_INCDEC_VALUES);
+		}
 
-			$ticketUpdates = [];
-			$actions = [];
-			if(($newCategory = intval($request->moveToCategory)) !== $ticket['category']) {
-				$ticketUpdates['category'] = $newCategory;
-				$actions[] = ['kind' => ActionKind::CategoryChange, 'reference_id' => $newCategory];
-			}
-			if(($newPriority = intval($request->moveToPriority)) !== $ticket['priority']) {
-				$ticketUpdates['priority'] = $newPriority;
-				$actions[] = ['kind' => ActionKind::PriorityChange, 'reference_id' => $newPriority];
-			}
-			if(($newLockState = !!$request->lock) !== !!($ticket['flags'] & TicketFlags::Locked)) {
-				$ticketUpdates['flags'] = $newLockState ? ('`flags` | '.TicketFlags::Locked) : ('`flags` & ~'.TicketFlags::Locked);
-				$actions[] = ['kind' => ActionKind::LockedChange, 'reference_id' => intval($newLockState)];
-			}
-			{
-				//TODO(Rennorb) @cleanup: This is stupid. Find a way to get back the member id, not the member name...
-				$newAssignment = query_one($db->select('member_id', 'core_members', ['name = ?', $request->assignTo]));
-				//NOTE(Rennorb): Coercing comparison here, because assignment = null should be treated as assignment = 0.
-				if($newAssignment != $ticket['assigned_to']) {
-					$ticketUpdates['assigned_to'] = $newAssignment;
-					$actions[] = ['kind' => ActionKind::Assigned, 'reference_id' => $newAssignment ?: null];
-				}
-			}
-			
-			if($ticketUpdates) {
-				$db->update('vssupport_tickets', $ticketUpdates, 'id = '.$ticketId, flags: Db::ALLOW_INCDEC_VALUES);
-			}
-
+		if(($values = $form->values()) && $values['text']) {
 			$flags = 0;
 			if($request->submit === 'internal')   $flags |= MessageFlags::Internal;
 
@@ -232,20 +232,18 @@ class tickets extends Controller
 			]);
 			$actions[] = ['kind' => ActionKind::Message, 'reference_id' => $messageId];
 
-			foreach($actions as &$action) {
-				$action['ticket'] = $ticketId;
-				$action['initiator'] = $member->member_id;
-			}
-			unset($action);
-			$db->insert('vssupport_ticket_action_history', $actions);
-
 			File::claimAttachments(static::_formatEditorKey($ticketId), $ticketId, $messageId);
+		}
 
-			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId));
+		foreach($actions as &$action) {
+			$action['ticket'] = $ticketId;
+			$action['initiator'] = $member->member_id;
 		}
-		else {
-			$output->error('missing_values', '', 400, $form->error);
-		}
+		unset($action);
+		$db->insert('vssupport_ticket_action_history', $actions);
+
+
+		$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId));
 	}
 
 	/**
@@ -310,7 +308,7 @@ class tickets extends Controller
 		}
 
 
-		$form->add(new Form\Editor('text', required: true, options: [
+		$form->add(new Form\Editor('text', required: false, options: [
 			'app' => 'vssupport',
 			'key' => 'TicketText',
 			'autoSaveKey' => static::_formatEditorKey($ticketId),
