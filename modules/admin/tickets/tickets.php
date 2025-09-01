@@ -147,6 +147,7 @@ class tickets extends Controller
 			// The null checks are here in case users get deleted. We cant really do much about it, but we can at least think about that case.
 			if(!$action['initiator']) $action['initiator'] = $action['initiator_id'] === 0 ? $ticket['issuer_name'] : static::_unknownName($lang);
 			if($action['kind'] === ActionKind::Assigned && !$action['assigned_to_name']) $action['assigned_to_name'] = static::_unknownName($lang);
+			if($action['kind'] === ActionKind::PriorityChange) $action['reference_id'] -= 2; // :UnsignedPriority
 		}
 		unset($action);
 
@@ -200,7 +201,7 @@ class tickets extends Controller
 		}
 		if(($newPriority = intval($request->moveToPriority)) !== $ticket['priority']) {
 			$ticketUpdates['priority'] = $newPriority;
-			$actions[] = ['kind' => ActionKind::PriorityChange, 'reference_id' => $newPriority];
+			$actions[] = ['kind' => ActionKind::PriorityChange, 'reference_id' => 2 + $newPriority]; // The column here is unsigned, need to wrap the priority. :UnsignedPriority
 		}
 		if(($newLockState = !!$request->lock) !== !!($ticket['flags'] & TicketFlags::Locked)) {
 			$ticketUpdates['flags'] = $newLockState ? ('`flags` | '.TicketFlags::Locked) : ('`flags` & ~'.TicketFlags::Locked);
@@ -263,9 +264,9 @@ class tickets extends Controller
 			$lang = Member::loggedIn()->language();
 			{
 				$select = $theme->getTemplate('forms', 'core')
-					->select('moveToCategory', $ticket['category'], false, $categories, class: 'ipsInput--auto');
+					->select('moveToCategory', $ticket['category'], false, $categories, class: 'ipsInput--auto stretch');
 				$title = htmlspecialchars($lang->addToStack('category'), ENT_DISALLOWED, 'UTF-8', FALSE);
-				$form->actionButtons[] = "<span title='$title'>$select</span>";
+				$form->actionButtons[] = "<span title='$title' class='i-flex_00'>$select</span>";
 			}
 			{
 				for($i = -2; $i <= 2; $i++) {
@@ -273,9 +274,9 @@ class tickets extends Controller
 					if($i === $ticket['priority'])  $options[$i] .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
 				}
 				$select = $theme->getTemplate('forms', 'core')
-					->select('moveToPriority', $ticket['priority'], false, $options, class: 'ipsInput--auto');
+					->select('moveToPriority', $ticket['priority'], false, $options, class: 'ipsInput--auto stretch');
 				$title = htmlspecialchars($lang->addToStack('priority'), ENT_DISALLOWED, 'UTF-8', FALSE);
-				$form->actionButtons[] = "<span title='$title'>$select</span>";
+				$form->actionButtons[] = "<span title='$title' class='i-flex_00'>$select</span>";
 			}
 			{
 				$select = (new Form\Member('assignTo', $ticket['assigned_to_name'], options: [
@@ -293,14 +294,14 @@ class tickets extends Controller
 					'placeholder' => 'dont_change',
 				]))->html();
 				$title = htmlspecialchars($lang->addToStack('assigned_to'), ENT_DISALLOWED, 'UTF-8', FALSE);
-				$form->actionButtons[] = "<span title='$title'>$select</span>";
+				$form->actionButtons[] = "<span title='$title' class='i-flex_00'>$select</span>";
 			}
 			{
 				$lockEl = $theme->getTemplate('forms', 'core', 'global')
 					->checkbox('lock', $ticket['flags'] & TicketFlags::Locked, label: 'ticket_lock', fancyToggle: true, tooltip: $lang->addToStack('ticket_lock_desc'));
-				$form->actionButtons[] = "<span style='user-select: none'>$lockEl</span>";
+				$form->actionButtons[] = "<span style='user-select: none; vertical-align: center;'>$lockEl</span>";
 			}
-			$form->actionButtons[] = '<span class="i-flex_91"></span>'; // spacer
+			$form->actionButtons[] = '<span class="i-flex_91" style="flex-basis: 20ch;"></span>'; // spacer
 			$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
 				->button('respond_internal', 'submit', null, 'ipsButton ipsButton--secondary', ['tabindex' => '3', 'accesskey' => 's', 'name' => 'submit', 'value' => 'internal']);
 			$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')

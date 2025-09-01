@@ -174,6 +174,7 @@ class tickets extends Controller
 		);
 		foreach($actions as &$action) {
 			if(!$action['initiator']) $action['initiator'] = $ticket['issuer_name'];
+			if($action['kind'] === ActionKind::PriorityChange) $action['reference_id'] -= 2; // :UnsignedPriority
 		}
 		unset($action);
 

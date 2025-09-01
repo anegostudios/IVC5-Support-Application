@@ -13,11 +13,19 @@
 .ipsSubmitRow {
 	display: flex;
 	flex-direction: row;
+	flex-wrap: wrap;
 	gap: .5em;
 }
 
 .ipsSubmitRow>* {
 	margin-top: 1.25em;
+}
+
+.ipsSubmitRow .stretch {
+	height: 100%;
+}
+.ipsSubmitRow>button {
+	line-height: 2;
 }
 
 .ipsSubmitRow>[title] {
