@@ -13,6 +13,7 @@ use IPS\Session;
 use IPS\vssupport\TicketStatus;
 
 use function defined;
+use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
 
 if(!defined('\IPS\SUITE_UNIQUE_KEY'))
@@ -78,8 +79,8 @@ class stati extends Controller
 				$buttons['delete'] = [
 					'icon'  => 'times-circle',
 					'title' => 'delete',
-					'link'  => URl::internal('app=vssupport&module=tickets&controller=stati&do=delete&id='.$row['id'])->csrf(),
-					'data'  => ['delete' => ''], // shows modal
+					'link'  => URl::internal('app=vssupport&module=tickets&controller=stati&do=delete&id='.$row['id']),
+					'data'  => ['ipsDialog' => '', 'ipsDialog-title' => Member::loggedIn()->language()->addToStack('status_delete')],
 				];
 			}
 			return $buttons;
@@ -125,22 +126,42 @@ class stati extends Controller
 
 	public function delete() : void
 	{
-		Session::i()->csrfCheck();
+		$request = Request::i();
 		$output = Output::i();
-		
-		//TODO move tickets to other status form
-		$statusId = intval(Request::i()->id);
+
+		$statusId = intval($request->id);
+
 		if(!$statusId) {
 			$output->error('missing_id', '', 400, '');
 			return;
 		}
-
-		$affected = Db::i()->delete('vssupport_ticket_stati', 'id='.$statusId);
-		if(!$affected) {
-			$output->error('status_not_found', '', 404, '');
+		if($statusId <= TicketStatus::__MAX_BUILTIN) {
+			$output->error('cannot_delete', '', 403, '');
 			return;
 		}
 
+		$db = Db::i();
+
+		if(query_one($db->select('COUNT(*)', ['vssupport_tickets', 't'], 't.status = '.$statusId)) > 0) {
+			$form = new Helpers\Form(submitLang: 'transfer_and_delete');
+
+			$otherStati = query_all_assoc($db->select("id, CONCAT('ticket_status_', name_key, '_name')", 'vssupport_ticket_stati', 'id != '.$statusId));
+			$form->addMessage('status_replacement_notice');
+			$form->add(new Helpers\Form\Select('status_replacement', required: true, options: ['options' => $otherStati]));
+
+			$values = $form->values();
+			if(!$values) {
+				$output->output = $form;
+				return;
+			}
+
+			$db->update('vssupport_tickets', ['status' => $values['status_replacement']], 'status = '.$statusId);
+		}
+		else {
+			if(!$request->confirmedDelete(submit: 'status_delete'))   return;
+		}
+
+		$db->delete('vssupport_ticket_stati', 'id='.$statusId);
 		$output->redirect(Url::internal('app=vssupport&module=tickets&controller=stati'), 'deleted');
 	}
 }

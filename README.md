@@ -74,8 +74,6 @@ Without leaving the ticket for most actions.
 - Email ingest
 - GitHub linking
 - GitLab linking
-- Admin ticket view
-	- Quick actions
 - Admin bulk actions
 - Migration from ivc4 builtin tickets
 - Option to delete open tickets when issuer gets deleted.

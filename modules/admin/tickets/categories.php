@@ -12,6 +12,7 @@ use IPS\Request;
 use IPS\Session;
 
 use function defined;
+use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
 
 if(!defined('\IPS\SUITE_UNIQUE_KEY'))
@@ -71,8 +72,8 @@ class categories extends Controller
 				'delete' => [
 					'icon'  => 'times-circle',
 					'title' => 'delete',
-					'link'  => URl::internal('app=vssupport&module=tickets&controller=categories&do=delete&id='.$row['id'])->csrf(),
-					'data'  => ['delete' => ''], // shows modal
+					'link'  => URl::internal('app=vssupport&module=tickets&controller=categories&do=delete&id='.$row['id']),
+					'data'  => ['ipsDialog' => '', 'ipsDialog-title' => Member::loggedIn()->language()->addToStack('category_delete')],
 				],
 			];
 		};
@@ -117,22 +118,38 @@ class categories extends Controller
 
 	public function delete() : void
 	{
-		Session::i()->csrfCheck();
+		$request = Request::i();
 		$output = Output::i();
-		
-		//TODO move tickets to other category form
-		$categoryId = intval(Request::i()->id);
+
+		$categoryId = intval($request->id);
+
 		if(!$categoryId) {
 			$output->error('missing_id', '', 400, '');
 			return;
 		}
 
-		$affected = Db::i()->delete('vssupport_ticket_categories', 'id='.$categoryId);
-		if(!$affected) {
-			$output->error('category_not_found', '', 404, '');
-			return;
+		$db = Db::i();
+
+		if(query_one($db->select('COUNT(*)', ['vssupport_tickets', 't'], 't.category = '.$categoryId)) > 0) {
+			$form = new Helpers\Form(submitLang: 'transfer_and_delete');
+
+			$otherCategories = query_all_assoc($db->select("id, CONCAT('ticket_cat_', name_key, '_name')", 'vssupport_ticket_categories', 'id != '.$categoryId));
+			$form->addMessage('category_replacement_notice');
+			$form->add(new Helpers\Form\Select('category_replacement', required: true, options: ['options' => $otherCategories]));
+
+			$values = $form->values();
+			if(!$values) {
+				$output->output = $form;
+				return;
+			}
+
+			$db->update('vssupport_tickets', ['category' => $values['category_replacement']], 'category = '.$categoryId);
+		}
+		else {
+			if(!$request->confirmedDelete(submit: 'category_delete'))   return;
 		}
 
+		$db->delete('vssupport_ticket_categories', 'id='.$categoryId);
 		$output->redirect(Url::internal('app=vssupport&module=tickets&controller=categories'), 'deleted');
 	}
 }

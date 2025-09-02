@@ -36,7 +36,6 @@ class tickets extends Controller
 		parent::execute();
 	}
 
-	// @copypasta: Copied in large parts from core.members .
 	protected function manage() : void
 	{
 		$lang = Member::loggedIn()->language();
