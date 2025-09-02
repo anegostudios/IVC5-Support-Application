@@ -89,11 +89,39 @@ class tickets extends Controller
 		$table->sortBy = $table->sortBy ?: 'created';
 		$table->sortDirection = $table->sortDirection ?: 'desc';
 
-		$table->quickSearch = function($string) {
-			return Db::i()->like('name', $string, TRUE, TRUE, \IPS\core\extensions\core\LiveSearch\Members::canPerformInlineSearch());
-		};
+		$table->quickSearch = 'subject';
 
-		//TODO(Rennorb) @completeness: $table->advancedSearch
+		$priorities = [];
+		$categories = [];
+		$stati = [];
+		if(Request::i()->advancedSearchForm) {
+			$db = Db::i();
+
+			for($p = -2; $p <= 2; $p++) {
+				$priorities[$p] = "ticket_prio_{$p}_name";
+			}
+
+			$q = $db->select('id, name_key', 'vssupport_ticket_categories');
+			foreach($q as $r) {
+				$categories[$r['id']] = "ticket_cat_{$r['name_key']}_name";
+			}
+			$q = $db->select('id, name_key', 'vssupport_ticket_stati');
+			foreach($q as $r) {
+				$stati[$r['id']] = "ticket_status_{$r['name_key']}_name";
+			}
+		}
+
+		$table->advancedSearch = [
+			'id'             => Helpers\Table\SEARCH_NUMERIC,
+			'created'        => Helpers\Table\SEARCH_DATE_RANGE,
+			'subject'        => Helpers\Table\SEARCH_CONTAINS_TEXT,
+			'priority'       => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $priorities]],
+			'category'       => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $categories]],
+			'status'         => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $stati]],
+			'issuer_name'    => Helpers\Table\SEARCH_CONTAINS_TEXT,
+			'issuer_email'   => Helpers\Table\SEARCH_CONTAINS_TEXT,
+			'last_update_at' => Helpers\Table\SEARCH_DATE_RANGE,
+		];
 
 		$table->rowButtons = function($row) {
 			return [
