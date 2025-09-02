@@ -120,6 +120,18 @@ class tickets extends Controller
 			'status'         => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $stati]],
 			'issuer_name'    => Helpers\Table\SEARCH_CONTAINS_TEXT,
 			'issuer_email'   => Helpers\Table\SEARCH_CONTAINS_TEXT,
+			'assigned_to'    => [Helpers\Table\SEARCH_MEMBER, [
+				'autocomplete' => [
+					'source'               => 'app=core&module=system&controller=ajax&do=findMember&type=mod', // only search for moderators
+					'resultItemTemplate'   => 'core.autocomplete.memberItem',
+					'commaTrigger'         => false,
+					'unique'               => true,
+					'minAjaxLength'        => 3,
+					'disallowedCharacters' => [],
+					'lang'                 => 'mem_optional',
+					'suggestionsOnly'      => true,
+				],
+			]],
 			'last_update_at' => Helpers\Table\SEARCH_DATE_RANGE,
 		];
 
