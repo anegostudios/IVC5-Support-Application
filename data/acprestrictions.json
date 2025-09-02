@@ -2,7 +2,8 @@
     "tickets": {
         "tickets": {
             "tickets_manage": "tickets_manage",
-            "categories_manage": "categories_manage"
+            "categories_manage": "categories_manage",
+            "stati_manage": "stati_manage"
         }
     }
 }

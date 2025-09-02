@@ -1,7 +1,7 @@
 <ips:template parameters="$ticket, $actions, $form"/>
 {{$createLink = \IPS\Http\Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');}}
 <h2 class="ipsTitle ipsTitle--h2">{lang="ticket"} #{$ticket['id']} - {$ticket['subject']}{template="button" app="core" group="forms" location="global" params="'ticket_create', 'link', $createLink, 'ipsButton ipsButton--primary i-font-size_1 i-float_end', ['tabindex' => 1, 'accesskey' => 'c']"}</h2>
-<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_cat_name_{$ticket['category']}"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}} <small class="i-color_soft i-font-size_-1">started <i class="fa-solid fa-clock"></i>&nbsp;{$ticket['created']}</small></h3>
+<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_cat_{$ticket['category']}_name"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}, {lang="ticket_status_{$ticket['status_name']}_name"}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}} <small class="i-color_soft i-font-size_-1">started <i class="fa-solid fa-clock"></i>&nbsp;{$ticket['created']}</small></h3>
 <div style="display: flex; flex-direction: column; gap: 1em;">
 	{{foreach $actions as $action}}
 		{template="action" location="global" group="tickets" params="$action"}

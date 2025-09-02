@@ -456,5 +456,72 @@
                 "initiator": "1"
             }
         ]
+    },
+    "vssupport_ticket_stati": {
+        "name": "vssupport_ticket_stati",
+        "columns": {
+            "id": {
+                "name": "id",
+                "type": "BIGINT",
+                "length": "20",
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": true
+            },
+            "name_key": {
+                "name": "name_key",
+                "type": "TINYTEXT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        },
+        "indexes": {
+            "PRIMARY": {
+                "type": "primary",
+                "name": "PRIMARY",
+                "columns": [
+                    "id"
+                ],
+                "length": [
+                    null
+                ]
+            }
+        },
+        "inserts": [
+            {
+                "id": "0",
+                "name_key": "open"
+            },
+            {
+                "id": "2",
+                "name_key": "processing"
+            },
+            {
+                "id": "5",
+                "name_key": "halted"
+            },
+            {
+                "id": "8",
+                "name_key": "completed"
+            },
+            {
+                "id": "9",
+                "name_key": "wontfix"
+            },
+            {
+                "id": "16",
+                "name_key": "custom"
+            }
+        ]
     }
 }

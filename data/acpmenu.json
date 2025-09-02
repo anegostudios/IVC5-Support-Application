@@ -13,6 +13,12 @@
             "do": "",
             "restriction": "categories_manage",
             "subcontrollers": ""
+        },
+        "stati": {
+            "tab": "vssupport",
+            "controller": "stati",
+            "do": "",
+            "restriction": "stati_manage"
         }
     }
 }

@@ -46,7 +46,7 @@ class categories extends Controller
 		$table->include = ['name_key', 'translated_name'];
 
 		$table->parsers['translated_name'] = function($val, $row) {
-			return Member::loggedIn()->language()->addToStack("ticket_cat_name_{$row['name_key']}");
+			return Member::loggedIn()->language()->addToStack("ticket_cat_{$row['name_key']}_name");
 		};
 
 		$table->quickSearch = function($string) {
@@ -54,9 +54,10 @@ class categories extends Controller
 		};
 
 		$table->rootButtons = [[
-			'icon' => 'plus-circle',
+			'icon'  => 'plus-circle',
 			'title' => 'category_add',
-			'link' => URl::internal('app=vssupport&module=tickets&controller=categories&do=edit'),
+			'link'  => URl::internal('app=vssupport&module=tickets&controller=categories&do=edit'),
+			'data'  => ['ipsDialog' => '', 'ipsDialog-title' => $lang->addToStack('category_add')],
 		]];
 
 		$table->rowButtons = function($row) {
@@ -65,6 +66,7 @@ class categories extends Controller
 					'icon'  => 'edit',
 					'title' => 'edit',
 					'link'  => URl::internal('app=vssupport&module=tickets&controller=categories&do=edit&id='.$row['id']),
+					'data'  => ['ipsDialog' => '', 'ipsDialog-title' => Member::loggedIn()->language()->addToStack('category_edit')],
 				],
 				'delete' => [
 					'icon'  => 'times-circle',
@@ -88,19 +90,18 @@ class categories extends Controller
 		$db = Db::i();
 
 		$form = new Helpers\Form(submitLang: $categoryId ? 'save' : 'category_add');
-		$nameKeyEl = new Helpers\Form\Text('name_key', required: true);
-		if($categoryId) {
-			$form->hiddenValues['categoryId'] = $categoryId;
-			$nameKeyEl->value = query_one($db->select('name_key', 'vssupport_ticket_categories', 'id = '.$categoryId));
+		$oldVal = null;
+		if($categoryId && empty(Request::i()->category_name_key)) {
+			$oldVal = query_one($db->select('name_key', 'vssupport_ticket_categories', 'id = '.$categoryId));
 		}
-		$form->add($nameKeyEl);
+		$form->add(new Helpers\Form\Text('category_name_key', defaultValue: $oldVal, required: true));
 
 		if($values = $form->values()) {
 			if($categoryId) { // editing existing
-				$db->update('vssupport_ticket_categories', ['name_key' => $values['name_key']], 'id = '.$categoryId);
+				$db->update('vssupport_ticket_categories', ['name_key' => $values['category_name_key']], 'id = '.$categoryId);
 			}
 			else { // create new
-				$db->insert('vssupport_ticket_categories', ['name_key' => $values['name_key']]);
+				$db->insert('vssupport_ticket_categories', ['name_key' => $values['category_name_key']]);
 			}
 
 			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=categories'), $categoryId ? 'saved' : 'created');

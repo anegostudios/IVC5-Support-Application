@@ -10,7 +10,9 @@
 	{{switch($action['kind']): case \IPS\vssupport\ActionKind::PriorityChange:}}
 		{lang="priority_changed_to"}&nbsp;{template="priorityLabel" location="global" group="tickets" params="$action['reference_id']"}
 	{{break; case \IPS\vssupport\ActionKind::CategoryChange:}}
-		{lang="category_changed_to"}&nbsp;{lang="ticket_cat_name_{$action['name_key']}"}
+		{lang="category_changed_to"}&nbsp;{lang="ticket_cat_{$action['name_key']}_name"}
+	{{break; case \IPS\vssupport\ActionKind::StatusChange:}}
+		{lang="status_changed_to"}&nbsp;{lang="ticket_status_{$action['name_key']}_name"}
 	{{break; case \IPS\vssupport\ActionKind::Assigned:}}
 		{{if $action['reference_id']}}
 			{lang="ticket_assigned_to"}&nbsp;{$action['assigned_to_name']}

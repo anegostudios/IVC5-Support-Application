@@ -29,6 +29,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- View all tickets
 		- View individual ticket
 			- Reply or add Internal Note and
+				- Change Status
 				- Change Category
 				- Change Priority
 				- Lock to staff members
@@ -38,7 +39,10 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 			- Manage Customer Invoices largely without leaving the ticket
 				- Inspect, Track, Cancel, Refund, Resend or Delete
 				- opens in new tab: Edit or Print
-		- Create / Edit / Delete Categories
+		- Create / Edit / Delete Ticket Categories
+			- Preview translated names
+		- Create / Edit / Delete new Ticket Stati
+			- Some stati are builtin and cannot be removed
 			- Preview translated names
 
 ### Screenshots

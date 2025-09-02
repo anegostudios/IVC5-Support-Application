@@ -15,12 +15,11 @@ use IPS\vssupport\ActionKind;
 use IPS\vssupport\MessageFlags;
 use IPS\vssupport\TicketFlags;
 
-use function defined;
 use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
 
-if(!defined('\IPS\SUITE_UNIQUE_KEY'))
+if(!\defined('\IPS\SUITE_UNIQUE_KEY'))
 {
 	header(($_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0').' 403 Forbidden');
 	exit;
@@ -54,28 +53,35 @@ class tickets extends Controller
 		$table->include = ['id', 'created', 'priority', 'subject', 'category', 'status', 'issuer_name', 'issuer_email', 'assigned_to', 'last_update_at', 'last_update_by'];
 		$table->mainColumn = 'created';
 
-		$table->joins[] = [
+		$table->joins = [[
 			'select'=> 'vssupport_ticket_categories.name_key as category',
 			'from'  => 'vssupport_ticket_categories',
 			'where' => 'vssupport_ticket_categories.id = vssupport_tickets.category',
 			'type'  => 'LEFT'
-		];
-
-		$table->joins[] = [
+		], [
+			'select'=> 'vssupport_ticket_stati.name_key as status',
+			'from'  => 'vssupport_ticket_stati',
+			'where' => 'vssupport_ticket_stati.id = vssupport_tickets.status',
+			'type'  => 'LEFT'
+		], [
 			'select'=> 'core_members.name as assigned_to',
 			'from'  => 'core_members',
 			'where' => 'core_members.member_id = vssupport_tickets.assigned_to',
 			'type'  => 'LEFT'
+		]];
+
+		$table->parsers = [
+			'category' => function($val, $row) {
+				return Member::loggedIn()->language()->addToStack("ticket_cat_{$val}_name");
+			},
+			'status' => function($val, $row) {
+				return Member::loggedIn()->language()->addToStack("ticket_status_{$val}_name");
+			},
+			'priority' => function($val, $row) {
+				$text = Member::loggedIn()->language()->addToStack("ticket_prio_{$val}_name");
+				return "<span class='prio-label prio-$val'>$text</span>";
+			},
 		];
-
-		$table->parsers['category'] = function($val, $row) {
-			return Member::loggedIn()->language()->addToStack("ticket_cat_name_$val");
-		};
-
-		$table->parsers['priority'] = function($val, $row) {
-			$text = Member::loggedIn()->language()->addToStack("ticket_prio_name_$val");
-			return "<span class='prio-label prio-$val'>$text</span>";
-		};
 
 		$table->primarySortBy = 'priority';
 		$table->primarySortDirection = 'desc';
@@ -126,9 +132,10 @@ class tickets extends Controller
 		$ticketId = intval($request->id);
 
 		$ticket = query_one(
-			$db->select('t.*, c.name_key as category_name, u.name as assigned_to_name', ['vssupport_tickets', 't'], 't.id = '.$ticketId)
+			$db->select('t.*, c.name_key AS category_name, s.name_key as status_name, u.name AS assigned_to_name', ['vssupport_tickets', 't'], 't.id = '.$ticketId)
 			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
 			->join(['core_members', 'u'], 'u.member_id = t.assigned_to')
+			->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
 		);
 		if(!$ticket) {
 			$output->error('node_error', '2C114/O', 404, '');
@@ -136,10 +143,11 @@ class tickets extends Controller
 		}
 
 		$actions = query_all(
-			$db->select('a.created, a.kind, a.reference_id, a.initiator as initiator_id, u.name as initiator, m.text, m.flags, c.name_key, as.name as assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
+			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, IFNULL(c.name_key, s.name_key) AS name_key, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
 			->join(['core_members', 'u'], 'u.member_id = a.initiator')
 			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
 			->join(['vssupport_ticket_categories', 'c'], 'c.id = a.reference_id AND a.kind = '.ActionKind::CategoryChange)
+			->join(['vssupport_ticket_stati', 's'], 's.id = a.reference_id AND a.kind = '.ActionKind::StatusChange)
 			->join(['core_members', 'as'], 'as.member_id = a.reference_id AND a.kind = '.ActionKind::Assigned)
 		);
 		
@@ -151,14 +159,7 @@ class tickets extends Controller
 		}
 		unset($action);
 
-		$categories = query_all_assoc($db->select("id, name_key", 'vssupport_ticket_categories'));
-		foreach($categories as $catId => &$cat) {
-			$cat = htmlspecialchars($lang->addToStack('ticket_cat_name_'.$cat), ENT_DISALLOWED, 'UTF-8', FALSE);
-			if($catId === $ticket['category'])  $cat .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
-		}
-		unset($cat);
-
-		$form = static::_createMessageForm($ticketId, $categories, $ticket, Url::internal('app=vssupport&module=tickets&controller=tickets&do=reply'));
+		$form = static::_createMessageForm($ticketId, true, $ticket, Url::internal('app=vssupport&module=tickets&controller=tickets&do=reply'));
 
 		$extraBlocks = [];
 
@@ -189,7 +190,7 @@ class tickets extends Controller
 		$db = Db::i();
 
 		$ticketId = intval($request->replyTo);
-		$form = static::_createMessageForm($ticketId, null, null);
+		$form = static::_createMessageForm($ticketId, false, null);
 
 		$ticket = query_one($db->select('*', 'vssupport_tickets', 'id = '.$ticketId));
 
@@ -198,6 +199,10 @@ class tickets extends Controller
 		if(($newCategory = intval($request->moveToCategory)) !== $ticket['category']) {
 			$ticketUpdates['category'] = $newCategory;
 			$actions[] = ['kind' => ActionKind::CategoryChange, 'reference_id' => $newCategory];
+		}
+		if(($newStatus = intval($request->moveToStatus)) !== $ticket['status']) {
+			$ticketUpdates['status'] = $newStatus;
+			$actions[] = ['kind' => ActionKind::StatusChange, 'reference_id' => $newStatus];
 		}
 		if(($newPriority = intval($request->moveToPriority)) !== $ticket['priority']) {
 			$ticketUpdates['priority'] = $newPriority;
@@ -247,10 +252,7 @@ class tickets extends Controller
 		$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId));
 	}
 
-	/**
-	 * @param string[] $categories id to translatable strings map
-	 */
-	static function _createMessageForm(int $ticketId, array|null $categories, array|null $ticket, Url $action = null) : Form {
+	static function _createMessageForm(int $ticketId, bool $allInputs, array|null $ticket, Url $action = null) : Form {
 		$theme = Theme::i();
 
 		// submitLang = null disables builtin button
@@ -260,9 +262,18 @@ class tickets extends Controller
 		$form->hiddenValues['replyTo'] = $ticketId;
 
 		// Do the buttons manually because we want more than a simple submit:
-		if($categories) {
+		if($allInputs) {
+			$db = Db::i();
 			$lang = Member::loggedIn()->language();
+
 			{
+				$categories = query_all_assoc($db->select("id, name_key", 'vssupport_ticket_categories'));
+				foreach($categories as $catId => &$cat) {
+					$cat = htmlspecialchars($lang->addToStack("ticket_cat_{$cat}_name"), ENT_DISALLOWED, 'UTF-8', FALSE);
+					if($catId === $ticket['category'])  $cat .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
+				}
+				unset($cat);
+
 				$select = $theme->getTemplate('forms', 'core')
 					->select('moveToCategory', $ticket['category'], false, $categories, class: 'ipsInput--auto stretch');
 				$title = htmlspecialchars($lang->addToStack('category'), ENT_DISALLOWED, 'UTF-8', FALSE);
@@ -270,7 +281,7 @@ class tickets extends Controller
 			}
 			{
 				for($i = -2; $i <= 2; $i++) {
-					$options[$i] = htmlspecialchars($lang->addToStack('ticket_prio_name_'.$i), ENT_DISALLOWED, 'UTF-8', FALSE);
+					$options[$i] = htmlspecialchars($lang->addToStack("ticket_prio_{$i}_name"), ENT_DISALLOWED, 'UTF-8', FALSE);
 					if($i === $ticket['priority'])  $options[$i] .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
 				}
 				$select = $theme->getTemplate('forms', 'core')
@@ -294,6 +305,19 @@ class tickets extends Controller
 					'placeholder' => 'dont_change',
 				]))->html();
 				$title = htmlspecialchars($lang->addToStack('assigned_to'), ENT_DISALLOWED, 'UTF-8', FALSE);
+				$form->actionButtons[] = "<span title='$title' class='i-flex_00'>$select</span>";
+			}
+			{
+				$stati = query_all_assoc($db->select("id, name_key", 'vssupport_ticket_stati'));
+				foreach($stati as $statusId => &$status) {
+					$status = htmlspecialchars($lang->addToStack("ticket_status_{$status}_name"), ENT_DISALLOWED, 'UTF-8', FALSE);
+					if($statusId === $ticket['status'])  $status .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
+				}
+				unset($status);
+
+				$select = $theme->getTemplate('forms', 'core')
+					->select('moveToStatus', $ticket['status'], false, $stati, class: 'ipsInput--auto stretch');
+				$title = htmlspecialchars($lang->addToStack('status'), ENT_DISALLOWED, 'UTF-8', FALSE);
 				$form->actionButtons[] = "<span title='$title' class='i-flex_00'>$select</span>";
 			}
 			{
