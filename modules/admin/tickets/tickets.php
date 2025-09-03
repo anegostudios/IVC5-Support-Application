@@ -1,5 +1,6 @@
 <?php namespace IPS\vssupport\modules\admin\tickets;
 
+use IPS\Application;
 use IPS\Db;
 use IPS\Dispatcher;
 use IPS\Dispatcher\Controller;
@@ -10,8 +11,11 @@ use IPS\Theme;
 use IPS\Helpers;
 use IPS\Helpers\Form;
 use IPS\Http\Url;
+use IPS\Notification;
+use IPS\Email;
 use IPS\Request;
 use IPS\vssupport\ActionKind;
+use IPS\vssupport\Message;
 use IPS\vssupport\MessageFlags;
 use IPS\vssupport\TicketFlags;
 
@@ -198,7 +202,7 @@ class tickets extends Controller
 		}
 		unset($action);
 
-		$form = static::_createMessageForm($ticketId, true, $ticket, Url::internal('app=vssupport&module=tickets&controller=tickets&do=reply'));
+		$form = static::_createMessageForm($ticketId, true, $ticket, Url::internal('app=vssupport&module=tickets&controller=tickets&do=reply&id='.$ticketId));
 
 		$extraBlocks = [];
 
@@ -228,10 +232,10 @@ class tickets extends Controller
 		$output = Output::i();
 		$db = Db::i();
 
-		$ticketId = intval($request->replyTo);
+		$ticketId = intval($request->id);
 		$form = static::_createMessageForm($ticketId, false, null);
 
-		$ticket = query_one($db->select('*', 'vssupport_tickets', 'id = '.$ticketId));
+		$ticket = query_one($db->select('*, HEX(hash) AS hash', 'vssupport_tickets', 'id = '.$ticketId));
 
 		$ticketUpdates = [];
 		$actions = [];
@@ -265,19 +269,14 @@ class tickets extends Controller
 			$db->update('vssupport_tickets', $ticketUpdates, 'id = '.$ticketId, flags: Db::ALLOW_INCDEC_VALUES);
 		}
 
+		$flags = 0;
 		if(($values = $form->values()) && $values['text']) {
-			$flags = 0;
 			if($request->submit === 'internal')   $flags |= MessageFlags::Internal;
 
-			$messageId = $db->insert('vssupport_messages', [
-				'ticket'          => $ticketId,
-				'text'            => $values['text'],
-				'text_searchable' => strip_tags($values['text']),
-				'flags'           => $flags,
-			]);
-			$actions[] = ['kind' => ActionKind::Message, 'reference_id' => $messageId];
+			$message = Message::insert($db, $ticketId, $values['text'], $flags);
+			$actions[] = ['kind' => ActionKind::Message, 'reference_id' => $message->id];
 
-			File::claimAttachments(static::_formatEditorKey($ticketId), $ticketId, $messageId);
+			File::claimAttachments(static::_formatEditorKey($ticketId), $ticketId, $message->id);
 		}
 
 		foreach($actions as &$action) {
@@ -287,7 +286,23 @@ class tickets extends Controller
 		unset($action);
 		$db->insert('vssupport_ticket_action_history', $actions);
 
+		if(!($flags & MessageFlags::Internal) && $values['text']) {
+			// needed for notification
+			$message->ticketHash = $ticket['hash'];
 
+			$emailParams = [$ticketId, $ticket['hash'], $values['text'], $member->name];
+			if($ticket['issuer_id']) {
+				$notification = new Notification(Application::load('vssupport'), 'ticket_response', $message, $emailParams, allowMerging: false);
+				$notification->recipients->attach(Member::load($ticket['issuer_id']));
+				$notification->send();
+			}
+			else {
+				$email = Email::buildFromTemplate('vssupport', 'notification_ticket_response', $emailParams, Email::TYPE_TRANSACTIONAL);
+				$email->send($ticket['issuer_email']);
+			}
+		}
+
+		//TODO(Rennorb) @perf: Would love to send output first, then do the email processing, but IVC doesn't really allow that.
 		$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$ticketId));
 	}
 
@@ -298,7 +313,6 @@ class tickets extends Controller
 		$form = new Form(submitLang: null, action: $action);
 		// Prevent the label being placed to the side. We want full width.
 		$form->class = 'ipsForm--vertical';
-		$form->hiddenValues['replyTo'] = $ticketId;
 
 		// Do the buttons manually because we want more than a simple submit:
 		if($allInputs) {

@@ -1,0 +1,14 @@
+<ips:template parameters="$ticketId, $ticketHash, $messageTextHtml, $initiatorName, $email" />
+{$email->language->addToStack('mail_part__initiator_responded_to_ticket', options: ['sprintf' => [$initiatorName, '', $ticketId], 'striptags' => 1])}
+
+{{$return .= strip_tags($messageTextHtml);}}
+
+{$email->language->addToStack('mail_part__here_is_the_link_to_ticket')}
+
+{url="app=vssupport&module=tickets&controller=tickets&do=view&hash={$ticketHash}" base="front" seoTemplate="tickets_view_hash"}
+
+
+{$email->language->addToStack('mail_part__do_not_respond_to_this_email')}
+
+
+-- {setting="board_name"}

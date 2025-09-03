@@ -5,6 +5,9 @@
         },
         "FrontNavigation": {
             "Support": "IPS\\vssupport\\extensions\\core\\FrontNavigation\\Support"
+        },
+        "Notifications": {
+            "Tickets": "IPS\\vssupport\\extensions\\core\\Notifications\\Tickets"
         }
     }
 }

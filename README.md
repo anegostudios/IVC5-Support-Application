@@ -18,6 +18,8 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- Timestamps on tickets and messages
 		- Friendly urls (mostly, tickets are still referenced by id)
 		- Action tracking (history of attribute changes)
+		- Notifications / Emails for
+			- New responses
 	- Frontend module
 		- Create new tickets (also possible as guest)
 		- Inspect individual tickets
@@ -69,8 +71,8 @@ Without leaving the ticket for most actions.
 
 - Email egress
 	- Daily digest for moderators
-	- Response notifications for users
-		- Notification settings
+	- New ticket confirmation
+- Allow notification merging
 - Email ingest
 - GitHub linking
 - GitLab linking
@@ -80,6 +82,7 @@ Without leaving the ticket for most actions.
 - Link from user profile to their tickets.
 - Better user change tracking
 	- User name change tracking is flaky
+- Content items? 
 
 ## License
 

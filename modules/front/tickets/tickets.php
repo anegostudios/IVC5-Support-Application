@@ -100,7 +100,7 @@ class tickets extends Controller
 				'text'            => $values['text'],
 				'text_searchable' => strip_tags($values['text']),
 			]);
-			log_ticket_action($db, $ticketId, ActionKind::Message, $member->member_id, $messageId);
+			log_ticket_action($db, $ticketId, ActionKind::Message, $member->member_id ?? 0, $messageId);
 
 			File::claimAttachments('new-ticket', $ticketId, $messageId);
 
@@ -155,13 +155,13 @@ class tickets extends Controller
 					'text'            => $values['text'],
 					'text_searchable' => strip_tags($values['text']),
 				]);
-				log_ticket_action($db, $ticket['id'], ActionKind::Message, $member->member_id, $messageId);
+				log_ticket_action($db, $ticket['id'], ActionKind::Message, $member->member_id ?? 0, $messageId);
 	
 				File::claimAttachments($autoSaveKey, $ticket['id'], $messageId);
 
 				if($ticket['status'] & TicketStatus::__FLAG_CLOSED) {
 					$db->update('vssupport_tickets', ['status' => TicketStatus::Open]);
-					log_ticket_action($db, $ticket['id'], ActionKind::StatusChange, $member->member_id, TicketStatus::Open);
+					log_ticket_action($db, $ticket['id'], ActionKind::StatusChange, $member->member_id ?? 0, TicketStatus::Open);
 				}
 	
 				$output->redirect($request->url());
