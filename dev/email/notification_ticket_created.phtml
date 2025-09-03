@@ -1,7 +1,7 @@
 <ips:template parameters="$ticketId, $ticketHash, $messageTextHtml, $initiatorName, $email" />
 {{$ticketLink = \IPS\Http\Url::internal("app=vssupport&module=tickets&controller=tickets&do=view&hash={$ticketHash}", base: "front", seoTemplate: "tickets_view_hash");}}
 <br />
-{$email->language->addToStack('mail_part__initiator_responded_to_ticket', options: ['htmlsprintf' => [$initiatorName, $ticketLink, $ticketId]])}
+{$email->language->addToStack('mail_part__ticket_created', options: ['htmlsprintf' => [$initiatorName, $ticketLink, $ticketId]])}
 <br />
 <br />
 <table width='100%' cellpadding='15' cellspacing='0' border='0' style='background: #f9f9f9;'>

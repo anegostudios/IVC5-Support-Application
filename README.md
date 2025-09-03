@@ -20,6 +20,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- Action tracking (history of attribute changes)
 		- Notifications / Emails for
 			- New responses
+			- Newly created tickets if the issuer is not logged in
 	- Frontend module
 		- Create new tickets (also possible as guest)
 		- Inspect individual tickets
@@ -71,7 +72,6 @@ Without leaving the ticket for most actions.
 
 - Email egress
 	- Daily digest for moderators
-	- New ticket confirmation
 - Allow notification merging
 - Email ingest
 - GitHub linking

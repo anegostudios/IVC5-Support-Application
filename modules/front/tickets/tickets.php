@@ -2,6 +2,7 @@
 
 use IPS\Db;
 use IPS\Dispatcher\Controller;
+use IPS\Email;
 use IPS\File;
 use IPS\Member;
 use IPS\Output;
@@ -79,12 +80,12 @@ class tickets extends Controller
 
 		if($values = $form->values()) {
 			if(!$member->member_id) {
-				$name =  $values['name'];
-				$email =  $values['email'];
+				$issuerName =  $values['name'];
+				$issuerEmail =  $values['email'];
 			}
 			else {
-				$name = $member->get_name();
-				$email = $member->email;
+				$issuerName = $member->get_name();
+				$issuerEmail = $member->email;
 			}
 
 			// manual query construction to allow usage of UNHEX
@@ -93,7 +94,7 @@ class tickets extends Controller
 					INSERT INTO {$db->prefix}vssupport_tickets (issuer_name, issuer_email, category, subject, issuer_id, hash)
 					VALUES(?, ?, ?, ?, ?, UNHEX(?))
 				SQL,
-				[$name, $email, $values['category'], $values['subject'], $member->member_id, $ticketHash]
+				[$issuerName, $issuerEmail, $values['category'], $values['subject'], $member->member_id, $ticketHash]
 			)->insert_id;
 			$messageId = $db->insert('vssupport_messages', [
 				'ticket'          => $ticketId,
@@ -103,6 +104,13 @@ class tickets extends Controller
 			log_ticket_action($db, $ticketId, ActionKind::Message, $member->member_id ?? 0, $messageId);
 
 			File::claimAttachments('new-ticket', $ticketId, $messageId);
+
+			// Since unregistered users cannot receive notifications, and have no record of their tickets, we just send them an email.
+			if(!$member->member_id) {
+				$emailParams = [$ticketId, $ticketHash, $values['text'], $issuerName];
+				$email = Email::buildFromTemplate('vssupport', 'notification_ticket_created', $emailParams, Email::TYPE_TRANSACTIONAL);
+				$email->send($issuerEmail);
+			}
 
 			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=tickets&do=view&hash='.$ticketHash, seoTemplate: 'tickets_view_hash'));
 			return;
