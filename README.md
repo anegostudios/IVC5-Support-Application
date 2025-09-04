@@ -83,6 +83,9 @@ Without leaving the ticket for most actions.
 - Better user change tracking
 	- User name change tracking is flaky
 - Content items? 
+- Invertible message flow in the backend (configurable)
+- Add disclaimer field on ticket entry
+- Hide the secondary menu when viewing tickets in the backend
 
 ## License
 

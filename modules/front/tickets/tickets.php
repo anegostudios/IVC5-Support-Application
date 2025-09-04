@@ -187,7 +187,7 @@ class tickets extends Controller
 		$theme = Theme::i();
 
 		$actions = query_all(
-			$db->select('a.created, a.kind, a.reference_id, u.name AS initiator, m.text, m.flags, IFNULL(c.name_key, s.name_key) AS name_key, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'],
+			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, IFNULL(c.name_key, s.name_key) AS name_key, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'],
 				where: 'a.ticket = '.$ticket['id'].' AND !(IFNULL(m.flags, 0) & '.MessageFlags::Internal.')', order: 'a.created ASC')
 			->join(['core_members', 'u'], 'u.member_id = a.initiator')
 			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
@@ -197,7 +197,9 @@ class tickets extends Controller
 		);
 		foreach($actions as &$action) {
 			if(!$action['initiator']) $action['initiator'] = $ticket['issuer_name'];
+			if($action['kind'] === ActionKind::Assigned && !$action['assigned_to_name']) $action['assigned_to_name'] = $lang->addToStack('unknown');
 			if($action['kind'] === ActionKind::PriorityChange) $action['reference_id'] -= 2; // :UnsignedPriority
+			if($action['kind'] === ActionKind::Message) $action['message_kind'] = $action['initiator_id'] === 0 || $action['initiator'] === $ticket['issuer_name'] ? 'issuer' : 'moderator';
 		}
 		unset($action);
 

@@ -199,6 +199,7 @@ class tickets extends Controller
 			if(!$action['initiator']) $action['initiator'] = $action['initiator_id'] === 0 ? $ticket['issuer_name'] : static::_unknownName($lang);
 			if($action['kind'] === ActionKind::Assigned && !$action['assigned_to_name']) $action['assigned_to_name'] = static::_unknownName($lang);
 			if($action['kind'] === ActionKind::PriorityChange) $action['reference_id'] -= 2; // :UnsignedPriority
+			if($action['kind'] === ActionKind::Message) $action['message_kind'] = ($action['flags'] & MessageFlags::Internal) ? 'internal' : (($action['initiator_id'] === 0 || $action['initiator'] === $ticket['issuer_name']) ? 'issuer' : 'moderator');
 		}
 		unset($action);
 

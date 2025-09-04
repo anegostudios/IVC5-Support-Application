@@ -5,9 +5,10 @@
 	gap: 1em;
 }
 
-.internal-note {
-	--i-box--ba-co: hsl(30, 18%, 30%);
+.ticket-message.message-internal {
+	--i-box--ba-co: hsl(40, 90%, 10%);
 	--i-boxHeader--ba-co: var(--i-box--ba-co);
+	--message-color: hsl(40, 80%, 45%);
 }
 
 .ipsSubmitRow {

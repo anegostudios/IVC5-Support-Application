@@ -26,10 +26,15 @@
   border-radius: .125em;
 	background-color: var(--ticket-prio-bg);
 	color: var(--ticket-prio-fg);
+	white-space: nowrap;
 }
 
-
-/* Messages */
-.message-time {
-	text-align: right;
+/* Message coloring */
+.ticket-message.message-issuer { --message-color: #358ef4; }
+.ticket-message.message-moderator { --message-color: #2fa92f; }
+.ticket-message {
+	border-left: solid var(--message-color, var(--i-background_4)) .5em;
+}
+.ticket-message .message-author {
+	color: var(--message-color);
 }
