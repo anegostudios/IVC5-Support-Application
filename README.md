@@ -70,8 +70,6 @@ Without leaving the ticket for most actions.
 
 ## TODO
 
-- Email egress
-	- Daily digest for moderators
 - Allow notification merging
 - Email ingest
 - GitHub linking

@@ -347,7 +347,7 @@ class tickets extends Controller
 				$select = (new Form\Member('assignTo', $ticket['assigned_to_name'], options: [
 					// Copy pasted from the original, just with the additional &type=mod.
 					'autocomplete' => [
-						'source'               => 'app=core&module=system&controller=ajax&do=findMember&type=mod',
+						'source'               => 'app=core&module=system&controller=ajax&do=findMember&type=mod', //TODO(Rennorb) @corectness: this is just wrong; see ajax controller
 						'resultItemTemplate'   => 'core.autocomplete.memberItem',
 						'commaTrigger'         => false,
 						'unique'               => true,

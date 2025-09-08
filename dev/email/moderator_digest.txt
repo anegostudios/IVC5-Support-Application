@@ -1,0 +1,25 @@
+<ips:template parameters="$assignedAndOpen, $email" />
+
+{$email->language->addToStack('mail_part__you_currently_have_n_open_tickets', options: ['pluralize' => [count($assignedAndOpen)]])}
+
+
+{{foreach $assignedAndOpen as $ticket}}
+
+
+{$ticket['subject']} - #{$ticket['id']}
+
+{$email->language->addToStack('mail_part__ticket_description_plain', options: ['sprintf' => [
+	$ticket['created'],
+	$email->language->addToStack('ticket_status_'.$ticket['status'].'_name'),
+	$email->language->addToStack('ticket_cat_'.$ticket['category'].'_name'),
+	$email->language->addToStack('ticket_prio_'.$ticket['priority'].'_name'),
+]])}
+
+{url="app=vssupport&module=tickets&controller=tickets&do=view&id={$ticket['id']}" base:"admin"}
+{{endforeach}}
+
+
+{$email->language->addToStack('mail_part__do_not_respond_to_this_email')}
+
+
+-- {setting="board_name"}

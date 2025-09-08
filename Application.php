@@ -54,6 +54,16 @@ function query_all_assoc(Select $query) : array
 	return $data;
 }
 
+function query_first_column(Select $query) : array
+{
+	$data = [];
+	for($query->rewind(); $query->valid(); $query->next()) {
+		$r = $query->current();
+		$data[] = reset($r);
+	}
+	return $data;
+}
+
 class ActionKind {
 	public const Message          =  1;
 	public const StatusChange     =  2;
