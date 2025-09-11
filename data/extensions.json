@@ -1,4 +1,12 @@
 {
+    "convert": {
+        "Library": {
+            "OldSupport": "IPS\\vssupport\\extensions\\convert\\Library\\OldSupport"
+        },
+        "Software": {
+            "OldSupport": "IPS\\vssupport\\extensions\\convert\\Software\\OldSupport"
+        }
+    },
     "core": {
         "EditorLocations": {
             "TicketText": "IPS\\vssupport\\extensions\\core\\EditorLocations\\TicketText"

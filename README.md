@@ -21,6 +21,13 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- Notifications / Emails for
 			- New responses
 			- Newly created tickets if the issuer is not logged in
+	- Migration tool to transfer Invision Community 4 tickets 
+		- Categories (prev. Departments)
+		- Stati
+		- Tickets
+			- Attributes (Category, Priority, Status, Assigned Staff)
+			- Messages, including Internal Notes
+			- some of the Action log
 	- Frontend module
 		- Create new tickets (also possible as guest)
 		- Inspect individual tickets
@@ -75,7 +82,8 @@ Without leaving the ticket for most actions.
 - GitHub linking
 - GitLab linking
 - Admin bulk actions
-- Migration from ivc4 builtin tickets
+- Migrate user settings
+- Migrate ticket attachments
 - Option to delete open tickets when issuer gets deleted.
 - Link from user profile to their tickets.
 - Better user change tracking
@@ -84,6 +92,9 @@ Without leaving the ticket for most actions.
 - Invertible message flow in the backend (configurable)
 - Add disclaimer field on ticket entry
 - Hide the secondary menu when viewing tickets in the backend
+- Use translatable form helper for category / status?
+- Use flags for "is closing status"
+- empty_local_data ?
 
 ## License
 

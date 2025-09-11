@@ -87,6 +87,21 @@ $lang = array(
 	'r__categories_manage' => 'Can manage Categories?',
 	'r__stati_manage' => 'Can manage Stati?',
 
+	'vssupport_pre_convert_notice' => 'This conversion expects a fresh installation of the new support system. Specifically tickets might fail to convert if others are already present, because of collisions in the new hashes. For now hash collisions have to be manually resolved in the database, should they occur.',
+
+	'convert_categories' => 'Convert Categories',
+	'_convert_categories' => 'Categories',
+	'convert_stati' => 'Convert Stati',
+	'_convert_stati' => 'Stati',
+	'convert_tickets' => 'Convert Tickets',
+	'_convert_tickets' => 'Tickets',
+	'convert_messages' => 'Convert Messages',
+	'_convert_messages' => 'Messages',
+	'convert_actions' => 'Convert Actions',
+	'_convert_actions' => 'Actions',
+
+	'vssupport_convert_failed_to_look_up_user' => 'Failed to find a old member in the new database.',
+
 	'ticket_prio_-2_name' => 'Backlog',
 	'ticket_prio_-1_name' => 'Below Average',
 	'ticket_prio_0_name'  => 'Normal',
