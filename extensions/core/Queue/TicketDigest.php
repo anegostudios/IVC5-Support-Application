@@ -52,7 +52,7 @@ class TicketDigest extends \IPS\Extensions\QueueAbstract
 		try {
 		$query = query_all(Moderators::select($db, 'm.*', 'm.member_id > '.$offset, 'm.member_id ASC', 10));
 		foreach($query as $row) {
-			$assignedAndOpen = query_all($db->select('t.id, t.subject, t.priority, t.created, s.name_key AS status, c.name_key as category',
+			$assignedAndOpen = query_all($db->select('t.id, t.subject, t.priority, t.created, t.status, t.category',
 				['vssupport_tickets', 't'], "$ticketOpenQuery AND t.assigned_to = {$row['member_id']}", $orderByLastAction)
 				->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
 				->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')

@@ -102,12 +102,11 @@ class UrlReflection {
 
 class TicketStatus {
 	public const Open         = 0;
-	public const InProgress   = 2;
-	public const Halted       = 5;
-	public const Completed    = 8;
-	public const WontFix      = 8 + 1;
-	public const __FLAG_CLOSED = 8;
 	public const __MAX_BUILTIN = 15;
+}
+
+class StatusFlags {
+	public const TicketClosed = 1 << 0;
 }
 
 

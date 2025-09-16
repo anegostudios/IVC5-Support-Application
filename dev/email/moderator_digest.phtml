@@ -9,7 +9,7 @@
 {$email->language->addToStack('mail_part__ticket_description', options: ['sprintf' => [
 	$ticket['created'],
 	$email->language->addToStack('ticket_status_'.$ticket['status'].'_name', options: ['escape' => 1]),
-	$email->language->addToStack('ticket_cat_'.$ticket['category'].'_name', options: ['escape' => 1]),
+	$email->language->addToStack('ticket_category_'.$ticket['category'].'_name', options: ['escape' => 1]),
 	$email->language->addToStack('ticket_prio_'.$ticket['priority'].'_name', options: ['escape' => 1]),
 ]])}
 </p>

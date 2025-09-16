@@ -92,7 +92,6 @@ Without leaving the ticket for most actions.
 - Invertible message flow in the backend (configurable)
 - Add disclaimer field on ticket entry
 - Hide the secondary menu when viewing tickets in the backend
-- Use translatable form helper for category / status?
 - Use flags for "is closing status"
 - empty_local_data ?
 - Note latest reply in moderator digest email

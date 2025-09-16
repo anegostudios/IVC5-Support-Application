@@ -11,7 +11,7 @@
 {$email->language->addToStack('mail_part__ticket_description_plain', options: ['sprintf' => [
 	$ticket['created'],
 	$email->language->addToStack('ticket_status_'.$ticket['status'].'_name'),
-	$email->language->addToStack('ticket_cat_'.$ticket['category'].'_name'),
+	$email->language->addToStack('ticket_category_'.$ticket['category'].'_name'),
 	$email->language->addToStack('ticket_prio_'.$ticket['priority'].'_name'),
 ]])}
 

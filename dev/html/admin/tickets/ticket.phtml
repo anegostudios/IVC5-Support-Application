@@ -1,6 +1,6 @@
 <ips:template parameters="$ticket, $actions, $form, $extraBlocks"/>
 <h2 class="ipsTitle ipsTitle--h2">{lang="ticket"} #{$ticket['id']} - {$ticket['subject']}</h2>
-<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_cat_{$ticket['category_name']}_name"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}, {lang="ticket_status_{$ticket['status_name']}_name"}{{if $ticket['assigned_to']}}, {lang="assigned_to"}:&nbsp;{$ticket['assigned_to_name']}{{endif}}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}}</h3>
+<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_category_{$ticket['category']}_name"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}, {lang="ticket_status_{$ticket['status']}_name"}{{if $ticket['assigned_to']}}, {lang="assigned_to"}:&nbsp;{$ticket['assigned_to_name']}{{endif}}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}}</h3>
 <h4 class="ipsTitle ipsTitle--h4">{$ticket['issuer_name']} - {$ticket['issuer_email']} <span class="i-color_soft">started <i class="fa-solid fa-clock"></i>&nbsp;{$ticket['created']}</span></h4>
 <div id="tick-main-wrap">
 	<div style="display: flex; flex-direction: column; gap: 1em;">

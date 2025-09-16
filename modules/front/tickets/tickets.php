@@ -12,6 +12,7 @@ use IPS\Http\Url;
 use IPS\Request;
 use IPS\vssupport\ActionKind;
 use IPS\vssupport\MessageFlags;
+use IPS\vssupport\StatusFlags;
 use IPS\vssupport\TicketFlags;
 use IPS\vssupport\TicketStatus;
 
@@ -43,9 +44,8 @@ class tickets extends Controller
 		$theme = Theme::i();
 
 		$tickets = query_all(
-			$db->select('t.id, t.subject, t.priority, t.created, t.flags, HEX(t.hash) AS hash, c.name_key as category, s.name_key as status', ['vssupport_tickets', 't'], 't.issuer_id = '.($member->member_id ?? 0))
-			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
-			->join(['vssupport_ticket_stati', 's'], 'c.id = t.status')
+			$db->select('t.id, t.subject, t.priority, t.created, t.flags, HEX(t.hash) AS hash, t.category', ['vssupport_tickets', 't'], 't.issuer_id = '.($member->member_id ?? 0).' AND !(s.flags & '.StatusFlags::TicketClosed.')')
+			->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
 		);
 
 		$output->title = $lang->addToStack('tickets');
@@ -61,7 +61,7 @@ class tickets extends Controller
 		$output = Output::i();
 		$db = Db::i();
 
-		$categories = query_all_assoc($db->select("id, CONCAT('ticket_cat_', name_key, '_name')", 'vssupport_ticket_categories'));
+		$categories = query_all_assoc($db->select("id, CONCAT('ticket_category_', id, '_name')", 'vssupport_ticket_categories'));
 
 		$form = new Form(submitLang: 'ticket_submit');
 		if(!$member->member_id) {
@@ -129,8 +129,7 @@ class tickets extends Controller
 		$request = Request::i();
 
 		$ticket = query_one(
-			$db->select('t.*, t.id, HEX(hash) AS hash, c.name_key as category, s.name_key as status_name', ['vssupport_tickets', 't'], ['hash = UNHEX(?)', $request->hash])
-			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
+			$db->select('t.*, t.id, HEX(hash) AS hash, s.flags AS status_flags', ['vssupport_tickets', 't'], ['hash = UNHEX(?)', $request->hash])
 			->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
 		);
 		if(!$ticket) {
@@ -167,7 +166,7 @@ class tickets extends Controller
 	
 				File::claimAttachments($autoSaveKey, $ticket['id'], $messageId);
 
-				if($ticket['status'] & TicketStatus::__FLAG_CLOSED) {
+				if($ticket['status_flags'] & StatusFlags::TicketClosed) {
 					$db->update('vssupport_tickets', ['status' => TicketStatus::Open]);
 					log_ticket_action($db, $ticket['id'], ActionKind::StatusChange, $member->member_id ?? 0, TicketStatus::Open);
 				}
@@ -176,7 +175,7 @@ class tickets extends Controller
 				return;
 			}
 			else {
-				if($ticket['status'] & TicketStatus::__FLAG_CLOSED) {
+				if($ticket['status_flags'] & StatusFlags::TicketClosed) {
 					$notice = htmlspecialchars($member->language()->addToStack('ticked_considered_closed_notice'), ENT_DISALLOWED, 'UTF-8', FALSE);
 					array_unshift($form->actionButtons, "<div>$notice</div>");
 				}
@@ -187,12 +186,10 @@ class tickets extends Controller
 		$theme = Theme::i();
 
 		$actions = query_all(
-			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, IFNULL(c.name_key, s.name_key) AS name_key, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'],
+			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'],
 				where: 'a.ticket = '.$ticket['id'].' AND !(IFNULL(m.flags, 0) & '.MessageFlags::Internal.')', order: 'a.created ASC')
 			->join(['core_members', 'u'], 'u.member_id = a.initiator')
 			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
-			->join(['vssupport_ticket_categories', 'c'], 'c.id = a.reference_id AND a.kind = '.ActionKind::CategoryChange)
-			->join(['vssupport_ticket_stati', 's'], 's.id = a.reference_id AND a.kind = '.ActionKind::StatusChange)
 			->join(['core_members', 'as'], 'as.member_id = a.reference_id AND a.kind = '.ActionKind::Assigned)
 		);
 		foreach($actions as &$action) {

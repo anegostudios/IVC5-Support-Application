@@ -298,18 +298,6 @@
                 "default": null,
                 "auto_increment": true,
                 "comment": "ID Number"
-            },
-            "name_key": {
-                "name": "name_key",
-                "type": "TINYTEXT",
-                "length": null,
-                "decimals": null,
-                "values": null,
-                "allow_null": false,
-                "default": null,
-                "comment": "",
-                "unsigned": false,
-                "auto_increment": false
             }
         },
         "indexes": {
@@ -326,12 +314,10 @@
         },
         "inserts": [
             {
-                "id": "1",
-                "name_key": "cat1"
+                "id": "1"
             },
             {
-                "id": "2",
-                "name_key": "cat2"
+                "id": "2"
             }
         ]
     },
@@ -461,27 +447,27 @@
         "name": "vssupport_ticket_stati",
         "columns": {
             "id": {
+                "allow_null": false,
+                "auto_increment": true,
+                "comment": "",
+                "decimals": null,
+                "default": null,
+                "length": 20,
                 "name": "id",
                 "type": "BIGINT",
-                "length": "20",
+                "unsigned": true,
+                "values": []
+            },
+            "flags": {
+                "name": "flags",
+                "type": "TINYINT",
+                "length": 3,
                 "decimals": null,
-                "values": null,
+                "values": [],
                 "allow_null": false,
                 "default": 0,
                 "comment": "",
                 "unsigned": true,
-                "auto_increment": true
-            },
-            "name_key": {
-                "name": "name_key",
-                "type": "TINYTEXT",
-                "length": null,
-                "decimals": null,
-                "values": null,
-                "allow_null": false,
-                "default": null,
-                "comment": "",
-                "unsigned": false,
                 "auto_increment": false
             }
         },
@@ -489,38 +475,35 @@
             "PRIMARY": {
                 "type": "primary",
                 "name": "PRIMARY",
-                "columns": [
-                    "id"
-                ],
                 "length": [
                     null
+                ],
+                "columns": [
+                    "id"
                 ]
             }
         },
+        "collation": "utf8mb4_unicode_ci",
         "inserts": [
             {
                 "id": "0",
-                "name_key": "open"
-            },
-            {
-                "id": "2",
-                "name_key": "processing"
-            },
-            {
-                "id": "5",
-                "name_key": "halted"
-            },
-            {
-                "id": "8",
-                "name_key": "completed"
-            },
-            {
-                "id": "9",
-                "name_key": "wontfix"
+                "flags": "0"
             },
             {
                 "id": "16",
-                "name_key": "custom"
+                "flags": "0"
+            },
+            {
+                "id": "17",
+                "flags": "0"
+            },
+            {
+                "id": "18",
+                "flags": "1"
+            },
+            {
+                "id": "19",
+                "flags": "1"
             }
         ]
     }

@@ -8,8 +8,10 @@ use IPS\Theme;
 use IPS\Output;
 use IPS\Helpers;
 use IPS\Http\Url;
+use IPS\Lang;
 use IPS\Request;
 use IPS\Session;
+use IPS\vssupport\StatusFlags;
 use IPS\vssupport\TicketStatus;
 
 use function defined;
@@ -45,19 +47,26 @@ class stati extends Controller
 		//$table->langPrefix = 'stati_';
 		$table->keyField = 'id';
 
-		$table->include = ['name_key', 'translated_name', 'is_closing_status'];
+		$table->include = ['name', 'is_closing_status', 'tickets_count'];
 
-		$table->parsers['translated_name'] = function($val, $row) {
-			return Member::loggedIn()->language()->addToStack("ticket_status_{$row['name_key']}_name");
+		$table->joins['tickets_count'] = [
+			'select'=> 'tickets_count',
+			'from'  => Db::i()->select('status, count(*) as tickets_count', 'vssupport_tickets', group: 'status'),
+			'where' => 'status = vssupport_ticket_stati.id',
+			'type'  => 'LEFT'
+		];
+
+		$table->parsers['name'] = function($val, $row) {
+			return Member::loggedIn()->language()->addToStack("ticket_status_{$row['id']}_name");
 		};
 		$table->parsers['is_closing_status'] = function($val, $row) {
-			$ico = ($row['id'] & TicketStatus::__FLAG_CLOSED) ? 'fa-check': 'fa-times';
+			$ico = ($row['flags'] & StatusFlags::TicketClosed) ? 'fa-check': 'fa-times';
 			return "<i class='fa-fw fa-solid $ico'></i>";
 		};
 
-		$table->quickSearch = function($string) {
-			return Db::i()->like('name_key', $string, TRUE, TRUE, \IPS\core\extensions\core\LiveSearch\Members::canPerformInlineSearch());
-		};
+		// $table->quickSearch = function($string) {
+		// 	return Db::i()->like('name_key', $string, TRUE, TRUE, \IPS\core\extensions\core\LiveSearch\Members::canPerformInlineSearch());
+		// };
 
 		$table->rootButtons = [[
 			'icon' => 'plus-circle',
@@ -88,30 +97,33 @@ class stati extends Controller
 
 		$output->title = $lang->addToStack('stati');
 		$output->breadcrumb[] = [null, $lang->addToStack('stati')];
-		// No way to make the wide table work properly via classes, so this template just wraps it in overflow auto.
-		$output->output = $theme->getTemplate('tickets')->list($table);
+		$output->output .= $table;
 	}
 
 	public function edit() : void
 	{
-		$statusId = intval(Request::i()->id);
+		$request = Request::i();
+		$statusId = intval($request->id);
 		$output = Output::i();
 		$db = Db::i();
 
 		$form = new Helpers\Form(submitLang: $statusId ? 'save' : 'status_add');
-		$oldVal = null;
-		if($statusId && empty(Request::i()->status_name_key)) {
-			$oldVal = query_one($db->select('name_key', 'vssupport_ticket_stati', 'id = '.$statusId));
+		$form->add(new Helpers\Form\Translatable('name', required: true, options: ['app' => 'vssupport', 'key' => $statusId ? "ticket_status_{$statusId}_name" : null]));
+		$isClosingStatus = false;
+		if($statusId && !$request->form_submitted) {
+			$isClosingStatus = boolval(query_one($db->select('flags', 'vssupport_ticket_stati', 'id = '.$statusId)) & StatusFlags::TicketClosed);
 		}
-		$form->add(new Helpers\Form\Text('status_name_key', defaultValue: $oldVal, required: true));
+		$form->add(new Helpers\Form\YesNo('is_closing_status', defaultValue: $isClosingStatus, required: true));
 
 		if($values = $form->values()) {
+			$data = ['flags' => $values['is_closing_status'] ? StatusFlags::TicketClosed : 0];
 			if($statusId) { // editing existing
-				$db->update('vssupport_ticket_stati', ['name_key' => $values['status_name_key']], 'id = '.$statusId);
+				$db->update('vssupport_ticket_stati', $data, 'id = '.$statusId);
 			}
 			else { // create new
-				$db->insert('vssupport_ticket_stati', ['name_key' => $values['status_name_key']]);
+				$statusId = $db->insert('vssupport_ticket_stati', $data);
 			}
+			Lang::saveCustom('vssupport', "ticket_status_{$statusId}_name", $values['name']);
 
 			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=stati'), $statusId ? 'saved' : 'created');
 			return;
@@ -145,7 +157,7 @@ class stati extends Controller
 		if(query_one($db->select('COUNT(*)', ['vssupport_tickets', 't'], 't.status = '.$statusId)) > 0) {
 			$form = new Helpers\Form(submitLang: 'transfer_and_delete');
 
-			$otherStati = query_all_assoc($db->select("id, CONCAT('ticket_status_', name_key, '_name')", 'vssupport_ticket_stati', 'id != '.$statusId));
+			$otherStati = query_all_assoc($db->select("id, CONCAT('ticket_status_', id, '_name')", 'vssupport_ticket_stati', 'id != '.$statusId));
 			$form->addMessage('status_replacement_notice');
 			$form->add(new Helpers\Form\Select('status_replacement', required: true, options: ['options' => $otherStati]));
 

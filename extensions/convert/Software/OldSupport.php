@@ -3,6 +3,7 @@
 use IPS\convert\App;
 use IPS\convert\Library;
 use IPS\convert\Software as ConverterSoftware;
+use IPS\Member;
 
 use function IPS\vssupport\query_one;
 
@@ -149,11 +150,16 @@ class OldSupport extends ConverterSoftware
 		$libraryClass = $this->getLibrary();
 		$libraryClass::setKey('dpt_id');
 
-		$q = $this->fetch(['nexus_support_departments', 'd'], 'dpt_id', null, 'd.dpt_id, IFNULL(d.dpt_name, w.word_default) AS dpt_name')
-			//:TranslatedField
-			->join(['core_sys_lang_words', 'w'], "d.dpt_name IS NULL AND w.lang_id = (SELECT lang_id FROM {$this->db->prefix}core_sys_lang WHERE lang_short = 'english' LIMIT 1) AND w.word_key = CONCAT('nexus_department_', d.dpt_id)");
+		$currentLang = Member::loggedIn()->language();
+		$langMap = [];
+
+		$q = $this->fetch(['nexus_support_departments', 'd'], 'dpt_id', null, 'd.dpt_id, l.lang_id, IFNULL(w.word_default, d.dpt_name) AS word_default, w.word_custom')
+			// Default stati don't actually use the database rows, but use translation keys (just as we do), so we need to fallback to those.
+			// :TranslatedField
+			->join(['core_sys_lang', 'l'], ["l.lang_short = ?", $currentLang->short])
+			->join(['core_sys_lang_words', 'w'], "w.lang_id = l.lang_id AND w.word_key = CONCAT('nexus_department_', d.dpt_id)");
 		foreach($q as $row) {
-			$libraryClass->convertCategory($row);
+			$libraryClass->convertCategory($currentLang, $langMap, $row, $this->db);
 			$libraryClass->setLastKeyValue($row['dpt_id']);
 		}
 	}
@@ -163,11 +169,15 @@ class OldSupport extends ConverterSoftware
 		$libraryClass = $this->getLibrary();
 		$libraryClass::setKey('status_id');
 
-		$q = $this->fetch(['nexus_support_statuses', 's'], 'status_id', null, 's.status_id, IFNULL(s.status_name, w.word_default) AS status_name')
-			// Default stati don't actually use the database rows, but use translation keys (just as we do), so we need to fallback to those. :TranslatedField
-			->join(['core_sys_lang_words', 'w'], "s.status_name IS NULL AND w.lang_id = (SELECT lang_id FROM {$this->db->prefix}core_sys_lang WHERE lang_short = 'english' LIMIT 1) AND w.word_key = CONCAT('nexus_status_', s.status_id,'_admin')");
+		$currentLang = Member::loggedIn()->language();
+		$langMap = [];
+
+		$q = $this->fetch(['nexus_support_statuses', 's'], 'status_id', null, 's.status_id, IFNULL(w.word_default, s.status_name) AS word_default, w.word_custom')
+			//:TranslatedField
+			->join(['core_sys_lang', 'l'], ["l.lang_short = ?", $currentLang->short])
+			->join(['core_sys_lang_words', 'w'], "w.lang_id = l.lang_id AND w.word_key = CONCAT('nexus_status_', s.status_id, '_admin')");
 		foreach($q as $row) {
-			$libraryClass->convertStatus($row);
+			$libraryClass->convertStatus($currentLang, $langMap, $row, $this->db);
 			$libraryClass->setLastKeyValue($row['status_id']);
 		}
 	}

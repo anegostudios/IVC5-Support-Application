@@ -17,6 +17,7 @@ use IPS\Request;
 use IPS\vssupport\ActionKind;
 use IPS\vssupport\Message;
 use IPS\vssupport\MessageFlags;
+use IPS\vssupport\StatusFlags;
 use IPS\vssupport\TicketFlags;
 
 use function IPS\vssupport\query_all;
@@ -59,16 +60,6 @@ class tickets extends Controller
 		$table->mainColumn = 'created';
 
 		$table->joins = [[
-			'select'=> 'c.name_key as category',
-			'from'  => ['vssupport_ticket_categories', 'c'],
-			'where' => 'c.id = vssupport_tickets.category',
-			'type'  => 'LEFT'
-		], [
-			'select'=> 's.name_key as status',
-			'from'  => ['vssupport_ticket_stati', 's'],
-			'where' => 's.id = vssupport_tickets.status',
-			'type'  => 'LEFT'
-		], [
 			'select'=> 'm.name as assigned_to',
 			'from'  => ['core_members', 'm'],
 			'where' => 'm.member_id = vssupport_tickets.assigned_to',
@@ -93,7 +84,7 @@ class tickets extends Controller
 		$table->parsers = [
 			'ticket' => function($val, $row) {
 				$subject = htmlspecialchars($row['subject'], ENT_DISALLOWED, 'UTF-8', FALSE);
-				$category = Member::loggedIn()->language()->addToStack("ticket_cat_{$row['category']}_name", options: ['escape' => 1]);
+				$category = Member::loggedIn()->language()->addToStack("ticket_category_{$row['category']}_name", options: ['escape' => 1]);
 				return <<<HTML
 					<div>
 						<h4>{$subject}&nbsp;<small class="i-color_soft">#{$row['id']}</small></h4>
@@ -157,13 +148,13 @@ class tickets extends Controller
 				$priorities[$p] = "ticket_prio_{$p}_name";
 			}
 
-			$q = $db->select('id, name_key', 'vssupport_ticket_categories');
+			$q = $db->select('id', 'vssupport_ticket_categories');
 			foreach($q as $r) {
-				$categories[$r['id']] = "ticket_cat_{$r['name_key']}_name";
+				$categories[$r['id']] = "ticket_category_{$r['id']}_name";
 			}
-			$q = $db->select('id, name_key', 'vssupport_ticket_stati');
+			$q = $db->select('id', 'vssupport_ticket_stati');
 			foreach($q as $r) {
-				$stati[$r['id']] = "ticket_status_{$r['name_key']}_name";
+				$stati[$r['id']] = "ticket_status_{$r['id']}_name";
 			}
 
 			$table->advancedSearch = [
@@ -232,8 +223,7 @@ class tickets extends Controller
 		$ticketId = intval($request->id);
 
 		$ticket = query_one(
-			$db->select('t.*, c.name_key AS category_name, s.name_key as status_name, u.name AS assigned_to_name', ['vssupport_tickets', 't'], 't.id = '.$ticketId)
-			->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
+			$db->select('t.*, u.name AS assigned_to_name', ['vssupport_tickets', 't'], 't.id = '.$ticketId)
 			->join(['core_members', 'u'], 'u.member_id = t.assigned_to')
 			->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
 		);
@@ -243,11 +233,9 @@ class tickets extends Controller
 		}
 
 		$actions = query_all(
-			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, IFNULL(c.name_key, s.name_key) AS name_key, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
+			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
 			->join(['core_members', 'u'], 'u.member_id = a.initiator')
 			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
-			->join(['vssupport_ticket_categories', 'c'], 'c.id = a.reference_id AND a.kind = '.ActionKind::CategoryChange)
-			->join(['vssupport_ticket_stati', 's'], 's.id = a.reference_id AND a.kind = '.ActionKind::StatusChange)
 			->join(['core_members', 'as'], 'as.member_id = a.reference_id AND a.kind = '.ActionKind::Assigned)
 		);
 		
@@ -378,9 +366,9 @@ class tickets extends Controller
 			$lang = Member::loggedIn()->language();
 
 			{
-				$categories = query_all_assoc($db->select("id, name_key", 'vssupport_ticket_categories'));
+				$categories = query_all_assoc($db->select("id, 1", 'vssupport_ticket_categories'));
 				foreach($categories as $catId => &$cat) {
-					$cat = htmlspecialchars($lang->addToStack("ticket_cat_{$cat}_name"), ENT_DISALLOWED, 'UTF-8', FALSE);
+					$cat = htmlspecialchars($lang->addToStack("ticket_category_{$catId}_name"), ENT_DISALLOWED, 'UTF-8', FALSE);
 					if($catId === $ticket['category'])  $cat .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
 				}
 				unset($cat);
@@ -419,9 +407,11 @@ class tickets extends Controller
 				$form->actionButtons[] = "<span title='$title' class='i-flex_00'>$select</span>";
 			}
 			{
-				$stati = query_all_assoc($db->select("id, name_key", 'vssupport_ticket_stati'));
+				$stati = query_all_assoc($db->select("id, flags", 'vssupport_ticket_stati'));
 				foreach($stati as $statusId => &$status) {
-					$status = htmlspecialchars($lang->addToStack("ticket_status_{$status}_name"), ENT_DISALLOWED, 'UTF-8', FALSE);
+					$flags = $status;
+					$status = htmlspecialchars($lang->addToStack("ticket_status_{$statusId}_name"), ENT_DISALLOWED, 'UTF-8', FALSE);
+					if($flags & StatusFlags::TicketClosed)  $status .= ' [C]';
 					if($statusId === $ticket['status'])  $status .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
 				}
 				unset($status);

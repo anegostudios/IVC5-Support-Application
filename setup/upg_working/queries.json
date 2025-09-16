@@ -270,18 +270,6 @@
                         "default": null,
                         "auto_increment": true,
                         "comment": "ID Number"
-                    },
-                    "name_key": {
-                        "name": "name_key",
-                        "type": "TINYTEXT",
-                        "length": null,
-                        "decimals": null,
-                        "values": null,
-                        "allow_null": false,
-                        "default": null,
-                        "comment": "",
-                        "unsigned": false,
-                        "auto_increment": false
                     }
                 },
                 "indexes": {
@@ -582,18 +570,6 @@
             {
                 "name": "vssupport_ticket_stati",
                 "columns": {
-                    "name_key": {
-                        "name": "name_key",
-                        "type": "TINYTEXT",
-                        "length": null,
-                        "decimals": null,
-                        "values": null,
-                        "allow_null": false,
-                        "default": null,
-                        "comment": "",
-                        "unsigned": false,
-                        "auto_increment": false
-                    },
                     "id": {
                         "name": "id",
                         "type": "BIGINT",
@@ -605,6 +581,18 @@
                         "comment": "",
                         "unsigned": true,
                         "auto_increment": true
+                    },
+                    "flags": {
+                        "name": "flags",
+                        "type": "TINYINT",
+                        "length": 3,
+                        "decimals": null,
+                        "values": [],
+                        "allow_null": false,
+                        "default": 0,
+                        "comment": "",
+                        "unsigned": true,
+                        "auto_increment": false
                     }
                 },
                 "indexes": {

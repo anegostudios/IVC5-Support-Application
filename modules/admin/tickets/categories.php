@@ -8,6 +8,7 @@ use IPS\Theme;
 use IPS\Output;
 use IPS\Helpers;
 use IPS\Http\Url;
+use IPS\Lang;
 use IPS\Request;
 use IPS\Session;
 
@@ -44,15 +45,22 @@ class categories extends Controller
 		//$table->langPrefix = 'category_';
 		$table->keyField = 'id';
 
-		$table->include = ['name_key', 'translated_name'];
+		$table->include = ['name', 'tickets_count'];
 
-		$table->parsers['translated_name'] = function($val, $row) {
-			return Member::loggedIn()->language()->addToStack("ticket_cat_{$row['name_key']}_name");
+		$table->joins['tickets_count'] = [
+			'select'=> 'tickets_count',
+			'from'  => Db::i()->select('category, count(*) as tickets_count', 'vssupport_tickets', group: 'category'),
+			'where' => 'category = vssupport_ticket_categories.id',
+			'type'  => 'LEFT'
+		];
+
+		$table->parsers['name'] = function($val, $row) {
+			return Member::loggedIn()->language()->addToStack("ticket_category_{$row['id']}_name");
 		};
 
-		$table->quickSearch = function($string) {
-			return Db::i()->like('name_key', $string, TRUE, TRUE, \IPS\core\extensions\core\LiveSearch\Members::canPerformInlineSearch());
-		};
+		// $table->quickSearch = function($string) {
+		// 	return Db::i()->like('name_key', $string, TRUE, TRUE, \IPS\core\extensions\core\LiveSearch\Members::canPerformInlineSearch());
+		// };
 
 		$table->rootButtons = [[
 			'icon'  => 'plus-circle',
@@ -80,8 +88,7 @@ class categories extends Controller
 
 		$output->title = $lang->addToStack('categories');
 		$output->breadcrumb[] = [null, $lang->addToStack('categories')];
-		// No way to make the wide table work properly via classes, so this template just wraps it in overflow auto.
-		$output->output = $theme->getTemplate('tickets')->list($table);
+		$output->output .= $table;
 	}
 
 	public function edit() : void
@@ -91,19 +98,13 @@ class categories extends Controller
 		$db = Db::i();
 
 		$form = new Helpers\Form(submitLang: $categoryId ? 'save' : 'category_add');
-		$oldVal = null;
-		if($categoryId && empty(Request::i()->category_name_key)) {
-			$oldVal = query_one($db->select('name_key', 'vssupport_ticket_categories', 'id = '.$categoryId));
-		}
-		$form->add(new Helpers\Form\Text('category_name_key', defaultValue: $oldVal, required: true));
+		$form->add(new Helpers\Form\Translatable('name', required: true, options: ['app' => 'vssupport', 'key' => $categoryId ? "ticket_category_{$categoryId}_name" : null]));
 
 		if($values = $form->values()) {
-			if($categoryId) { // editing existing
-				$db->update('vssupport_ticket_categories', ['name_key' => $values['category_name_key']], 'id = '.$categoryId);
+			if(!$categoryId) { // create new
+				$categoryId = $db->insert('vssupport_ticket_categories', []);
 			}
-			else { // create new
-				$db->insert('vssupport_ticket_categories', ['name_key' => $values['category_name_key']]);
-			}
+			Lang::saveCustom('vssupport', "ticket_category_{$categoryId}_name", $values['name']);
 
 			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=categories'), $categoryId ? 'saved' : 'created');
 			return;
@@ -133,7 +134,7 @@ class categories extends Controller
 		if(query_one($db->select('COUNT(*)', ['vssupport_tickets', 't'], 't.category = '.$categoryId)) > 0) {
 			$form = new Helpers\Form(submitLang: 'transfer_and_delete');
 
-			$otherCategories = query_all_assoc($db->select("id, CONCAT('ticket_cat_', name_key, '_name')", 'vssupport_ticket_categories', 'id != '.$categoryId));
+			$otherCategories = query_all_assoc($db->select("id, CONCAT('ticket_category_', id, '_name')", 'vssupport_ticket_categories', 'id != '.$categoryId));
 			$form->addMessage('category_replacement_notice');
 			$form->add(new Helpers\Form\Select('category_replacement', required: true, options: ['options' => $otherCategories]));
 

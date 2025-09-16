@@ -3,6 +3,7 @@
 use IPS\convert\App;
 use \IPS\convert\Library as CoreLibrary;
 use IPS\Db;
+use IPS\Lang;
 use IPS\vssupport\ActionKind;
 use IPS\vssupport\MessageFlags;
 use IPS\vssupport\TicketFlags;
@@ -126,8 +127,8 @@ class OldSupport extends CoreLibrary
 
 		
 		switch($method) {
-			case 'convertCategories': return ['vssupport_ticket_categories' => null];
-			case 'convertStati':      return ['vssupport_ticket_stati' => 'id > '.TicketStatus::__MAX_BUILTIN];
+			case 'convertCategories': return ['vssupport_ticket_categories' => null]; // TODO(Rennorb) @correctness: Should this truncate the language tables ? 
+			case 'convertStati':      return ['vssupport_ticket_stati' => 'id > '.TicketStatus::__MAX_BUILTIN]; // TODO(Rennorb) @correctness: Should this truncate the language tables ?
 			case 'convertTickets':    return ['vssupport_tickets' => null, 'vssupport_messages' => null, 'vssupport_ticket_action_history' => null];
 			case 'convertMessages':   return ['vssupport_messages' => null];
 			case 'convertActions':    return ['vssupport_ticket_action_history' => null];
@@ -136,24 +137,103 @@ class OldSupport extends CoreLibrary
 		return [];
 	}
 	
-	public function convertCategory(array $row)
+	public function convertCategory(Lang $currentLang, array &$localLanguageMap, array $row, Db $remoteDatabase)
 	{
 		$db = Db::i();
-		$name_key = str_replace(' ', '_', mb_strtolower($row['dpt_name']));
-		$newId = query_one($db->select('id', 'vssupport_ticket_categories', ['name_key = ?', $name_key])) // merge if easily possible
-		 ?: $db->insert('vssupport_ticket_categories', ['name_key' => $name_key]);
+
+		//TODO(Rennorb) @correctness: Validate that all languages match before considering mergeable. :MultiLangMerge
+		// In theory we should only consider the merge if all languages have the same values, but that seems extremely complicated for little gain.
+
+		$mergeCandidate = query_one($db->select('w.word_key', ['core_sys_lang_words', 'w'], [
+			["word_app = 'vssupport'"],
+			['lang_short = ?', $currentLang->short],
+			['word_default = ?', $row['word_default']],
+			['word_custom = ?', $row['word_custom']]
+		]));
+		if($mergeCandidate) {
+			$newId = substr($mergeCandidate, /*ticket_category_*/ 16, /*_name*/ -5);
+		}
+		else {
+			$newId = $db->insert('vssupport_ticket_categories', []);
+
+			$word_key = "ticket_category_{$newId}_name";
+			$valuesFolded = "(?, 'vssupport', '{$word_key}', ?, ?, ?)";
+			$binds = [$currentLang->id, $row['word_default'], $row['word_custom'], $row['word_custom'] !== null];
+
+			$extraLangs = $remoteDatabase->select('l.lang_short, IFNULL(w.word_default, d.dpt_name) AS word_default, w.word_custom', ['nexus_support_departments', 'd'], ['d.dpt_id = ?', $row['dpt_id']])
+				->join(['core_sys_lang_words', 'w'], ["w.lang_id != ? AND w.word_key = CONCAT('nexus_department_', d.dpt_id)", $row['lang_id']])
+				->join(['core_sys_lang', 'l'], "l.lang_id = w.lang_id");
+			foreach($extraLangs as $extraRow) {
+				$localLanguage = static::mapLanguage($db, $localLanguageMap, $extraRow['lang_short']);
+				if(!$localLanguage) {
+					$valuesFolded .= ", (?, 'vssupport', '{$word_key}', ?, ?, ?)";
+					array_push($binds, $localLanguage, $extraRow['word_default'], $extraRow['word_custom'], $extraRow['word_custom'] !== null);
+				}
+				//TODO(Rennorb) @debug: Log missing language
+			}
+
+			$db->preparedQuery(<<<SQL
+				INSERT INTO core_sys_lang_words (lang_id, word_app, word_key, word_default, word_custom, word_is_custom)
+					VALUES ($valuesFolded)
+				ON DUPLICATE KEY UPDATE
+					word_default = VALUES(word_default), word_custom = VALUES(word_custom), word_is_custom = VALUES(word_is_custom)
+			SQL, $binds);
+		}
 		$this->software->app->addLink($newId, $row['dpt_id'], 'vssupport_ticket_categories');
 	}
 
-	public function convertStatus(array $row)
+	public function convertStatus(Lang $currentLang, array &$localLanguageMap, array $row, Db $remoteDatabase)
 	{
 		$db = Db::i();
-		$name_key = str_replace(' ', '_', mb_strtolower($row['status_name']));
-		$newId = query_one($db->select('id', 'vssupport_ticket_stati', ['name_key = ?', $name_key])) // merge if easily possible
-			?: $db->insert('vssupport_ticket_stati', ['name_key' => $name_key]);
+
+		//TODO(Rennorb): :MultiLangMerge
+
+		$mergeCandidate = query_one($db->select('w.word_key', ['core_sys_lang_words', 'w'], [
+			["word_app = 'vssupport'"],
+			['lang_short = ?', $currentLang->short],
+			['word_default = ?', $row['word_default']],
+			['word_custom = ?', $row['word_custom']]
+		]));
+		if($mergeCandidate) {
+			$newId = substr($mergeCandidate, /*ticket_status_*/ 14, /*_name*/ -5);
+		}
+		else {
+			$newId = $db->insert('vssupport_ticket_stati', []);
+
+			$word_key = "ticket_status_{$newId}_name";
+			$valuesFolded = "(?, 'vssupport', '{$word_key}', ?, ?, ?)";
+			$binds = [$currentLang->id, $row['word_default'], $row['word_custom'], $row['word_custom'] !== null];
+
+			$extraLangs = $remoteDatabase->select('l.lang_short, IFNULL(w.word_default, s.status_name) AS word_default, w.word_custom', ['nexus_support_statuses', 's'], ['s.status_id = ?', $row['status_id']])
+				->join(['core_sys_lang_words', 'w'], ["w.lang_id != ? AND w.word_key = CONCAT('nexus_status_', s.status_id, '_admin')", $row['lang_id']])
+				->join(['core_sys_lang', 'l'], "l.lang_id = w.lang_id");
+			foreach($extraLangs as $extraRow) {
+				$localLanguage = static::mapLanguage($db, $localLanguageMap, $extraRow['lang_short']);
+				if(!$localLanguage) {
+					$valuesFolded .= ", (?, 'vssupport', '{$word_key}', ?, ?, ?)";
+					array_push($binds, $localLanguage, $extraRow['word_default'], $extraRow['word_custom'], $extraRow['word_custom'] !== null);
+				}
+				//TODO(Rennorb) @debug: Log missing language
+			}
+
+			$db->preparedQuery(<<<SQL
+				INSERT INTO core_sys_lang_words (lang_id, word_app, word_key, word_default, word_custom, word_is_custom)
+					VALUES ($valuesFolded)
+				ON DUPLICATE KEY UPDATE
+					word_default = VALUES(word_default), word_custom = VALUES(word_custom), word_is_custom = VALUES(word_is_custom)
+			SQL, $binds);
+		}
+		
 		$this->software->app->addLink($newId, $row['status_id'], 'vssupport_ticket_stati');
 	}
-	
+
+	static function mapLanguage(Db $db, array &$localLanguageMap, string $languageShort) : int
+	{
+		if(isset($localLanguageMap[$languageShort]))  return $localLanguageMap[$languageShort];
+
+		return $localLanguageMap[$languageShort] = intval(query_one($db->select('lang_id', 'core_sys_lang', ['lang_short = ?', $languageShort])));
+	}
+
 	// $severityDelta = 1 + SELECT MAX(sev_position) - MIN(sev_position) FROM nexus_support_severities
 	public function convertTicket(array $row, int $severityDelta)
 	{
