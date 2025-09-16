@@ -50,18 +50,6 @@
                 "unsigned": false,
                 "values": []
             },
-            "last_update_by": {
-                "name": "last_update_by",
-                "type": "INT",
-                "length": null,
-                "decimals": null,
-                "values": null,
-                "allow_null": false,
-                "default": 0,
-                "comment": "",
-                "unsigned": false,
-                "auto_increment": false
-            },
             "subject": {
                 "name": "subject",
                 "type": "TINYTEXT",
@@ -442,6 +430,18 @@
                 ],
                 "columns": [
                     "ticket"
+                ]
+            },
+            "ticket_by_created": {
+                "type": "key",
+                "name": "ticket_by_created",
+                "columns": [
+                    "ticket",
+                    "created"
+                ],
+                "length": [
+                    null,
+                    null
                 ]
             }
         },

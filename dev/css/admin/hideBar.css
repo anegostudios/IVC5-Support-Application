@@ -1,0 +1,19 @@
+#acpAppList > li.acpAppList_active .acpAppList__sub {
+	display: none;
+}
+
+#acpAppMenu {
+	--menu-width: 0;
+}
+#acpAppMenu:focus,
+#acpAppMenu:focus-within,
+#acpAppMenu:hover {
+	--menu-width: 200px;
+}
+
+
+#acpAppList > li.acpAppList_active:focus .acpAppList__sub,
+#acpAppList > li.acpAppList_active:focus-within .acpAppList__sub,
+#acpAppList > li.acpAppList_active:hover .acpAppList__sub {
+	display: block;
+}

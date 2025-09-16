@@ -45,6 +45,8 @@ class tickets extends Controller
 		$lang = Member::loggedIn()->language();
 		$output = Output::i();
 		$theme = Theme::i();
+		$request = Request::i();
+		$db = Db::i();
 
 		/* Some advanced search links may bring us here */
 		$output->bypassCsrfKeyCheck = true;
@@ -53,43 +55,94 @@ class tickets extends Controller
 		//$table->langPrefix = 'ticket_';
 		$table->keyField = 'id';
 
-		$table->include = ['id', 'created', 'priority', 'subject', 'category', 'status', 'issuer_name', 'issuer_email', 'assigned_to', 'last_update_at', 'last_update_by'];
+		$table->include = ['ticket', 'status', 'priority', 'assigned_to', 'created', 'last_update'];
 		$table->mainColumn = 'created';
 
 		$table->joins = [[
-			'select'=> 'vssupport_ticket_categories.name_key as category',
-			'from'  => 'vssupport_ticket_categories',
-			'where' => 'vssupport_ticket_categories.id = vssupport_tickets.category',
+			'select'=> 'c.name_key as category',
+			'from'  => ['vssupport_ticket_categories', 'c'],
+			'where' => 'c.id = vssupport_tickets.category',
 			'type'  => 'LEFT'
 		], [
-			'select'=> 'vssupport_ticket_stati.name_key as status',
-			'from'  => 'vssupport_ticket_stati',
-			'where' => 'vssupport_ticket_stati.id = vssupport_tickets.status',
+			'select'=> 's.name_key as status',
+			'from'  => ['vssupport_ticket_stati', 's'],
+			'where' => 's.id = vssupport_tickets.status',
 			'type'  => 'LEFT'
 		], [
-			'select'=> 'core_members.name as assigned_to',
-			'from'  => 'core_members',
-			'where' => 'core_members.member_id = vssupport_tickets.assigned_to',
+			'select'=> 'm.name as assigned_to',
+			'from'  => ['core_members', 'm'],
+			'where' => 'm.member_id = vssupport_tickets.assigned_to',
+			'type'  => 'LEFT'
+		], [
+			'select'=> 'la.last_update_at',
+			'from'  => $db->select('ticket, max(created) as last_update_at', ['vssupport_ticket_action_history', 'la'], group: 'ticket'), //NOTE(Rennorb): Due to the extremely questionable implementation of the query joiner this _has to be_ a select object...
+			'where' => 'la.ticket = vssupport_tickets.id',
+			'type'  => 'LEFT'
+		], [
+			//'select'=> 'a.initiator as last_update_by',
+			'from'  => ['vssupport_ticket_action_history', 'la2'],
+			'where' => 'la2.ticket = vssupport_tickets.id AND la2.created = la.last_update_at',
+			'type'  => 'LEFT'
+		], [
+			'select'=> 'lm.name as last_update_by_name',
+			'from'  => ['core_members', 'lm'],
+			'where' => 'lm.member_id = la2.initiator',
 			'type'  => 'LEFT'
 		]];
 
 		$table->parsers = [
-			'category' => function($val, $row) {
-				return Member::loggedIn()->language()->addToStack("ticket_cat_{$val}_name");
+			'ticket' => function($val, $row) {
+				$subject = htmlspecialchars($row['subject'], ENT_DISALLOWED, 'UTF-8', FALSE);
+				$category = Member::loggedIn()->language()->addToStack("ticket_cat_{$row['category']}_name", options: ['escape' => 1]);
+				return <<<HTML
+					<div>
+						<h4>{$subject}&nbsp;<small class="i-color_soft">#{$row['id']}</small></h4>
+						<small class="i-color_soft">{$category}</small>
+					</div>
+				HTML;
 			},
 			'status' => function($val, $row) {
 				return Member::loggedIn()->language()->addToStack("ticket_status_{$val}_name");
 			},
 			'priority' => function($val, $row) {
-				$text = Member::loggedIn()->language()->addToStack("ticket_prio_{$val}_name");
+				$text = Member::loggedIn()->language()->addToStack("ticket_prio_{$val}_name", options: ['escape' => 1]);
 				return "<span class='prio-label prio-$val'>$text</span>";
+			},
+			'created' => function($val, $row) {
+				$name = htmlspecialchars($row['issuer_name'], ENT_DISALLOWED, 'UTF-8', FALSE);
+				return <<<HTML
+					<div>
+						<p>{$name}</p>
+						<p><small class="i-color_soft">{$val}</small></p>
+					</div>
+				HTML;
+			},
+			'last_update' => function($val, $row) {
+				$name = htmlspecialchars($row['last_update_by_name'] ?: $row['issuer_name'], ENT_DISALLOWED, 'UTF-8', FALSE);
+				return <<<HTML
+					<div>
+						<p>{$name}</p>
+						<p><small class="i-color_soft">{$row['last_update_at']}</small></p>
+					</div>
+				HTML;
 			},
 		];
 
-		$table->primarySortBy = 'priority';
-		$table->primarySortDirection = 'desc';
+		if(!isset($table->sortBy)) {
+			$table->primarySortBy = 'priority';
+			$table->primarySortDirection = 'desc';
+		}
 
-		$table->sortBy = $table->sortBy ?: 'created';
+		//NOTE(Rennorb): I feel like the table->sortOptions should do this translation, but afaict those literally do nothing.
+		$sortTranslation = [
+			'ticket'      => 'vssupport_tickets.subject',
+			'status'      => 'vssupport_tickets.status',
+			'priority'    => 'vssupport_tickets.priority',
+			'assigned_to' => 'vssupport_tickets.assigned_to',
+			'created'     => 'vssupport_tickets.created',
+			'last_update' => 'vssupport_tickets.last_update_at',
+		];
+		$table->sortBy = ($sortTranslation[$table->sortBy] ?? $table->sortBy) ?: 'created';
 		$table->sortDirection = $table->sortDirection ?: 'desc';
 
 		$table->quickSearch = 'subject';
@@ -97,8 +150,8 @@ class tickets extends Controller
 		$priorities = [];
 		$categories = [];
 		$stati = [];
-		if(Request::i()->advancedSearchForm) {
-			$db = Db::i();
+		if($request->advancedSearchForm || $request->advanced_search_submitted) {
+			// Only do the heavy lifting when displaying the advanced search mask
 
 			for($p = -2; $p <= 2; $p++) {
 				$priorities[$p] = "ticket_prio_{$p}_name";
@@ -112,31 +165,35 @@ class tickets extends Controller
 			foreach($q as $r) {
 				$stati[$r['id']] = "ticket_status_{$r['name_key']}_name";
 			}
+
+			$table->advancedSearch = [
+				'id'             => Helpers\Table\SEARCH_NUMERIC,
+				'created'        => Helpers\Table\SEARCH_DATE_RANGE,
+				'subject'        => Helpers\Table\SEARCH_CONTAINS_TEXT,
+				'priority'       => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $priorities]],
+				'category'       => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $categories]],
+				'status'         => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $stati]],
+				'issuer_name'    => Helpers\Table\SEARCH_CONTAINS_TEXT,
+				'issuer_email'   => Helpers\Table\SEARCH_CONTAINS_TEXT,
+				'assigned_to'    => [Helpers\Table\SEARCH_MEMBER, [
+					'autocomplete' => [
+						'source'               => 'app=core&module=system&controller=ajax&do=findMember&type=mod', // only search for moderators
+						'resultItemTemplate'   => 'core.autocomplete.memberItem',
+						'commaTrigger'         => false,
+						'unique'               => true,
+						'minAjaxLength'        => 3,
+						'disallowedCharacters' => [],
+						'lang'                 => 'mem_optional',
+						'suggestionsOnly'      => true,
+					],
+				]],
+				'last_update_at' => Helpers\Table\SEARCH_DATE_RANGE,
+			];
+		}
+		else {
+			$table->advancedSearch = ['dummy' => 1]; // dummy so the advanced search actually shows up
 		}
 
-		$table->advancedSearch = [
-			'id'             => Helpers\Table\SEARCH_NUMERIC,
-			'created'        => Helpers\Table\SEARCH_DATE_RANGE,
-			'subject'        => Helpers\Table\SEARCH_CONTAINS_TEXT,
-			'priority'       => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $priorities]],
-			'category'       => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $categories]],
-			'status'         => [Helpers\Table\SEARCH_SELECT, ['noDefault' => true, 'multiple' => true, 'options' => $stati]],
-			'issuer_name'    => Helpers\Table\SEARCH_CONTAINS_TEXT,
-			'issuer_email'   => Helpers\Table\SEARCH_CONTAINS_TEXT,
-			'assigned_to'    => [Helpers\Table\SEARCH_MEMBER, [
-				'autocomplete' => [
-					'source'               => 'app=core&module=system&controller=ajax&do=findMember&type=mod', // only search for moderators
-					'resultItemTemplate'   => 'core.autocomplete.memberItem',
-					'commaTrigger'         => false,
-					'unique'               => true,
-					'minAjaxLength'        => 3,
-					'disallowedCharacters' => [],
-					'lang'                 => 'mem_optional',
-					'suggestionsOnly'      => true,
-				],
-			]],
-			'last_update_at' => Helpers\Table\SEARCH_DATE_RANGE,
-		];
 
 		$table->rowButtons = function($row) {
 			return [
@@ -149,10 +206,10 @@ class tickets extends Controller
 		};
 
 		$output->title = $lang->addToStack('tickets');
-		$output->breadcrumb[] = [null, $lang->addToStack('tickets')];
+		$output->breadcrumb[] = [URl::internal('app=vssupport&module=tickets&controller=tickets'), $lang->addToStack('tickets')];
 		// No way to make the wide table work properly via classes, so this template just wraps it in overflow auto.
-		$output->output = $theme->getTemplate('tickets')->list($table);
-		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'));
+		$output->output = $theme->getTemplate('tickets', 'vssupport')->list($table);
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'), $theme->css('hideBar.css'));
 	}
 
 	static ?string $unknown = null;
@@ -223,7 +280,7 @@ class tickets extends Controller
 		$bc[] = [null, $ticket['subject']];
 		$output->showTitle = false;
 		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $actions, $form, $extraBlocks);
-		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'), $theme->css('ticket.css'));
+		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'), $theme->css('ticket.css'), $theme->css('hideBar.css'));
 	}
 
 	public function reply() : void

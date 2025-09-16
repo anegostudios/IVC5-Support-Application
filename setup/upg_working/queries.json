@@ -502,6 +502,18 @@
                         "length": [
                             null
                         ]
+                    },
+                    "ticket_by_created": {
+                        "type": "key",
+                        "name": "ticket_by_created",
+                        "columns": [
+                            "ticket",
+                            "created"
+                        ],
+                        "length": [
+                            null,
+                            null
+                        ]
                     }
                 }
             }
@@ -608,6 +620,36 @@
                     }
                 }
             }
+        ]
+    },
+    {
+        "method": "dropColumn",
+        "params": [
+            "vssupport_tickets",
+            "last_update_by"
+        ]
+    },
+    {
+        "method": "addIndex",
+        "params": [
+            "vssupport_tickets",
+            {
+                "type": "key",
+                "name": "created",
+                "columns": [
+                    "created"
+                ],
+                "length": [
+                    null
+                ]
+            }
+        ]
+    },
+    {
+        "method": "dropIndex",
+        "params": [
+            "vssupport_tickets",
+            "created"
         ]
     }
 ]

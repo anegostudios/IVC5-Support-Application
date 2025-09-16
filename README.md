@@ -95,6 +95,7 @@ Without leaving the ticket for most actions.
 - Use translatable form helper for category / status?
 - Use flags for "is closing status"
 - empty_local_data ?
+- Note latest reply in moderator digest email
 
 ## License
 

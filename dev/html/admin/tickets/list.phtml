@@ -2,6 +2,11 @@
 <div id="ticket-list-wrapper" style="overflow-y: auto;">
 	{$table|raw}
 </div>
+<style>
+	#ticket-list-wrapper tr>:first-child {
+		min-width: 45ch;
+	}
+</style>
 <script>
 	// middle click to open in new tab
 	document.getElementById('ticket-list-wrapper').getElementsByTagName('table')[0].addEventListener("mousedown", e => {
