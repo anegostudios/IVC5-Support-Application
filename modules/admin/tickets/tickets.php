@@ -232,8 +232,10 @@ class tickets extends Controller
 			return;
 		}
 
+		$sortDir = ($request->cookie['ticketSort'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
 		$actions = query_all(
-			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created ASC')
+			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created '.$sortDir)
 			->join(['core_members', 'u'], 'u.member_id = a.initiator')
 			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
 			->join(['core_members', 'as'], 'as.member_id = a.reference_id AND a.kind = '.ActionKind::Assigned)
@@ -267,7 +269,7 @@ class tickets extends Controller
 		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets', seoTemplate: 'tickets_list'), $lang->addToStack('tickets')];
 		$bc[] = [null, $ticket['subject']];
 		$output->showTitle = false;
-		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $actions, $form, $extraBlocks);
+		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $actions, $form, $extraBlocks, $sortDir);
 		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'), $theme->css('ticket.css'), $theme->css('hideBar.css'));
 	}
 
@@ -357,6 +359,7 @@ class tickets extends Controller
 
 		// submitLang = null disables builtin button
 		$form = new Form(submitLang: null, action: $action);
+		$form->attributes['id'] = 'reply-form';
 		// Prevent the label being placed to the side. We want full width.
 		$form->class = 'ipsForm--vertical';
 
