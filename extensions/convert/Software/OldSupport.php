@@ -49,6 +49,10 @@ class OldSupport extends ConverterSoftware
 	public static function canConvert() : ?array
 	{
 		return [
+			'convertStaffPreferences' => [
+				'table' => 'nexus_support_staff_preferences',
+				'where' => NULL,
+			],
 			'convertCategories'	=> [
 				'table' => 'nexus_support_departments',
 				'where' => NULL,
@@ -83,7 +87,7 @@ class OldSupport extends ConverterSoftware
 	
 	public static function canConvertSettings() : bool
 	{
-		return FALSE; // TODO maybe? 
+		return FALSE;
 	}
 	public function settingsMap() : array
 	{
@@ -143,6 +147,19 @@ class OldSupport extends ConverterSoftware
 	public static function fixPostData(string $post, ?string $className = null, ?int $contentId = null, ?App $app = null) : string
 	{
 		return $post;
+	}
+
+	public function convertStaffPreferences()
+	{
+		$libraryClass = $this->getLibrary();
+		$libraryClass::setKey('staff_id');
+
+		$q = $this->fetch(['nexus_support_staff_preferences', 'p'], 'staff_id', null, 'p.staff_id, p.content, m.name, m.email')
+			->join(['core_members', 'm'], 'm.member_id = p.staff_id');
+		foreach($q as $row) {
+			$libraryClass->convertStaffPreferences($row);
+			$libraryClass->setLastKeyValue($row['staff_id']);
+		}
 	}
 	
 	public function convertCategories()

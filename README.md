@@ -28,6 +28,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 			- Attributes (Category, Priority, Status, Assigned Staff)
 			- Messages, including Internal Notes
 			- some of the Action log
+		- Staff preferences for default reply
 	- Frontend module
 		- Create new tickets (also possible as guest)
 		- Inspect individual tickets
@@ -49,6 +50,8 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 			- Manage Customer Invoices largely without leaving the ticket
 				- Inspect, Track, Cancel, Refund, Resend or Delete
 				- opens in new tab: Edit or Print
+			- Staff member preferences
+				- Set your default reply template
 		- Create / Edit / Delete Ticket Categories
 			- Preview translated names
 		- Create / Edit / Delete new Ticket Stati
@@ -82,7 +85,6 @@ Without leaving the ticket for most actions.
 - GitHub linking
 - GitLab linking
 - Admin bulk actions
-- Migrate user settings
 - Migrate ticket attachments
 - Option to delete open tickets when issuer gets deleted.
 - Link from user profile to their tickets.
@@ -91,8 +93,6 @@ Without leaving the ticket for most actions.
 - Content items? 
 - Invertible message flow in the backend (configurable)
 - Add disclaimer field on ticket entry
-- Hide the secondary menu when viewing tickets in the backend
-- Use flags for "is closing status"
 - empty_local_data ?
 - Note latest reply in moderator digest email
 

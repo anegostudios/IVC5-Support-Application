@@ -19,6 +19,17 @@
             "controller": "stati",
             "do": "",
             "restriction": "stati_manage"
+        },
+        "ticketspreferences": {
+            "tab": "vssupport",
+            "controller": "tickets",
+            "do": "preferences",
+            "restriction": "tickets_manage",
+            "menu_checks": {
+                "do": [
+                    "preferences"
+                ]
+            }
         }
     }
 }

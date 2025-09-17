@@ -360,10 +360,12 @@ class tickets extends Controller
 		// Prevent the label being placed to the side. We want full width.
 		$form->class = 'ipsForm--vertical';
 
+		$defaultReply = null;
 		// Do the buttons manually because we want more than a simple submit:
 		if($allInputs) {
 			$db = Db::i();
-			$lang = Member::loggedIn()->language();
+			$member = Member::loggedIn();
+			$lang = $member->language();
 
 			{
 				$categories = query_all_assoc($db->select("id, 1", 'vssupport_ticket_categories'));
@@ -431,10 +433,13 @@ class tickets extends Controller
 				->button('respond_internal', 'submit', null, 'ipsButton ipsButton--secondary', ['tabindex' => '3', 'accesskey' => 's', 'name' => 'submit', 'value' => 'internal']);
 			$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
 				->button('respond_public', 'submit', null, 'ipsButton ipsButton--primary', ['tabindex' => '2', 'accesskey' => 's', 'name' => 'submit', 'value' => 'public']);
+
+			$defaultReply = query_one($db->select('default_reply', 'vssupport_mod_preferences', 'member_id = '.$member->member_id));
+			if($defaultReply) $defaultReply = str_replace('{issuer_name}', $ticket['issuer_name'], $defaultReply);
 		}
 
 
-		$form->add(new Form\Editor('text', required: false, options: [
+		$form->add(new Form\Editor('text', $defaultReply, required: false, options: [
 			'app' => 'vssupport',
 			'key' => 'TicketText',
 			'autoSaveKey' => static::_formatEditorKey($ticketId),
@@ -445,4 +450,40 @@ class tickets extends Controller
 	}
 
 	static function _formatEditorKey(int $ticketId) : string { return 'ticket-message-'.$ticketId; }
+
+	public function preferences()
+	{
+		$member = Member::loggedIn();
+		$lang = $member->language();
+		$request = Request::i();
+		$db = Db::i();
+
+		if(!$request->form_submitted) {
+			$default_reply = query_one($db->select('default_reply', 'vssupport_mod_preferences', 'member_id = '.$member->member_id));
+		}
+		else {
+			$default_reply = null;
+		}
+
+		$form = new Form();
+		// Prevent the label being placed to the side. We want full width.
+		$form->class = 'ipsForm--vertical';
+
+		$form->add(new Form\Editor('default_reply', $default_reply,  options: [
+			'app'         => 'vssupport',
+			'key'         => 'TicketText',
+			'autoSaveKey' => 'default_message',
+			'allowAttachments' => false,
+			'tags'        => [
+				'{issuer_name}' => $lang->addToStack('issuer_name'),
+			],
+		]));
+
+		if($values = $form->values()) {
+			$db->insert('vssupport_mod_preferences', ['member_id' => $member->member_id, 'default_reply' => trim($values['default_reply']) ?: null], true);
+			$request->setClearAutosaveCookie('default_message');
+		}
+
+		Output::i()->output .= $form;
+	}
 }

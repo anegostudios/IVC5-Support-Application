@@ -35,6 +35,18 @@ class OldSupport extends CoreLibrary
 
 		foreach($this->getConvertableItems() as $k => $v) {
 			switch($k) {
+				case 'convertStaffPreferences':
+					$return[$k] = [
+						'step_title'   => 'convert_staff_preferences',
+						'step_method'  => 'convertStaffPreferences',
+						'ips_rows'     => $db->select('COUNT(*)', 'vssupport_mod_preferences'),
+						'source_rows'  => ['table' => $v['table'], 'where' => $v['where']],
+						'per_cycle'    => 200,
+						'dependencies' => [],
+						'link_type'    => 'vssupport_members',
+					];
+					break;
+
 				case 'convertCategories':
 					$return[$k] = [
 						'step_title'   => 'convert_categories',
@@ -125,8 +137,8 @@ class OldSupport extends CoreLibrary
 		$cc = $classname::canConvert();
 		if($cc === null || !isset($cc[$method])) return [];
 
-		
 		switch($method) {
+			case 'convertStaffPreferences': return ['vssupport_mod_preferences' => null];
 			case 'convertCategories': return ['vssupport_ticket_categories' => null]; // TODO(Rennorb) @correctness: Should this truncate the language tables ? 
 			case 'convertStati':      return ['vssupport_ticket_stati' => 'id > '.TicketStatus::__MAX_BUILTIN]; // TODO(Rennorb) @correctness: Should this truncate the language tables ?
 			case 'convertTickets':    return ['vssupport_tickets' => null, 'vssupport_messages' => null, 'vssupport_ticket_action_history' => null];
@@ -135,6 +147,14 @@ class OldSupport extends CoreLibrary
 		}
 
 		return [];
+	}
+
+	public function convertStaffPreferences(array $row)
+	{
+		$db = Db::i();
+
+		$newUser = $this->mapUserByNameAndEmail($db, $row['staff_id'], $row['name'], $row['email']);
+		$db->insert('vssupport_mod_preferences', ['member_id' => $newUser, 'default_reply' => $row['content']], true);
 	}
 	
 	public function convertCategory(Lang $currentLang, array &$localLanguageMap, array $row, Db $remoteDatabase)
@@ -364,6 +384,23 @@ class OldSupport extends CoreLibrary
 			if(!$email) return 0;
 
 			$newId = intval(query_one($db->select('member_id', 'core_members', ['email = ?', $email])));
+			$this->software->app->addLink($newId, $oldId, 'vssupport_members');
+		}
+
+		return $newId;
+	}
+
+	function mapUserByNameAndEmail(Db $db, int $oldId, string $name, string $email) : int
+	{
+		if(!$oldId) return 0;
+
+		try {
+			$newId = $this->software->app->getLink($oldId, 'vssupport_members');
+		}
+		catch(\OutOfRangeException $ex) {
+			if(!$email) return 0;
+
+			$newId = intval(query_one($db->select('member_id', 'core_members', [['name = ?', $name], ['email = ?', $email]])));
 			$this->software->app->addLink($newId, $oldId, 'vssupport_members');
 		}
 

@@ -639,5 +639,73 @@
             "vssupport_tickets",
             "created"
         ]
+    },
+    {
+        "method": "createTable",
+        "params": [
+            {
+                "name": "vssupport_mod_preferences",
+                "columns": {
+                    "id": {
+                        "name": "id",
+                        "type": "BIGINT",
+                        "length": "20",
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": false,
+                        "default": 0,
+                        "comment": "",
+                        "unsigned": true,
+                        "auto_increment": true
+                    },
+                    "member_id": {
+                        "name": "member_id",
+                        "type": "INT",
+                        "length": null,
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": false,
+                        "default": 0,
+                        "comment": "",
+                        "unsigned": true,
+                        "auto_increment": false
+                    },
+                    "default_reply": {
+                        "name": "default_reply",
+                        "type": "TEXT",
+                        "length": null,
+                        "decimals": null,
+                        "values": null,
+                        "allow_null": true,
+                        "default": null,
+                        "comment": "",
+                        "unsigned": false,
+                        "auto_increment": false
+                    }
+                },
+                "indexes": {
+                    "PRIMARY": {
+                        "type": "primary",
+                        "name": "PRIMARY",
+                        "columns": [
+                            "id"
+                        ],
+                        "length": [
+                            null
+                        ]
+                    },
+                    "member": {
+                        "type": "unique",
+                        "name": "member",
+                        "columns": [
+                            "member_id"
+                        ],
+                        "length": [
+                            null
+                        ]
+                    }
+                }
+            }
+        ]
     }
 ]

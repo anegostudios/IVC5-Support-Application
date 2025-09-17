@@ -28,6 +28,7 @@ class TicketText extends EditorLocationsAbstract
 	 */
 	public function canAttach( MemberClass $member, Editor $field ): ?bool
 	{
+		if($field->options['autoSaveKey'] === 'default_message') return false;
 		return NULL;
 	}
 	

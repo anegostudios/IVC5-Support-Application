@@ -64,6 +64,9 @@ $lang = array(
 	'last_update_at' => 'Last Updated',
 	'last_update' => 'Last Updated',
 	'created' => 'Created',
+	'menu__vssupport_tickets_ticketspreferences' => 'My Preferences',
+	'default_reply' => 'Default Reply Text',
+	'default_reply_desc' => 'This text will be prepared as a reply when you open a ticket on the AdminCP.',
 
 	'notifications__vssupport_Tickets' => 'Support Tickets',
 	'notifications__vssupport_Tickets_ticket_response' => 'New Response',

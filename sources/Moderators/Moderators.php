@@ -1,6 +1,7 @@
 <?php namespace IPS\vssupport;
 
 use IPS\Db;
+use IPS\Member;
 use IPS\Patterns\ActiveRecord;
 
 if(!\defined('\IPS\SUITE_UNIQUE_KEY'))
