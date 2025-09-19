@@ -1,8 +1,6 @@
 <?php namespace IPS\vssupport;
 
 use IPS\Db;
-use IPS\Member;
-use IPS\Patterns\ActiveRecord;
 
 if(!\defined('\IPS\SUITE_UNIQUE_KEY'))
 {
@@ -10,7 +8,7 @@ if(!\defined('\IPS\SUITE_UNIQUE_KEY'))
 	exit;
 }
 
-// This so there is a centralized place to do the moderator selection, in case we want to go for a separate user role at some point.
+// This exists to have a centralized place to do the moderator selection, in case we want to go for a separate user role at some point.
 
 class Moderators {
 	/**

@@ -17,6 +17,7 @@ use IPS\Request;
 use IPS\vssupport\ActionKind;
 use IPS\vssupport\Message;
 use IPS\vssupport\MessageFlags;
+use IPS\vssupport\Moderators;
 use IPS\vssupport\StatusFlags;
 use IPS\vssupport\TicketFlags;
 
@@ -168,7 +169,7 @@ class tickets extends Controller
 				'issuer_email'   => Helpers\Table\SEARCH_CONTAINS_TEXT,
 				'assigned_to'    => [Helpers\Table\SEARCH_MEMBER, [
 					'autocomplete' => [
-						'source'               => 'app=core&module=system&controller=ajax&do=findMember&type=mod', // only search for moderators
+						'source'               => 'app=vssupport&module=tickets&controller=tickets&do=ajaxGetModerators',
 						'resultItemTemplate'   => 'core.autocomplete.memberItem',
 						'commaTrigger'         => false,
 						'unique'               => true,
@@ -397,7 +398,7 @@ class tickets extends Controller
 				$select = (new Form\Member('assignTo', $ticket['assigned_to_name'], options: [
 					// Copy pasted from the original, just with the additional &type=mod.
 					'autocomplete' => [
-						'source'               => 'app=core&module=system&controller=ajax&do=findMember&type=mod', //TODO(Rennorb) @corectness: this is just wrong; see ajax controller
+						'source'               => 'app=vssupport&module=tickets&controller=tickets&do=ajaxGetModerators',
 						'resultItemTemplate'   => 'core.autocomplete.memberItem',
 						'commaTrigger'         => false,
 						'unique'               => true,
@@ -488,5 +489,29 @@ class tickets extends Controller
 		}
 
 		Output::i()->output .= $form;
+	}
+
+
+	public function ajaxGetModerators()
+	{
+		$results = [];
+
+		$searchLike = str_replace(['%', '_'], ['\%', '\_'], mb_strtolower(Request::i()->input)).'%';
+		$q = Moderators::select(Db::i(), '*', ['m.name LIKE ?', $searchLike], 'LENGTH(name) ASC', 20);
+			
+		foreach($q as $row)
+		{
+			$member = Member::constructFromData($row);
+
+			$results[] = [
+				'id'    => $member->member_id,
+				'value' => $member->name,
+				'name'  => $member->group['prefix'] . htmlspecialchars($member->name, ENT_DISALLOWED | ENT_QUOTES, 'UTF-8', FALSE) . $member->group['suffix'],
+				'extra' => $member->groupName,
+				'photo' => (string) $member->photo,
+			];
+		}
+
+		Output::i()->json($results);
 	}
 }
