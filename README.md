@@ -34,10 +34,12 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- Inspect individual tickets
 			- Add more messages / Reply to the ticket if it is not locked
 		- List of tickets created by current member
+			- Read markers
 		- Tickets are not enumerable
 		- Requires captcha if enabled
 	- Admin module
 		- View all tickets
+			- Read markers
 		- View individual ticket
 			- Reply or add Internal Note and
 				- Change Status
