@@ -6,6 +6,31 @@
 	#ticket-list-wrapper tr>:first-child {
 		min-width: 45ch;
 	}
+
+	.ipsControlStrip_button>[data-controlstrip-action="conv_len"]>.ipsControlStrip_icon {
+		display: none;
+	}
+	.ipsControlStrip_button>[data-controlstrip-action="conv_len"]::after {
+		content: attr(data-count);
+	}
+
+	.ticket-read-mark {
+		margin-top: -14px;
+		margin-bottom: -14px;
+		margin-left: -10px;
+
+		padding-left: .5em;
+		border-left: solid .5em var(--i-co);
+		padding-top: 14px;
+		padding-bottom: 14px;
+	}
+	.ticket-read-mark.read {
+		border-left-color: transparent;
+	}
+
+  #ticket-list-wrapper .ipsTable--collapse .ipsControlStrip:not(.ipsControlStrip_showText) .ipsControlStrip_item {
+		display: none;
+  }
 </style>
 <script>
 	// middle click to open in new tab

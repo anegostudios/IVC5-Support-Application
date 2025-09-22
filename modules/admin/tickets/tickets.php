@@ -19,6 +19,7 @@ use IPS\vssupport\Message;
 use IPS\vssupport\MessageFlags;
 use IPS\vssupport\Moderators;
 use IPS\vssupport\StatusFlags;
+use IPS\vssupport\Ticket;
 use IPS\vssupport\TicketFlags;
 use IPS\vssupport\TicketStatus;
 
@@ -136,14 +137,20 @@ class tickets extends Controller
 			'from'  => ['vssupport_ticket_stati', 's'],
 			'where' => 's.id = vssupport_tickets.status',
 			'type'  => 'LEFT'
+		], [
+			'select' => 'FROM_UNIXTIME((mark.item_app_key_2 << 32) | mark.item_app_key_3) >= la.last_update_at AS `read`', // :ReadMarkerTimestamps
+			'from'   => ['core_item_markers', 'mark'],
+			'where'  => "mark.item_app = 'vssupport' AND mark.item_member_id = {$member->member_id} AND mark.item_app_key_1 = vssupport_tickets.id",
+			'type'   => 'LEFT',
 		]];
 
 		$table->parsers = [
 			'ticket' => function($val, $row) {
 				$subject = htmlspecialchars($row['subject'], ENT_DISALLOWED, 'UTF-8', FALSE);
 				$category = Member::loggedIn()->language()->addToStack("ticket_category_{$row['category']}_name", options: ['escape' => 1]);
+				$class = $row['read'] ? ' read' : ' i-color_contrast';
 				return <<<HTML
-					<div>
+					<div class="ticket-read-mark{$class}">
 						<h4>{$subject}&nbsp;<small class="i-color_soft">#{$row['id']}</small></h4>
 						<small class="i-color_soft">{$category}</small>
 					</div>
@@ -279,7 +286,8 @@ class tickets extends Controller
 	{
 		$output = Output::i();
 		$theme = Theme::i();
-		$lang = Member::loggedIn()->language();
+		$member = Member::loggedIn();
+		$lang = $member->language();
 		$db =  Db::i();
 		$request = Request::i();
 
@@ -334,6 +342,8 @@ class tickets extends Controller
 		$output->showTitle = false;
 		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $actions, $form, $extraBlocks, $sortDir);
 		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'), $theme->css('ticket.css'), $theme->css('hideBar.css'));
+
+		Ticket::markRead($ticketId, $member->member_id);
 	}
 
 	public function reply() : void

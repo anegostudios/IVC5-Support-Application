@@ -17,11 +17,3 @@
 #acpAppList > li.acpAppList_active:hover .acpAppList__sub {
 	display: block;
 }
-
-/*ticket list table*/
-.ipsControlStrip_button>[data-controlstrip-action="conv_len"]>.ipsControlStrip_icon {
-	display: none;
-}
-.ipsControlStrip_button>[data-controlstrip-action="conv_len"]::after {
-	content: attr(data-count);
-}
