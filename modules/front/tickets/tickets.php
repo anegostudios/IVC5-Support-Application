@@ -44,7 +44,7 @@ class tickets extends Controller
 		$theme = Theme::i();
 
 		$tickets = query_all(
-			$db->select('t.id, t.subject, t.priority, t.created, t.flags, HEX(t.hash) AS hash, t.category', ['vssupport_tickets', 't'], 't.issuer_id = '.($member->member_id ?? 0).' AND !(s.flags & '.StatusFlags::TicketClosed.')')
+			$db->select('t.id, t.subject, t.priority, t.created, t.flags, HEX(t.hash) AS hash, t.category', ['vssupport_tickets', 't'], 't.issuer_id = '.($member->member_id ?? 0).' AND !(s.flags & '.StatusFlags::TicketResolved.')')
 			->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
 		);
 
@@ -166,7 +166,7 @@ class tickets extends Controller
 	
 				File::claimAttachments($autoSaveKey, $ticket['id'], $messageId);
 
-				if($ticket['status_flags'] & StatusFlags::TicketClosed) {
+				if($ticket['status_flags'] & StatusFlags::TicketResolved) {
 					$db->update('vssupport_tickets', ['status' => TicketStatus::Open]);
 					log_ticket_action($db, $ticket['id'], ActionKind::StatusChange, $member->member_id ?? 0, TicketStatus::Open);
 				}
@@ -175,7 +175,7 @@ class tickets extends Controller
 				return;
 			}
 			else {
-				if($ticket['status_flags'] & StatusFlags::TicketClosed) {
+				if($ticket['status_flags'] & StatusFlags::TicketResolved) {
 					$notice = htmlspecialchars($member->language()->addToStack('ticked_considered_closed_notice'), ENT_DISALLOWED, 'UTF-8', FALSE);
 					array_unshift($form->actionButtons, "<div>$notice</div>");
 				}

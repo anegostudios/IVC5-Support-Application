@@ -60,7 +60,7 @@ class stati extends Controller
 			return Member::loggedIn()->language()->addToStack("ticket_status_{$row['id']}_name");
 		};
 		$table->parsers['is_closing_status'] = function($val, $row) {
-			$ico = ($row['flags'] & StatusFlags::TicketClosed) ? 'fa-check': 'fa-times';
+			$ico = ($row['flags'] & StatusFlags::TicketResolved) ? 'fa-check': 'fa-times';
 			return "<i class='fa-fw fa-solid $ico'></i>";
 		};
 
@@ -103,36 +103,37 @@ class stati extends Controller
 	public function edit() : void
 	{
 		$request = Request::i();
+		$editing = $request->id !== null;
 		$statusId = intval($request->id);
 		$output = Output::i();
 		$db = Db::i();
 
-		$form = new Helpers\Form(submitLang: $statusId ? 'save' : 'status_add');
-		$form->add(new Helpers\Form\Translatable('name', required: true, options: ['app' => 'vssupport', 'key' => $statusId ? "ticket_status_{$statusId}_name" : null]));
+		$form = new Helpers\Form(submitLang: $editing ? 'save' : 'status_add');
+		$form->add(new Helpers\Form\Translatable('name', required: true, options: ['app' => 'vssupport', 'key' => $editing ? "ticket_status_{$statusId}_name" : null]));
 		$isClosingStatus = false;
-		if($statusId && !$request->form_submitted) {
-			$isClosingStatus = boolval(query_one($db->select('flags', 'vssupport_ticket_stati', 'id = '.$statusId)) & StatusFlags::TicketClosed);
+		if($editing && !$request->form_submitted) {
+			$isClosingStatus = boolval(query_one($db->select('flags', 'vssupport_ticket_stati', 'id = '.$statusId)) & StatusFlags::TicketResolved);
 		}
-		$form->add(new Helpers\Form\YesNo('is_closing_status', defaultValue: $isClosingStatus, required: true));
+		$form->add(new Helpers\Form\YesNo('is_closing_status', defaultValue: $isClosingStatus, required: true, options: ['disabled' => $editing && $statusId <= TicketStatus::__MAX_BUILTIN ]));
 
 		if($values = $form->values()) {
-			$data = ['flags' => $values['is_closing_status'] ? StatusFlags::TicketClosed : 0];
-			if($statusId) { // editing existing
+			$data = ['flags' => $values['is_closing_status'] ? StatusFlags::TicketResolved : 0];
+			if($editing) {
 				$db->update('vssupport_ticket_stati', $data, 'id = '.$statusId);
 			}
-			else { // create new
+			else {
 				$statusId = $db->insert('vssupport_ticket_stati', $data);
 			}
 			Lang::saveCustom('vssupport', "ticket_status_{$statusId}_name", $values['name']);
 
-			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=stati'), $statusId ? 'saved' : 'created');
+			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=stati'), $editing ? 'saved' : 'created');
 			return;
 		}
 
 		$lang = Member::loggedIn()->language();
 
 		$output->breadcrumb[] = [URl::internal('app=vssupport&module=tickets&controller=stati'), $lang->addToStack('stati')];
-		$output->title = $lang->addToStack($statusId ? 'status_edit' : 'status_add');
+		$output->title = $lang->addToStack($editing ? 'status_edit' : 'status_add');
 		$output->output .= $form;
 	}
 

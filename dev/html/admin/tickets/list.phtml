@@ -19,7 +19,7 @@
 			if(!row) return;
 		}
 
-		const anchorEl = row.lastElementChild.getElementsByTagName('a')[0];
+		const anchorEl = row.lastElementChild.querySelector('a[data-controlstrip-action="view"]');
 		open(anchorEl.href, '_blank', 'noopener');
 	})
 </script>

@@ -66,7 +66,12 @@ $lang = array(
 	'created' => 'Created',
 	'menu__vssupport_tickets_ticketspreferences' => 'My Preferences',
 	'default_reply' => 'Default Reply Text',
-	'default_reply_desc' => 'This text will be prepared as a reply when you open a ticket on the AdminCP.',
+	'default_reply_desc' => 'This text will be prepared as a reply when you view a ticket on the AdminCP.',
+	'all_new_and_unassigned' => 'New and unassigned',
+	'all_unresolved' => 'All not Resolved',
+	'all_new_and_assigned_to_me' => 'Assigned to me and New',
+	'all_unresolved_and_assigned_to_me' => 'Assigned to me and not Resolved',
+	'conversation_length' => 'Conversation length',
 
 	'notifications__vssupport_Tickets' => 'Support Tickets',
 	'notifications__vssupport_Tickets_ticket_response' => 'New Response',
@@ -120,9 +125,9 @@ $lang = array(
 	'ticket_category_1_name' => 'Category 1',
 	'ticket_category_2_name' => 'Category 2',
 
-	'ticket_status_0_name' => 'Open',
+	'ticket_status_0_name'  => 'New',
 	'ticket_status_16_name' => 'In Progress',
 	'ticket_status_17_name' => 'Halted',
-	'ticket_status_18_name' => 'Completed',
+	'ticket_status_18_name' => 'Resolved',
 	'ticket_status_19_name' => "Won't Fix",
 );

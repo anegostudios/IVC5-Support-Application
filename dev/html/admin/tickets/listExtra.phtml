@@ -1,0 +1,8 @@
+<ips:template parameters="$tabs, $activeTabKey" />
+<div class="ipsButtonBar">
+	<ul class="i-flex i-flex-direction_row i-padding-bottom_0">
+		{{foreach $tabs as $key => $tab}}
+		<li class="i-flex_00"><a class="ipsDataFilters__button{{if $activeTabKey === $key}} i-color_inherit i-background_3{{endif}}" href="{$tab['url']|raw}"><span class="i-background_1 i-padding-inline_1">{$tab['count']}</span>&nbsp;{lang="$tab['name']"}</a></li>
+		{{endforeach}}
+	</ul>
+</div>

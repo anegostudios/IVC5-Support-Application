@@ -20,6 +20,7 @@ use IPS\vssupport\MessageFlags;
 use IPS\vssupport\Moderators;
 use IPS\vssupport\StatusFlags;
 use IPS\vssupport\TicketFlags;
+use IPS\vssupport\TicketStatus;
 
 use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
@@ -44,7 +45,8 @@ class tickets extends Controller
 
 	protected function manage() : void
 	{
-		$lang = Member::loggedIn()->language();
+		$member = Member::loggedIn();
+		$lang = $member->language();
 		$output = Output::i();
 		$theme = Theme::i();
 		$request = Request::i();
@@ -53,12 +55,62 @@ class tickets extends Controller
 		/* Some advanced search links may bring us here */
 		$output->bypassCsrfKeyCheck = true;
 
-		$table = new Helpers\Table\Db('vssupport_tickets', Url::internal('app=vssupport&module=tickets&controller=tickets'));
+		$baseUrl = Url::internal('app=vssupport&module=tickets&controller=tickets');
+		$table = new Helpers\Table\Db('vssupport_tickets', $baseUrl);
+		$table->enableRealtime = true;
 		//$table->langPrefix = 'ticket_';
 		$table->keyField = 'id';
 
+		
+		if(!$request->advancedSearchForm && !$request->advanced_search_submitted) {
+			$tabs = [
+				'u' => ['url' => $baseUrl->setQueryString('s', 'u'), 'name' => 'all_new_and_unassigned'],
+				'a' => ['url' => $baseUrl->setQueryString('s', 'a'), 'name' => 'all_unresolved'],
+				'm' => ['url' => $baseUrl, 'name' => 'all_new_and_assigned_to_me'],
+				'n' => ['url' => $baseUrl->setQueryString('s', 'n'), 'name' => 'all_unresolved_and_assigned_to_me'],
+			];
+
+			$tabKey = array_key_exists($request->s, $tabs) ? $request->s : 'm';
+			switch($tabKey) {
+				case 'u':
+					$table->where = [['!(s.flags & '.StatusFlags::TicketResolved.')'], ['assigned_to IS NULL']];
+					$table->baseUrl = $table->baseUrl->setQueryString('s', $tabKey);
+					break;
+
+				case 'a':
+					$table->where = [['!(s.flags & '.StatusFlags::TicketResolved.')']];
+					$table->baseUrl = $table->baseUrl->setQueryString('s', $tabKey);
+					break;
+
+				case 'm':
+					$table->where = [['status = '.TicketStatus::Open], ['assigned_to = ? ', $member->member_id]];
+					// don't set search param, this here is the tab for now
+					break;
+
+				case 'n':
+					$table->where = [['!(s.flags & '.StatusFlags::TicketResolved.')'], ['assigned_to = ? ', $member->member_id]];
+					$table->baseUrl = $table->baseUrl->setQueryString('n', $tabKey);
+					break;
+			}
+
+			$myId = intval($member->member_id);
+			// @security: $myId is numeric, therefore sql inert.
+			$counts = query_one($db->select("
+				COUNT(CASE WHEN t.assigned_to IS NULL THEN 1 ELSE NULL END) AS `u`,
+				COUNT(*) AS `a`,
+				COUNT(CASE WHEN t.assigned_to = $myId AND t.status = ".TicketStatus::Open." THEN 1 ELSE NULL END) AS `m`,
+				COUNT(CASE WHEN t.assigned_to = $myId THEN 1 ELSE NULL END) AS `n`
+			", ['vssupport_tickets', 't'], '!(s.flags & '.StatusFlags::TicketResolved.')')
+				->join(['vssupport_ticket_stati', 's'], 's.id = t.status', 'LEFT'));
+			foreach($counts as $key => $count) {
+				$tabs[$key]['count'] = $count;
+			}
+
+			$table->extraHtml = $theme->getTemplate('tickets', 'vssupport')->listExtra($tabs, $tabKey);
+		}
+		
 		$table->include = ['ticket', 'status', 'priority', 'assigned_to', 'created', 'last_update'];
-		$table->mainColumn = 'created';
+		$table->mainColumn = 'ticket';
 
 		$table->joins = [[
 			'select'=> 'm.name as assigned_to',
@@ -66,8 +118,8 @@ class tickets extends Controller
 			'where' => 'm.member_id = vssupport_tickets.assigned_to',
 			'type'  => 'LEFT'
 		], [
-			'select'=> 'la.last_update_at',
-			'from'  => $db->select('ticket, max(created) as last_update_at', ['vssupport_ticket_action_history', 'la'], group: 'ticket'), //NOTE(Rennorb): Due to the extremely questionable implementation of the query joiner this _has to be_ a select object...
+			'select'=> 'la.last_update_at, la.conv_length',
+			'from'  => $db->select('ticket, max(created) as last_update_at, count(CASE WHEN kind = '.ActionKind::Message.' THEN 1 ELSE NULL END) as conv_length', ['vssupport_ticket_action_history', 'la'], group: 'ticket'), //NOTE(Rennorb): Due to the extremely questionable implementation of the query joiner this _has to be_ a select object...
 			'where' => 'la.ticket = vssupport_tickets.id',
 			'type'  => 'LEFT'
 		], [
@@ -79,6 +131,10 @@ class tickets extends Controller
 			'select'=> 'lm.name as last_update_by_name',
 			'from'  => ['core_members', 'lm'],
 			'where' => 'lm.member_id = la2.initiator',
+			'type'  => 'LEFT'
+		], [
+			'from'  => ['vssupport_ticket_stati', 's'],
+			'where' => 's.id = vssupport_tickets.status',
 			'type'  => 'LEFT'
 		]];
 
@@ -150,12 +206,12 @@ class tickets extends Controller
 			}
 
 			$q = $db->select('id', 'vssupport_ticket_categories');
-			foreach($q as $r) {
-				$categories[$r['id']] = "ticket_category_{$r['id']}_name";
+			foreach($q as $id) {
+				$categories[$id] = "ticket_category_{$id}_name";
 			}
 			$q = $db->select('id', 'vssupport_ticket_stati');
-			foreach($q as $r) {
-				$stati[$r['id']] = "ticket_status_{$r['id']}_name";
+			foreach($q as $id) {
+				$stati[$id] = "ticket_status_{$id}_name";
 			}
 
 			$table->advancedSearch = [
@@ -189,10 +245,16 @@ class tickets extends Controller
 
 		$table->rowButtons = function($row) {
 			return [
+				'conv_len' => [
+					'icon'   => '',
+					'title'  => 'conversation_length',
+					'data'   => ['count' => $row['conv_length']],
+				],
 				'view' => [
-					'icon'  => 'search',
-					'title' => 'view',
-					'link'  => URl::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$row['id']),
+					'icon'   => 'search',
+					'title'  => 'view',
+					'link'   => URl::internal('app=vssupport&module=tickets&controller=tickets&do=view&id='.$row['id']),
+					'target' => '_blank',
 				],
 			];
 		};
@@ -417,7 +479,7 @@ class tickets extends Controller
 				foreach($stati as $statusId => &$status) {
 					$flags = $status;
 					$status = htmlspecialchars($lang->addToStack("ticket_status_{$statusId}_name"), ENT_DISALLOWED, 'UTF-8', FALSE);
-					if($flags & StatusFlags::TicketClosed)  $status .= ' [C]';
+					if($flags & StatusFlags::TicketResolved)  $status .= ' [C]';
 					if($statusId === $ticket['status'])  $status .= ' ('.htmlspecialchars($lang->addToStack('current'), ENT_DISALLOWED, 'UTF-8', FALSE).')';
 				}
 				unset($status);
