@@ -65,21 +65,45 @@ class tickets extends Controller
 		$output = Output::i();
 		$db = Db::i();
 
-		$categories = query_all_assoc($db->select("id, CONCAT('ticket_category_', id, '_name')", 'vssupport_ticket_categories'));
-
 		$form = new Form(submitLang: 'ticket_submit');
+
 		if(!$member->member_id) {
 			$form->add(new Form\Text('name', required: true, options: [ 'maxLength' => 256 ]));
 			$form->add(new Form\Email('email', required: true, options: [ 'maxLength' => 256 ]));
 		}
-		$form->add(new Form\Select('category', required: true, options: [ 'options' => $categories ]));
+
+		$categories = query_all_assoc($db->select("id, CONCAT('ticket_category_', id, '_name')", 'vssupport_ticket_categories'));
+		//NOTE(Rennorb): for some reason, the provided id here doesn't translate directly into a html id. it gets prefixed with `elSelect_`
+		$form->add(new Form\Select('category', required: true, options: [ 'options' => $categories ], id: 'ticket-category'));
+		$disclaimers = '';
+		foreach($categories as $id => $_) {
+			$text = $lang->addToStack("ticket_category_{$id}_disclaimer", options: ['returnBlank' => true]);
+			$classExtra = !$disclaimers && $text ? ' selected' : ''; // make the first one visible
+			$disclaimers .= "<div id='ticket-disclaimer-{$id}' class='ipsMessage ipsMessage--form$classExtra'>$text</div>";
+		}
+		$form->addHtml(<<<HTML
+			<style>#ticket-disclaimers>*{display:none;}#ticket-disclaimers>.selected:not(:empty){display:block;margin-top:0;}</style>
+			<div id='ticket-disclaimers'>{$disclaimers}</div>
+			<script>{
+				const select = document.getElementById('elSelect_ticket-category');
+				let lastSelectedEl = document.getElementById('ticket-disclaimer-'+select.value);
+				select.addEventListener('change', e => {
+					lastSelectedEl.classList.remove('selected');
+					lastSelectedEl = document.getElementById('ticket-disclaimer-'+e.target.value)
+					lastSelectedEl.classList.add('selected');
+				});
+			}</script>
+		HTML);
+
 		$form->add(new Form\Text('subject', required: true, options: [ 'maxLength' => 256 ]));
+
 		$form->add(new Form\Editor('text', required: true, options: [
 			'app'         => 'vssupport',
 			'key'         => 'TicketText',
 			'autoSaveKey' => 'new-ticket',
 			'attachIds'   => null,
 		]));
+
 		$form->add(new Form\Captcha());
 
 		if($values = $form->values()) {

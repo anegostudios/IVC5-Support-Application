@@ -33,6 +33,7 @@ $lang = array(
 	'category_delete' => 'Delete Category',
 	'category_replacement' => 'Replacement Category',
 	'category_replacement_notice' => 'There are tickets using the category you want to delete. Select a different category to transfer those tickets to.',
+	'disclaimer_desc' => 'This disclaimer is shown to the issuer when creating a ticket in this category.',
 	'menu__vssupport_tickets_stati' => 'Manage Stati',
 	'status' => 'Status',
 	'status_add' => 'Add new Status',

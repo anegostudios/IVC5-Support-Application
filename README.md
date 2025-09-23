@@ -57,6 +57,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 				- Per device history flow direction
 		- Create / Edit / Delete Ticket Categories
 			- Preview translated names
+			- Set per category disclaimers shown in frontend
 		- Create / Edit / Delete new Ticket Stati
 			- Some stati are builtin and cannot be removed
 			- Preview translated names
@@ -93,9 +94,8 @@ Without leaving the ticket for most actions.
 - Link from user profile to their tickets.
 - Better user change tracking
 	- User name change tracking is flaky
-- Content items? 
-- Add disclaimer field on ticket entry
-- empty_local_data ?
+- Clear category disclaimer editor autosave value
+- Migration: empty_local_data ?
 - Note latest reply in moderator digest email
 
 ## License

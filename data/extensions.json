@@ -9,6 +9,7 @@
     },
     "core": {
         "EditorLocations": {
+            "CategoryDisclaimer": "IPS\\vssupport\\extensions\\core\\EditorLocations\\CategoryDisclaimer",
             "TicketText": "IPS\\vssupport\\extensions\\core\\EditorLocations\\TicketText"
         },
         "FrontNavigation": {

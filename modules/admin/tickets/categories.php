@@ -45,7 +45,7 @@ class categories extends Controller
 		//$table->langPrefix = 'category_';
 		$table->keyField = 'id';
 
-		$table->include = ['name', 'tickets_count'];
+		$table->include = ['name', 'has_disclaimer', 'tickets_count'];
 
 		$table->joins['tickets_count'] = [
 			'select'=> 'tickets_count',
@@ -56,6 +56,17 @@ class categories extends Controller
 
 		$table->parsers['name'] = function($val, $row) {
 			return Member::loggedIn()->language()->addToStack("ticket_category_{$row['id']}_name");
+		};
+		$table->parsers['has_disclaimer'] = function($val, $row) {
+			try {
+				$hasDisclaimer = !empty(Member::loggedIn()->language()->get("ticket_category_{$row['id']}_disclaimer"));
+			}
+			catch(\UnderflowException) {
+				$hasDisclaimer = false;
+			}
+
+			$ico = $hasDisclaimer ? 'check' : 'xmark';
+			return "<i class='fa-solid fa-$ico'></i>";
 		};
 
 		// $table->quickSearch = function($string) {
@@ -93,18 +104,27 @@ class categories extends Controller
 
 	public function edit() : void
 	{
-		$categoryId = intval(Request::i()->id);
+		$request = Request::i();
 		$output = Output::i();
 		$db = Db::i();
 
+		$categoryId = intval($request->id);
+		
 		$form = new Helpers\Form(submitLang: $categoryId ? 'save' : 'category_add');
 		$form->add(new Helpers\Form\Translatable('name', required: true, options: ['app' => 'vssupport', 'key' => $categoryId ? "ticket_category_{$categoryId}_name" : null]));
+
+		$disclaimerAutosaveKey = 'cat-disclaimer-'.$categoryId; // Save the key because we maybe it after maybe changing the id on create
+		$form->add(new Helpers\Form\Translatable('disclaimer', required: false, options: ['app' => 'vssupport', 'key' => $categoryId ? "ticket_category_{$categoryId}_disclaimer" : null, 'editor' => ['app' => 'vssupport', 'key' => 'CategoryDisclaimer', 'autoSaveKey' => $disclaimerAutosaveKey, 'allowAttachments' => false]]));
 
 		if($values = $form->values()) {
 			if(!$categoryId) { // create new
 				$categoryId = $db->insert('vssupport_ticket_categories', []);
 			}
 			Lang::saveCustom('vssupport', "ticket_category_{$categoryId}_name", $values['name']);
+			Lang::saveCustom('vssupport', "ticket_category_{$categoryId}_disclaimer", $values['disclaimer']);
+
+			//TODO(Rennorb) @ux, @correctness: Autosave does not get cleared despite the call here.
+			$request->setClearAutosaveCookie($disclaimerAutosaveKey);
 
 			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=categories'), $categoryId ? 'saved' : 'created');
 			return;
@@ -150,7 +170,10 @@ class categories extends Controller
 			if(!$request->confirmedDelete(submit: 'category_delete'))   return;
 		}
 
+		Lang::deleteCustom('vssupport', "ticket_category_{$categoryId}_name");
+		Lang::deleteCustom('vssupport', "ticket_category_{$categoryId}_disclaimer");
 		$db->delete('vssupport_ticket_categories', 'id='.$categoryId);
+
 		$output->redirect(Url::internal('app=vssupport&module=tickets&controller=categories'), 'deleted');
 	}
 }
