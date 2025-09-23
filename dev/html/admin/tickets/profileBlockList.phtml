@@ -1,0 +1,21 @@
+<ips:template parameters="$tickets, $totalCount, $member" />
+<div id="user-tickets-box" class="ipsBox">
+	<h2 class="ipsBox__header"><i class="fa-solid fa-medkit ipsBox__header-icon"></i>{lang="tickets"}</h2>
+	<div>
+		{{foreach $tickets as $ticket}}
+		<a class="ticket i-padding_2 i-padding-block_1 i-display_block i-color_hard" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&id={$ticket['id']}"}">
+			<h3 class="i-flex">{$ticket['subject']}&nbsp;<span class="i-color_soft">#{$ticket['id']}</span><span class="i-margin-start_auto">{lang="ticket_status_{$ticket['status']}_name"}</span></h3>
+			<p class="i-color_soft i-flex">{lang="ticket_category_{$ticket['category']}_name"}<span class="i-margin-start_auto">{$ticket['created']}</span></p>
+		</a>
+		{{endforeach}}
+	</div>
+	{{if $totalCount > 1}}
+	<div class="ipsViewAll">
+		<a href="{url="app=vssupport&module=tickets&controller=tickets&advanced_search_submitted=1&issuer_email={$member->email}"}">{lang="show_all"}</a>
+	</div>
+	{{endif}}
+</div>
+<style>
+#user-tickets-box a.ticket:nth-child(n+2) { border-top: 1px solid var(--i-background_4); }
+#user-tickets-box a.ticket:hover { background-color: var(--i-background_hover); }
+</style>

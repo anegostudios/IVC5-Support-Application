@@ -61,6 +61,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- Create / Edit / Delete new Ticket Stati
 			- Some stati are builtin and cannot be removed
 			- Preview translated names
+		- ACP Profile block showing member ticket history
 
 ### Screenshots
 
@@ -84,18 +85,17 @@ Without leaving the ticket for most actions.
 
 ## TODO
 
-- Allow notification merging
+- Note latest reply in moderator digest email
+- Migrate ticket attachments
 - Email ingest
 - GitHub linking
 - GitLab linking
-- Admin bulk actions
-- Migrate ticket attachments
 - Option to delete open tickets when issuer gets deleted.
-- Link from user profile to their tickets.
 - Better user change tracking
 	- User name change tracking is flaky
+- Admin bulk actions
+- Allow notification merging
 - Migration: empty_local_data ?
-- Note latest reply in moderator digest email
 
 ## License
 

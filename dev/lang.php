@@ -23,6 +23,7 @@ $lang = array(
 	'ticket_issuer_email_changed' => 'The ticket issuer changed their email. The notification email has been adjusted.',
 	'ticket_issuer_name_changed' => 'The issuer of this thicket changed their display name.',
 	'my_tickets' => 'My Tickets',
+	'show_all' => 'Show All',
 	'message_add' => 'Add Message',
 	'ticked_considered_closed_notice' => 'This ticket is considered to be closed, responding will reopen the ticket.',
 	'menu__vssupport_tickets_categories' => 'Manage Categories',

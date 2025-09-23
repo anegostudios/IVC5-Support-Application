@@ -15,6 +15,9 @@
         "FrontNavigation": {
             "Support": "IPS\\vssupport\\extensions\\core\\FrontNavigation\\Support"
         },
+        "MemberACPProfileBlocks": {
+            "Tickets": "IPS\\vssupport\\extensions\\core\\MemberACPProfileBlocks\\Tickets"
+        },
         "Notifications": {
             "Tickets": "IPS\\vssupport\\extensions\\core\\Notifications\\Tickets"
         },
