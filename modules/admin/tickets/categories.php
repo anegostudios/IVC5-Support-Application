@@ -121,10 +121,12 @@ class categories extends Controller
 				$categoryId = $db->insert('vssupport_ticket_categories', []);
 			}
 			Lang::saveCustom('vssupport', "ticket_category_{$categoryId}_name", $values['name']);
-			Lang::saveCustom('vssupport', "ticket_category_{$categoryId}_disclaimer", $values['disclaimer']);
+			$disclaimer = array_filter(array_map('trim', $values['disclaimer']));
+			if($disclaimer) Lang::saveCustom('vssupport', "ticket_category_{$categoryId}_disclaimer", $disclaimer);
 
-			//TODO(Rennorb) @ux, @correctness: Autosave does not get cleared despite the call here.
-			$request->setClearAutosaveCookie($disclaimerAutosaveKey);
+			foreach(Lang::getEnabledLanguages() as $lang) { // mirror behavior of Translatable internals
+				$request->setClearAutosaveCookie($disclaimerAutosaveKey.$lang->id);
+			}
 
 			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=categories'), $categoryId ? 'saved' : 'created');
 			return;

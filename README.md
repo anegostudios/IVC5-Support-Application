@@ -94,7 +94,6 @@ Without leaving the ticket for most actions.
 - Link from user profile to their tickets.
 - Better user change tracking
 	- User name change tracking is flaky
-- Clear category disclaimer editor autosave value
 - Migration: empty_local_data ?
 - Note latest reply in moderator digest email
 
