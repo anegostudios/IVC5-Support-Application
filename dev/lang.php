@@ -93,8 +93,8 @@ $lang = array(
 	'mailsub__vssupport_moderator_digest' => 'Support Ticket Digest',
 	'emailtpl_moderator_digest' => 'Moderator digest',
 	'mail_part__you_currently_have_n_open_tickets' => 'You currently have {# [1:Ticket that is][?:Tickets that are]} assigned to you and open:',
-	'mail_part__ticket_description' => 'Opened: %s <br />Status: %s - Category: %s - Priority: %s',
-	'mail_part__ticket_description_plain' => 'Opened: %s - Status: %s - Category: %s - Priority: %s',
+	'mail_part__ticket_description' => 'Opened: %s - Last reply by: %s @ %s<br />Status: %s - Category: %s - Priority: %s',
+	'mail_part__ticket_description_plain' => 'Opened: %s - Last reply by: %s @ %s - Status: %s - Category: %s - Priority: %s',
 
 	'sending_moderator_digest' => 'Sending moderator daily digests...',
 

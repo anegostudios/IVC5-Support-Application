@@ -85,11 +85,11 @@ Without leaving the ticket for most actions.
 
 ## TODO
 
-- Note latest reply in moderator digest email
 - Migrate ticket attachments
 - Email ingest
 - GitHub linking
 - GitLab linking
+- MFAArea Extension ?
 - Option to delete open tickets when issuer gets deleted.
 - Better user change tracking
 	- User name change tracking is flaky

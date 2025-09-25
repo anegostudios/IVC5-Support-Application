@@ -49,13 +49,16 @@ class TicketDigest extends \IPS\Extensions\QueueAbstract
 		$ticketOpenQuery = 't.status = '.TicketStatus::Open;
 		$orderByLastAction = '(SELECT MAX(created) FROM vssupport_ticket_action_history WHERE ticket = t.id) DESC'; //TODO(Rennorb) @perf
 
-		try {
 		$query = query_all(Moderators::select($db, 'm.*', 'm.member_id > '.$offset, 'm.member_id ASC', 10));
 		foreach($query as $row) {
-			$assignedAndOpen = query_all($db->select('t.id, t.subject, t.priority, t.created, t.status, t.category',
+			$assignedAndOpen = query_all($db->select('t.id, t.subject, t.priority, t.created, t.status, t.category, la.last_update_at, IFNULL(lm.name, t.issuer_name) as last_update_by_name',
 				['vssupport_tickets', 't'], "$ticketOpenQuery AND t.assigned_to = {$row['member_id']}", $orderByLastAction)
 				->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
 				->join(['vssupport_ticket_categories', 'c'], 'c.id = t.category')
+				//NOTE(Rennorb): Due to the extremely questionable implementation of the query joiner this _has to be_ a select object...
+				->join($db->select('ticket, max(created) as last_update_at', ['vssupport_ticket_action_history', 'la'], group: 'ticket'), 'la.ticket = t.id')
+				->join(['vssupport_ticket_action_history', 'la2'], 'la2.ticket = t.id AND la2.created = la.last_update_at')
+				->join( ['core_members', 'lm'], 'lm.member_id = la2.initiator')
 			);
 
 			$emailParams = [
@@ -69,9 +72,6 @@ class TicketDigest extends \IPS\Extensions\QueueAbstract
 			$offset = intval($row['member_id']);
 			$data['done']++;
 		}
-	}catch(\Exception $ex) {
-		die(var_dump($ex));
-	}
 
 		if($oldOffset === $offset)  throw new QueueOutOfRangeException();
 
