@@ -38,3 +38,8 @@
 .ticket-message .message-author {
 	color: var(--message-color);
 }
+
+.ticket-message.email-ingest>:last-child {
+	white-space: pre;
+	line-break: normal;
+}

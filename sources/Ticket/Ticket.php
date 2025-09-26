@@ -1,7 +1,6 @@
 <?php namespace IPS\vssupport;
 
 use IPS\Db;
-use IPS\Db\Select;
 
 if(!\defined('\IPS\SUITE_UNIQUE_KEY'))
 {
@@ -10,6 +9,8 @@ if(!\defined('\IPS\SUITE_UNIQUE_KEY'))
 }
 
 class Ticket {
+	public const HASH_BYTE_LEN = 16;
+
 	//NOTE(Rennorb): In theory, IVC has the ReadMarkers Trait, but that is so deep into the MVC trench that I cannot be bothered trying to make it work without implementing 50 things i don't care about.
 	// So we just do it ourself.
 

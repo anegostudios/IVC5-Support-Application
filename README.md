@@ -62,6 +62,7 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 			- Some stati are builtin and cannot be removed
 			- Preview translated names
 		- ACP Profile block showing member ticket history
+		- Settings for email ingress (currently IMAP only)
 
 ### Screenshots
 
@@ -86,9 +87,9 @@ Without leaving the ticket for most actions.
 ## TODO
 
 - Migrate ticket attachments
-- Email ingest
 - GitHub linking
 - GitLab linking
+- Fix AdminCP not highlighting the correct menu item
 - MFAArea Extension ?
 - Option to delete open tickets when issuer gets deleted.
 - Better user change tracking
@@ -96,6 +97,8 @@ Without leaving the ticket for most actions.
 - Admin bulk actions
 - Allow notification merging
 - Migration: empty_local_data ?
+- Get the in system/Email/Outgoing/Smtp.php:221 that prevents settings custom `Message-id`'s fixed.
+
 
 ## License
 

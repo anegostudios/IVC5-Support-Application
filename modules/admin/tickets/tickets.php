@@ -11,13 +11,13 @@ use IPS\Theme;
 use IPS\Helpers;
 use IPS\Helpers\Form;
 use IPS\Http\Url;
-use IPS\Notification;
-use IPS\Email;
 use IPS\Request;
 use IPS\vssupport\ActionKind;
+use IPS\vssupport\Email;
 use IPS\vssupport\Message;
 use IPS\vssupport\MessageFlags;
 use IPS\vssupport\Moderators;
+use IPS\vssupport\Notification;
 use IPS\vssupport\StatusFlags;
 use IPS\vssupport\Ticket;
 use IPS\vssupport\TicketFlags;
@@ -317,7 +317,11 @@ class tickets extends Controller
 			if(!$action['initiator']) $action['initiator'] = $action['initiator_id'] === 0 ? $ticket['issuer_name'] : static::_unknownName($lang);
 			if($action['kind'] === ActionKind::Assigned && !$action['assigned_to_name']) $action['assigned_to_name'] = static::_unknownName($lang);
 			if($action['kind'] === ActionKind::PriorityChange) $action['reference_id'] -= 2; // :UnsignedPriority
-			if($action['kind'] === ActionKind::Message) $action['message_kind'] = ($action['flags'] & MessageFlags::Internal) ? 'internal' : (($action['initiator_id'] === 0 || $action['initiator'] === $ticket['issuer_name']) ? 'issuer' : 'moderator');
+			if($action['kind'] === ActionKind::Message) {
+				$classes = ($action['flags'] & MessageFlags::Internal) ? 'message-internal' : (($action['initiator_id'] === 0 || $action['initiator'] === $ticket['issuer_name']) ? 'message-issuer' : 'message-moderator');
+				if($action['flags'] & MessageFlags::EmailIngest) $classes .= ' email-ingest';
+				$action['classes'] = $classes;
+			}
 		}
 		unset($action);
 
@@ -411,15 +415,11 @@ class tickets extends Controller
 			// needed for notification
 			$message->ticketHash = $ticket['hash'];
 
-			$emailParams = [$ticketId, $ticket['hash'], $values['text'], $member->name];
 			if($ticket['issuer_id']) {
-				$notification = new Notification(Application::load('vssupport'), 'ticket_response', $message, $emailParams, allowMerging: false);
-				$notification->recipients->attach(Member::load($ticket['issuer_id']));
-				$notification->send();
+				Notification::sendNewResponseNotification($ticketId, $ticket['hash'], Member::load($ticket['issuer_id']), $message, $member->name);
 			}
 			else {
-				$email = Email::buildFromTemplate('vssupport', 'notification_ticket_response', $emailParams, Email::TYPE_TRANSACTIONAL);
-				$email->send($ticket['issuer_email']);
+				Email::sendTicketResponseEmail($ticketId, $ticket['hash'], $values['text'], $ticket['issuer_email'], $member->name);
 			}
 		}
 

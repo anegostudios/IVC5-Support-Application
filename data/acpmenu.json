@@ -30,6 +30,12 @@
                     "preferences"
                 ]
             }
+        },
+        "settings": {
+            "tab": "vssupport",
+            "controller": "settings",
+            "do": "",
+            "restriction": "settings_manage"
         }
     }
 }

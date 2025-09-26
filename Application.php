@@ -16,7 +16,8 @@ use IPS\Db;
 use IPS\Db\Select;
 
 class MessageFlags {
-	public const Internal = 1 << 0;
+	public const Internal    = 1 << 0;
+	public const EmailIngest = 1 << 1;
 }
 
 class TicketFlags {

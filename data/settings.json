@@ -1,1 +1,6 @@
-[]
+[
+    {
+        "key": "vssupport_mail_ingres",
+        "default": "{}"
+    }
+]
