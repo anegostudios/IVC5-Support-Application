@@ -1,8 +1,23 @@
-/* TODO(Rennorb) @ui: horizontal layout for wide */
 #tick-main-wrap {
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
+}
+
+@media (min-width: 1900px) {
+	#tick-main-wrap {
+		flex-direction: row;
+	}
+	#tick-hist-wrap {
+		flex-grow: 1;
+	}
+	#extra-blocks-container {
+		min-width: 50em;
+	}
+	#extra-blocks-container>* {
+		position: sticky;
+		top: 5em; /*header spacing*/
+	}
 }
 
 .ticket-message.message-internal {
@@ -44,7 +59,7 @@
 	left: 0; /* fix bug in core */
 }
 
-#extra-blocks-container {
+#extra-blocks-container>* {
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
