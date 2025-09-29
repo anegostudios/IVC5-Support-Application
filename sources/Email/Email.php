@@ -110,8 +110,6 @@ class Email
 
 		$processed = 0;
 		foreach($overviews as $overview) {
-			if($overview->seen) continue;
-
 			$inReplyTo = $overview->in_reply_to ?? '';
 			if(!$inReplyTo) continue;
 
