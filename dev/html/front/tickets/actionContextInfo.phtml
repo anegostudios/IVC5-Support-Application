@@ -1,2 +1,2 @@
 <ips:template parameters="$action"/>
-<span class="i-font-size_-2 i-color_soft i-flex_00"><i class="fa-solid fa-clock"></i>&nbsp;{$action['created']}</span>
+<span class="i-font-size_-2 i-color_soft i-flex_00"><i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($action['created'])->html(true);}}</span>

@@ -224,7 +224,11 @@ class tickets extends Controller
 			if(!$action['initiator']) $action['initiator'] = $ticket['issuer_name'];
 			if($action['kind'] === ActionKind::Assigned && !$action['assigned_to_name']) $action['assigned_to_name'] = $lang->addToStack('unknown');
 			if($action['kind'] === ActionKind::PriorityChange) $action['reference_id'] -= 2; // :UnsignedPriority
-			if($action['kind'] === ActionKind::Message) $action['message_kind'] = $action['initiator_id'] === 0 || $action['initiator'] === $ticket['issuer_name'] ? 'issuer' : 'moderator';
+			if($action['kind'] === ActionKind::Message) {
+				$classes = $action['initiator_id'] === 0 || $action['initiator'] === $ticket['issuer_name'] ? 'message-issuer' : 'message-moderator';
+				if($action['flags'] & MessageFlags::EmailIngest) $classes .= ' email-ingest';
+				$action['classes'] = $classes;
+			} 
 		}
 		unset($action);
 

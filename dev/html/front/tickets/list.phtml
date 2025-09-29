@@ -14,7 +14,7 @@
 	{{foreach $tickets as $ticket}}
 		<a class="ipsBox i-padding_2 ticket{{if $ticket['read']}} read{{endif}}" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&hash={$ticket['hash']}" seoTemplate="tickets_view_hash"}">
 			<h3>{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}} {$ticket['subject']}</h3>
-			<h3 class="i-color_soft i-flex">{template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}<span class="i-margin-start_auto">{$ticket['created']}</span></h3>
+			<h3 class="i-color_soft i-flex">{template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}<span class="i-margin-start_auto">{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html(true);}}</span></h3>
 		</a>
 	{{endforeach}}
 </div>

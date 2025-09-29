@@ -110,5 +110,10 @@ class StatusFlags {
 	public const TicketResolved = 1 << 0;
 }
 
+function format_local_date_time(string $dbData) : \IPS\DateTime
+{
+	return \IPS\DateTime::createFromFormat('Y-m-d H:i:s', $dbData);
+}
+
 
 class Application extends SystemApplication { }

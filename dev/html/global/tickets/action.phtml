@@ -1,7 +1,7 @@
 <ips:template parameters="$action"/>
 {{if $action['kind'] === \IPS\vssupport\ActionKind::Message}}
 	<div class="ipsBox ticket-message {$action['classes']}">
-		<div class="ipsBox__header i-padding-end_2"><span class="i-flex_91 message-author">{$action['initiator']}</span><span class="i-font-size_-2 i-color_soft i-flex_00"><i class="fa-solid fa-clock"></i>&nbsp;{$action['created']}</span></div>
+		<div class="ipsBox__header i-padding-end_2"><span class="i-flex_91 message-author">{$action['initiator']}</span><span class="i-font-size_-2 i-color_soft i-flex_00"><i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($action['created'])->html(true);}}</span></div>
 		<div class="i-padding_2">{$action['text']|raw}</div>
 	</div>
 {{else}}
