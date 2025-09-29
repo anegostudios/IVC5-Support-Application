@@ -5,7 +5,7 @@
 		{{foreach $tickets as $ticket}}
 		<a class="ticket i-padding_2 i-padding-block_1 i-display_block i-color_hard" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&id={$ticket['id']}"}">
 			<h3 class="i-flex">{$ticket['subject']}&nbsp;<span class="i-color_soft">#{$ticket['id']}</span><span class="i-margin-start_auto">{lang="ticket_status_{$ticket['status']}_name"}</span></h3>
-			<p class="i-color_soft i-flex">{lang="ticket_category_{$ticket['category']}_name"}<span class="i-margin-start_auto">{$ticket['created']}</span></p>
+			<p class="i-color_soft i-flex">{lang="ticket_category_{$ticket['category']}_name"}<span class="i-margin-start_auto">{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html(short: true);}}</span></p>
 		</a>
 		{{endforeach}}
 	</div>

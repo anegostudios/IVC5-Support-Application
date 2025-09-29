@@ -23,6 +23,7 @@ use IPS\vssupport\Ticket;
 use IPS\vssupport\TicketFlags;
 use IPS\vssupport\TicketStatus;
 
+use function IPS\vssupport\format_local_date_time;
 use function IPS\vssupport\query_all;
 use function IPS\vssupport\query_all_assoc;
 use function IPS\vssupport\query_one;
@@ -165,19 +166,21 @@ class tickets extends Controller
 			},
 			'created' => function($val, $row) {
 				$name = htmlspecialchars($row['issuer_name'], ENT_DISALLOWED, 'UTF-8', FALSE);
+				$date = format_local_date_time($val);
 				return <<<HTML
 					<div>
 						<p>{$name}</p>
-						<p><small class="i-color_soft">{$val}</small></p>
+						<p><small class="i-color_soft">{$date->html(short: true)}</small></p>
 					</div>
 				HTML;
 			},
 			'last_update' => function($val, $row) {
 				$name = htmlspecialchars($row['last_update_by_name'] ?: $row['issuer_name'], ENT_DISALLOWED, 'UTF-8', FALSE);
+				$date = format_local_date_time($row['last_update_at'] ?? '0000-00-00 00:00:00');
 				return <<<HTML
 					<div>
 						<p>{$name}</p>
-						<p><small class="i-color_soft">{$row['last_update_at']}</small></p>
+						<p><small class="i-color_soft">{$date->html(short: true)}</small></p>
 					</div>
 				HTML;
 			},

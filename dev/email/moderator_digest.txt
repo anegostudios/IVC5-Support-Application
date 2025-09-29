@@ -9,9 +9,9 @@
 {$ticket['subject']} - #{$ticket['id']}
 
 {$email->language->addToStack('mail_part__ticket_description_plain', options: ['sprintf' => [
-	$ticket['created'],
+	\IPS\vssupport\format_local_date_time($ticket['created']),
 	$ticket['last_update_by_name'],
-	$ticket['last_update_at'],
+	\IPS\vssupport\format_local_date_time($ticket['last_update_at'] ?? '0000-00-00 00:00:00'),
 	$email->language->addToStack('ticket_status_'.$ticket['status'].'_name'),
 	$email->language->addToStack('ticket_category_'.$ticket['category'].'_name'),
 	$email->language->addToStack('ticket_prio_'.$ticket['priority'].'_name'),
