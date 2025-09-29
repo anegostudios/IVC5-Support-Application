@@ -1,1 +1,52 @@
-{}
+{
+    "app=vssupport&module=tickets&controller=tickets": {
+        "lang_key": "menu__vssupport_tickets_tickets",
+        "restriction": "tickets_manage",
+        "keywords": [
+            "Support",
+            "Ticket"
+        ]
+    },
+    "app=vssupport&module=tickets&controller=categories": {
+        "lang_key": "menu__vssupport_tickets_categories",
+        "restriction": "categories_manage",
+        "keywords": [
+            "Support",
+            "Ticket",
+            "Category"
+        ]
+    },
+    "app=vssupport&module=tickets&controller=stati": {
+        "lang_key": "menu__vssupport_tickets_stati",
+        "restriction": "stati_manage",
+        "keywords": [
+            "Support",
+            "Ticket",
+            "Status"
+        ]
+    },
+    "app=vssupport&module=tickets&controller=tickets&do=preferences": {
+        "lang_key": "menu__vssupport_tickets_ticketspreferences",
+        "restriction": "tickets_manage",
+        "keywords": [
+            "Support",
+            "Ticket",
+            "Default",
+            "Reply"
+        ]
+    },
+    "app=vssupport&module=tickets&controller=settings": {
+        "lang_key": "menu__vssupport_tickets_settings",
+        "restriction": "settings_manage",
+        "keywords": [
+            "Support",
+            "Ticket",
+            "Mail",
+            "Email",
+            "SMTP",
+            "Ingres",
+            "Ingest",
+            "Inbox"
+        ]
+    }
+}
