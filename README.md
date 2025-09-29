@@ -84,13 +84,27 @@ Managing purchase information of affected customer.
 ![img](.doc/ticket_admin_view_purchases_overlay.jpg)  
 Without leaving the ticket for most actions.
 
+## Installation
+
+1. Obtain an installation of [Invision Community 5](https://invisioncommunity.com/)
+2. Download the `VS Support xx.xx.xx.tar` from [the latest github releases](https://github.com/anegostudios/IVC5-Support-Application/releases/latest)
+3. Log into the IVC5 AdminCP and navigate to `System > Applications`
+4. Click on `Upload`, and supply the file you just downloaded.
+5. It already works. You should now:
+
+	0. Optionally migrate old tickets via the conversion tool,
+	1. configure moderator permissions,
+	2. configure custom Stati and Categories,
+	3. optionally configure email ingress,
+	4. place the frontend menu item for endusers to issue tickets.
+
 ## TODO
 
-- Migrate ticket attachments
 - GitHub linking
 - GitLab linking
-- Fix AdminCP not highlighting the correct menu item
 - MFAArea Extension ?
+- Fix AdminCP not highlighting the correct menu item
+- Migrate ticket attachments
 - Option to delete open tickets when issuer gets deleted.
 - Better user change tracking
 	- User name change tracking is flaky

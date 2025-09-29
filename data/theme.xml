@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<theme name="Default" author_name="Invision Power Services, Inc" author_url="https://www.invisioncommunity.com">
+ <template template_group="tickets" template_name="action" template_data="$action" template_location="global" template_app="vssupport"><![CDATA[{{if $action['kind'] === \IPS\vssupport\ActionKind::Message}}
+	<div class="ipsBox ticket-message {$action['classes']}">
+		<div class="ipsBox__header i-padding-end_2"><span class="i-flex_91 message-author">{$action['initiator']}</span><span class="i-font-size_-2 i-color_soft i-flex_00"><i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($action['created'])->html(true);}}</span></div>
+		<div class="i-padding_2">{$action['text']|raw}</div>
+	</div>
+{{else}}
+	<div class="i-padding-inline_2 i-color_soft i-flex i-gap_1">
+		<span class="i-flex_91">
+		{{switch($action['kind']): case \IPS\vssupport\ActionKind::PriorityChange:}}
+			{lang="priority_changed_to"}&nbsp;{template="priorityLabel" location="global" group="tickets" params="$action['reference_id']"}
+		{{break; case \IPS\vssupport\ActionKind::CategoryChange:}}
+			{lang="category_changed_to"}&nbsp;{lang="ticket_category_{$action['reference_id']}_name"}
+		{{break; case \IPS\vssupport\ActionKind::StatusChange:}}
+			{lang="status_changed_to"}&nbsp;{lang="ticket_status_{$action['reference_id']}_name"}
+		{{break; case \IPS\vssupport\ActionKind::Assigned:}}
+			{{if $action['reference_id']}}
+				{lang="ticket_assigned_to"}&nbsp;{$action['assigned_to_name']}
+			{{else}}
+				{lang="ticket_unassigned"}
+			{{endif}}
+		{{break; case \IPS\vssupport\ActionKind::LockedChange:}}
+			{lang="locked_changed_to_{$action['reference_id']}"}
+		{{break; case \IPS\vssupport\ActionKind::UserDeleted:}}
+			{lang="ticket_issuer_deleted"}
+		{{break; case \IPS\vssupport\ActionKind::UserMerged:}}
+			{lang="ticket_issuer_merged"}
+		{{break; case \IPS\vssupport\ActionKind::UserValidated:}}
+			{lang="ticket_issuer_validated"}
+		{{break; case \IPS\vssupport\ActionKind::UserEmailChanged:}}
+			{lang="ticket_issuer_email_changed"}
+		{{break; case \IPS\vssupport\ActionKind::UserNameChanged:}}
+			{lang="ticket_issuer_name_changed"}
+		{{break; default:}}
+			Action: {$action['kind']} {$action['reference_id']}
+		{{endswitch}}
+		</span>
+		{template="actionContextInfo" group="tickets" params="$action"}
+	</div>
+{{endif}}]]></template>
+ <template template_group="tickets" template_name="actionContextInfo" template_data="$action" template_location="admin" template_app="vssupport"><![CDATA[<span class="i-font-size_-2 i-color_soft i-flex_00">{$action['initiator']} - <i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($action['created'])->html(true);}}</span>]]></template>
+ <template template_group="tickets" template_name="actionContextInfo" template_data="$action" template_location="front" template_app="vssupport"><![CDATA[<span class="i-font-size_-2 i-color_soft i-flex_00"><i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($action['created'])->html(true);}}</span>]]></template>
+ <template template_group="tickets" template_name="list" template_data="$table" template_location="admin" template_app="vssupport"><![CDATA[<div id="ticket-list-wrapper" style="overflow-y: auto;">
+	{$table|raw}
+</div>
+<style>
+	#ticket-list-wrapper tr>:first-child {
+		min-width: 45ch;
+	}
+
+	.ipsControlStrip_button>[data-controlstrip-action="conv_len"]>.ipsControlStrip_icon {
+		display: none;
+	}
+	.ipsControlStrip_button>[data-controlstrip-action="conv_len"]::after {
+		content: attr(data-count);
+	}
+
+	.ticket-read-mark {
+		margin-top: -14px;
+		margin-bottom: -14px;
+		margin-left: -10px;
+
+		padding-left: .5em;
+		border-left: solid .5em var(--i-co);
+		padding-top: 14px;
+		padding-bottom: 14px;
+	}
+	.ticket-read-mark.read {
+		border-left-color: transparent;
+	}
+
+  #ticket-list-wrapper .ipsTable--collapse .ipsControlStrip:not(.ipsControlStrip_showText) .ipsControlStrip_item {
+		display: none;
+  }
+</style>
+<script>
+	// middle click to open in new tab
+	document.getElementById('ticket-list-wrapper').getElementsByTagName('table')[0].addEventListener("mousedown", e => {
+		if(e.which !== 2) return;
+		e.preventDefault();
+
+		let row = e.target;
+		while(row.nodeName !== 'TR') {
+			row = row.parentElement;
+			if(!row) return;
+		}
+
+		const anchorEl = row.lastElementChild.querySelector('a[data-controlstrip-action="view"]');
+		open(anchorEl.href, '_blank', 'noopener');
+	})
+</script>]]></template>
+ <template template_group="tickets" template_name="list" template_data="$tickets" template_location="front" template_app="vssupport"><![CDATA[<div style="text-align: right">
+	{{$createLink = \IPS\Http\Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');}}
+	{template="button" app="core" group="forms" location="global" params="'ticket_create', 'link', $createLink, 'ipsButton ipsButton--primary', ['tabindex' => 1, 'accesskey' => 'c']"}
+</div>
+<style>
+.ticket {
+	border-left: solid .5em var(--i-co);
+	padding-left: .5em;
+}
+.ticket.read { border-left-color: transparent; }
+</style>
+<div class="i-flex i-flex-direction_column i-gap_1">
+	{{foreach $tickets as $ticket}}
+		<a class="ipsBox i-padding_2 ticket{{if $ticket['read']}} read{{endif}}" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&hash={$ticket['hash']}" seoTemplate="tickets_view_hash"}">
+			<h3>{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}} {$ticket['subject']}</h3>
+			<h3 class="i-color_soft i-flex">{template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}<span class="i-margin-start_auto">{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html(true);}}</span></h3>
+		</a>
+	{{endforeach}}
+</div>]]></template>
+ <template template_group="tickets" template_name="listExtra" template_data="$tabs, $activeTabKey" template_location="admin" template_app="vssupport"><![CDATA[<div class="ipsButtonBar">
+	<ul class="i-flex i-flex-direction_row i-padding-bottom_0">
+		{{foreach $tabs as $key => $tab}}
+		<li class="i-flex_00"><a class="ipsDataFilters__button{{if $activeTabKey === $key}} i-color_inherit i-background_3{{endif}}" href="{$tab['url']|raw}"><span class="i-background_1 i-padding-inline_1">{$tab['count']}</span>&nbsp;{lang="$tab['name']"}</a></li>
+		{{endforeach}}
+	</ul>
+</div>]]></template>
+ <template template_group="tickets" template_name="priorityLabel" template_data="$priority" template_location="global" template_app="vssupport"><![CDATA[<span class="prio-label prio-{$priority}">{lang="ticket_prio_{$priority}_name"}</span>]]></template>
+ <template template_group="tickets" template_name="profileBlockList" template_data="$tickets, $totalCount, $member" template_location="admin" template_app="vssupport"><![CDATA[<div id="user-tickets-box" class="ipsBox">
+	<h2 class="ipsBox__header"><i class="fa-solid fa-medkit ipsBox__header-icon"></i>{lang="tickets"}</h2>
+	<div>
+		{{foreach $tickets as $ticket}}
+		<a class="ticket i-padding_2 i-padding-block_1 i-display_block i-color_hard" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&id={$ticket['id']}"}">
+			<h3 class="i-flex">{$ticket['subject']}&nbsp;<span class="i-color_soft">#{$ticket['id']}</span><span class="i-margin-start_auto">{lang="ticket_status_{$ticket['status']}_name"}</span></h3>
+			<p class="i-color_soft i-flex">{lang="ticket_category_{$ticket['category']}_name"}<span class="i-margin-start_auto">{$ticket['created']}</span></p>
+		</a>
+		{{endforeach}}
+	</div>
+	{{if $totalCount > 1}}
+	<div class="ipsViewAll">
+		<a href="{url="app=vssupport&module=tickets&controller=tickets&advanced_search_submitted=1&issuer_email={$member->email}"}">{lang="show_all"}</a>
+	</div>
+	{{endif}}
+</div>
+<style>
+#user-tickets-box a.ticket:nth-child(n+2) { border-top: 1px solid var(--i-background_4); }
+#user-tickets-box a.ticket:hover { background-color: var(--i-background_hover); }
+</style>]]></template>
+ <template template_group="tickets" template_name="purchasesWidget" template_data="$targetUserName, $tabs, $activeTabKey, $activeTabContents" template_location="admin" template_app="vssupport"><![CDATA[<div class='ipsBox' data-ips-template="purchases">
+	<h2 class="ipsBox__header">{lang="users_purchases" sprintf="$targetUserName"}</h2>
+	<i-tabs class='ipsTabs ipsTabs--stretch' id='ipsTabs_purchases' data-ipsTabBar data-ipsTabBar-contentArea='#ipsTabs_purchases_content' data-ipsTabBar-updateUrl="false">
+		<div role='tablist'>
+			{{foreach $tabs as $k => $tab}}
+				<a href='{$tab["url"]}' class='ipsTabs__tab' role="tab" id='ipsTabs_purchases_{$k}' aria-controls="ipsTabs_purchases_{$k}_panel" aria-selected="{{if $activeTabKey == $k}}true{{else}}false{{endif}}">
+				{lang="purchase_tab_{$k}"}
+				({$tab['count']})
+				</a>
+			{{endforeach}}
+		</div>
+		{template="tabScrollers" app="core" group="global" location="global"}
+	</i-tabs>
+	<div id='ipsTabs_purchases_content' class='ipsTabs__panels acpFormTabContent'>
+		<div id='ipsTabs_purchases_{$activeTabKey}_panel' class='ipsTabs__panel' role="tabpanel" aria-labelledby='ipsTabs_purchases_{$activeTabKey}'>
+			{$activeTabContents|raw}
+		</div>
+	</div>
+</div>]]></template>
+ <template template_group="tickets" template_name="purchasesWidgetRow" template_data="$purchase, $description, $buttons" template_location="admin" template_app="vssupport"><![CDATA[<div class="i-flex i-gap_1 i-padding_2 ">
+	<span class="ipsTree__icon i-align-self_center"><i class="fa-solid fa-{$purchase->getIcon()}"></i></span>
+	<div>
+		<h3 class="ipsList__label">{$purchase->name}</h3>
+		<p>$description</p>
+	</div>
+	<div class="i-flex_91"></div>
+	<div>{template="controlStrip" group="global" app="core" params="$buttons"}</div>
+</div>]]></template>
+ <template template_group="tickets" template_name="ticket" template_data="$ticket, $actions, $form, $extraBlocks, $sortDir" template_location="admin" template_app="vssupport"><![CDATA[<h2 class="ipsTitle ipsTitle--h2 i-flex"><span>{lang="ticket"} #{$ticket['id']} - {$ticket['subject']}</span><button id="change-history-sort" style="align-self: flex-start; margin-left: auto;" class="ipsButton i-padding_1 i-font-size_3" title="{lang='change_history_direction'}" click="javascript:void(0)"><i class="fa fa-sort-numeric-{$sortDir}"></i></button></h2>
+<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_category_{$ticket['category']}_name"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}, {lang="ticket_status_{$ticket['status']}_name"}{{if $ticket['assigned_to']}}, {lang="assigned_to"}:&nbsp;{$ticket['assigned_to_name']}{{endif}}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}}</h3>
+<h4 class="ipsTitle ipsTitle--h4">{$ticket['issuer_name']} - {$ticket['issuer_email']} <span class="i-color_soft">started <i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html();}}</span></h4>
+<div id="tick-main-wrap">
+	<div id="tick-hist-wrap" style="display: flex; flex-direction: column; gap: 1em;">
+		{{if $sortDir === 'asc'}}
+			{{foreach $actions as $action}}
+				{template="action" location="global" group="tickets" params="$action"}
+			{{endforeach}}
+			{$form|raw}
+		{{else}}
+			{$form|raw}
+			{{foreach $actions as $action}}
+				{template="action" location="global" group="tickets" params="$action"}
+			{{endforeach}}
+		{{endif}}
+	</div>
+	<div id="extra-blocks-container">
+		<div>
+		{{foreach $extraBlocks as $extra}}
+			{$extra|raw}
+		{{endforeach}}
+		</div>
+	</div>
+</div>
+<script lang="text/javascript">
+{
+	let histSortDir = '{$sortDir}';
+	const histContainer = document.getElementById('tick-hist-wrap');
+	const changeSortBtn = document.getElementById('change-history-sort');
+	changeSortBtn.addEventListener('click', () => {
+		histSortDir = histSortDir === 'asc' ? 'desc' : 'asc';
+		changeSortBtn.firstElementChild.classList.toggle('fa-sort-numeric-asc', histSortDir === 'asc')
+		changeSortBtn.firstElementChild.classList.toggle('fa-sort-numeric-desc', histSortDir !== 'asc')
+		histContainer.replaceChildren(...Array.from(histContainer.children).reverse());
+		ips.utils.cookie.set('ticketSort', histSortDir, true);
+	})
+	if(histSortDir === 'asc') {
+		//TODO(Rennorb) @ux: only scroll if previously read
+		document.getElementById('reply-form').scrollIntoView({ behavior: "instant", block: "end" });
+	}
+}
+</script>]]></template>
+ <template template_group="tickets" template_name="ticket" template_data="$ticket, $actions, $form" template_location="front" template_app="vssupport"><![CDATA[{{$createLink = \IPS\Http\Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');}}
+<h2 class="ipsTitle ipsTitle--h2">{lang="ticket"} #{$ticket['id']} - {$ticket['subject']}{template="button" app="core" group="forms" location="global" params="'ticket_create', 'link', $createLink, 'ipsButton ipsButton--primary i-font-size_1 i-float_end', ['tabindex' => 1, 'accesskey' => 'c']"}</h2>
+<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_category_{$ticket['category']}_name"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}, {lang="ticket_status_{$ticket['status']}_name"}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}} <small class="i-color_soft i-font-size_-1">started <i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html(true);}}</small></h3>
+<div style="display: flex; flex-direction: column; gap: 1em;">
+	{{foreach $actions as $action}}
+		{template="action" location="global" group="tickets" params="$action"}
+	{{endforeach}}
+	{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}
+		<div class="ipsBox i-padding_2 i-text-align_center i-background_moderated">{lang="ticket_locked"}</div>
+	{{else}}
+		{$form|raw}
+	{{endif}}
+</div>]]></template>
+ <css css_location="global" css_app="vssupport" css_attributes="" css_path="." css_name="global.css"><![CDATA[/* Prio labels */
+/* TODO(Rennorb) @visual: [data-ips-scheme="light"] / dark .. */
+:root {
+	--ticket-prio-bg--2: #444;
+	--ticket-prio-fg--2: #999;
+	--ticket-prio-bg--1: #444;
+	--ticket-prio-fg--1: #999;
+	--ticket-prio-bg-0: #444;
+	--ticket-prio-fg-0: #999;
+	--ticket-prio-bg-1: #faa;
+	--ticket-prio-fg-1: #999;
+	--ticket-prio-bg-2: #f44;
+	--ticket-prio-fg-2: #fdd;
+}
+
+.prio--2 { --ticket-prio-bg: var(--ticket-prio-bg--2); --ticket-prio-fg: var(--ticket-prio-fg--2); }
+.prio--1 { --ticket-prio-bg: var(--ticket-prio-bg--1); --ticket-prio-fg: var(--ticket-prio-fg--1); }
+.prio-0 { --ticket-prio-bg: var(--ticket-prio-bg-0); --ticket-prio-fg: var(--ticket-prio-fg-0); }
+.prio-1 { --ticket-prio-bg: var(--ticket-prio-bg-1); --ticket-prio-fg: var(--ticket-prio-fg-1); }
+.prio-2 { --ticket-prio-bg: var(--ticket-prio-bg-2); --ticket-prio-fg: var(--i-color_hard); }
+.prio-label {
+	display: inline-block;
+	padding: 0 .25em;
+  height: 1.2em;
+  line-height: 1;
+  border-radius: .125em;
+	background-color: var(--ticket-prio-bg);
+	color: var(--ticket-prio-fg);
+	white-space: nowrap;
+}
+
+/* Message coloring */
+.ticket-message.message-issuer { --message-color: #358ef4; }
+.ticket-message.message-moderator { --message-color: #2fa92f; }
+.ticket-message {
+	border-left: solid var(--message-color, var(--i-background_4)) .5em;
+}
+.ticket-message .message-author {
+	color: var(--message-color);
+}
+
+.ticket-message.email-ingest>:last-child {
+	white-space: pre;
+	line-break: normal;
+}]]></css>
+ <css css_location="admin" css_app="vssupport" css_attributes="" css_path="." css_name="hideBar.css"><![CDATA[#acpAppList > li.acpAppList_active .acpAppList__sub {
+	display: none;
+}
+
+#acpAppMenu {
+	--menu-width: 0;
+}
+#acpAppMenu:focus,
+#acpAppMenu:focus-within,
+#acpAppMenu:hover {
+	--menu-width: 200px;
+}
+
+
+#acpAppList > li.acpAppList_active:focus .acpAppList__sub,
+#acpAppList > li.acpAppList_active:focus-within .acpAppList__sub,
+#acpAppList > li.acpAppList_active:hover .acpAppList__sub {
+	display: block;
+}
+]]></css>
+ <css css_location="admin" css_app="vssupport" css_attributes="" css_path="." css_name="ticket.css"><![CDATA[#tick-main-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+@media (min-width: 1900px) {
+	#tick-main-wrap {
+		flex-direction: row;
+	}
+	#tick-hist-wrap {
+		flex-grow: 1;
+	}
+	#extra-blocks-container {
+		min-width: 50em;
+	}
+	#extra-blocks-container>* {
+		position: sticky;
+		top: 5em; /*header spacing*/
+	}
+}
+
+.ticket-message.message-internal {
+	--i-box--ba-co: hsl(40, 90%, 10%);
+	--i-boxHeader--ba-co: var(--i-box--ba-co);
+	--message-color: hsl(40, 80%, 45%);
+}
+
+.ipsSubmitRow {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: .5em;
+}
+
+.ipsSubmitRow>* {
+	margin-top: 1.25em;
+}
+
+.ipsSubmitRow .stretch {
+	height: 100%;
+}
+.ipsSubmitRow>button {
+	line-height: 2;
+}
+
+.ipsSubmitRow>[title] {
+	position: relative;
+}
+
+.ipsSubmitRow>[title]::before {
+	content: attr(title);
+	position: absolute;
+	bottom: calc(100% + .25em);
+	left: 1ch;
+}
+
+.ipsSubmitRow .ipsSwitch:before {
+	left: 0; /* fix bug in core */
+}
+
+#extra-blocks-container>* {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}]]></css>
+</theme>

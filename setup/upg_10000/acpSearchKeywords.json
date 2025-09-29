@@ -1,0 +1,11 @@
+{
+    "added": [
+        "app=vssupport&module=tickets&controller=tickets",
+        "app=vssupport&module=tickets&controller=categories",
+        "app=vssupport&module=tickets&controller=stati",
+        "app=vssupport&module=tickets&controller=tickets&do=preferences",
+        "app=vssupport&module=tickets&controller=settings"
+    ],
+    "edited": [],
+    "removed": []
+}

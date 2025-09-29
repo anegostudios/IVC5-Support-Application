@@ -1,0 +1,34 @@
+{
+    "html": {
+        "added": [
+            "global\/tickets\/action",
+            "admin\/tickets\/actionContextInfo",
+            "front\/tickets\/actionContextInfo",
+            "admin\/tickets\/list",
+            "front\/tickets\/list",
+            "admin\/tickets\/listExtra",
+            "global\/tickets\/priorityLabel",
+            "admin\/tickets\/profileBlockList",
+            "admin\/tickets\/purchasesWidget",
+            "admin\/tickets\/purchasesWidgetRow",
+            "admin\/tickets\/ticket",
+            "front\/tickets\/ticket"
+        ],
+        "edited": [],
+        "removed": []
+    },
+    "css": {
+        "added": [
+            "global\/global.css",
+            "admin\/hideBar.css",
+            "admin\/ticket.css"
+        ],
+        "edited": [],
+        "removed": []
+    },
+    "resources": {
+        "added": [],
+        "edited": [],
+        "removed": []
+    }
+}

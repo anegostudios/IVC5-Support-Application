@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language>
+ <app key="vssupport" version="10000">
+  <word key="__app_vssupport" js="0">VS Support</word>
+  <word key="menutab__vssupport" js="0">VS Support</word>
+  <word key="menutab__vssupport_icon" js="0">medkit</word>
+  <word key="menu__vssupport_tickets" js="0">Tickets</word>
+  <word key="menu__vssupport_tickets_tickets" js="0">Ticket List</word>
+  <word key="module__vssupport_tickets" js="0">Tickets</word>
+  <word key="frontnavigation_vssupport" js="0">Support</word>
+  <word key="tickets" js="0">Tickets</word>
+  <word key="ticket" js="0">Ticket</word>
+  <word key="ticket_submit" js="0">Submit Ticket</word>
+  <word key="ticket_create" js="0">New Ticket</word>
+  <word key="ticket_lock" js="0">Lock Ticket</word>
+  <word key="ticket_lock_desc" js="0">Locking a ticket restricts conversation to staff member only and prevents reopening by the issuer.</word>
+  <word key="ticket_locked" js="0">This Ticket has been locked.</word>
+  <word key="locked_changed_to_0" js="0">Ticket has been Unlocked</word>
+  <word key="locked_changed_to_1" js="0">Ticket has been Locked</word>
+  <word key="ticket_issuer_deleted" js="0">The issuer of this ticket was deleted. Name and notification email will be kept.</word>
+  <word key="ticket_issuer_merged" js="0">The issuer of this ticket was merged into another user. The ticket issuer has been adjusted.</word>
+  <word key="ticket_issuer_validated" js="0">A user with the same email as the issuer of this ticket has completed registration. This ticket has been merged into that user.</word>
+  <word key="ticket_issuer_email_changed" js="0">The ticket issuer changed their email. The notification email has been adjusted.</word>
+  <word key="ticket_issuer_name_changed" js="0">The issuer of this thicket changed their display name.</word>
+  <word key="my_tickets" js="0">My Tickets</word>
+  <word key="show_all" js="0">Show All</word>
+  <word key="message_add" js="0">Add Message</word>
+  <word key="ticked_considered_closed_notice" js="0">This ticket is considered to be closed, responding will reopen the ticket.</word>
+  <word key="menu__vssupport_tickets_categories" js="0">Manage Categories</word>
+  <word key="category" js="0">Category</word>
+  <word key="category_add" js="0">Add new Category</word>
+  <word key="category_edit" js="0">Edit Category</word>
+  <word key="category_changed_to" js="0">Category has been changed to</word>
+  <word key="category_delete" js="0">Delete Category</word>
+  <word key="category_replacement" js="0">Replacement Category</word>
+  <word key="category_replacement_notice" js="0">There are tickets using the category you want to delete. Select a different category to transfer those tickets to.</word>
+  <word key="editor__vssupport_CategoryDisclaimer" js="0">Per-Category Disclaimer</word>
+  <word key="disclaimer_desc" js="0">This disclaimer is shown to the issuer when creating a ticket in this category.</word>
+  <word key="menu__vssupport_tickets_stati" js="0">Manage Stati</word>
+  <word key="status" js="0">Status</word>
+  <word key="status_add" js="0">Add new Status</word>
+  <word key="status_edit" js="0">Edit Status</word>
+  <word key="status_delete" js="0">Delete Status</word>
+  <word key="status_changed_to" js="0">Status has been changed to</word>
+  <word key="status_replacement" js="0">Replacement Status</word>
+  <word key="status_replacement_notice" js="0">There are tickets using the status you want to delete. Select a different status to transfer those tickets to.</word>
+  <word key="stati" js="0">Stati</word>
+  <word key="is_closing_status" js="0">Is closing status?</word>
+  <word key="is_closing_status_desc" js="0">This status causes tickets to be considered 'closed', causing them to not show up in lists by default.</word>
+  <word key="priority" js="0">Priority</word>
+  <word key="priority_changed_to" js="0">Priority has been changed to</word>
+  <word key="assigned_to" js="0">Assigned To</word>
+  <word key="assign_to" js="0">Assign To</word>
+  <word key="ticket_assigned_to" js="0">Ticket has been assigned to</word>
+  <word key="ticket_unassigned" js="0">Ticket assignment has been removed</word>
+  <word key="text" js="0">Text</word>
+  <word key="editor__vssupport_TicketText" js="0">Ticket Creation</word>
+  <word key="respond_internal" js="0">Add as Internal Note</word>
+  <word key="respond_public" js="0">Respond</word>
+  <word key="dont_change" js="0">Don't change</word>
+  <word key="transfer_and_delete" js="0">Transfer and Delete</word>
+  <word key="current" js="0">Current</word>
+  <word key="users_invoices" js="0">%s's Invoices</word>
+  <word key="users_purchases" js="0">%s's Purchases</word>
+  <word key="issuer_name" js="0">Issuer Name</word>
+  <word key="issuer_email" js="0">Issuer Email</word>
+  <word key="last_update_at" js="0">Last Updated</word>
+  <word key="last_update" js="0">Last Updated</word>
+  <word key="created" js="0">Created</word>
+  <word key="menu__vssupport_tickets_ticketspreferences" js="0">My Preferences</word>
+  <word key="default_reply" js="0">Default Reply Text</word>
+  <word key="default_reply_desc" js="0">This text will be prepared as a reply when you view a ticket on the AdminCP.</word>
+  <word key="all_new_and_unassigned" js="0">New and unassigned</word>
+  <word key="all_unresolved" js="0">All not Resolved</word>
+  <word key="all_new_and_assigned_to_me" js="0">Assigned to me and New</word>
+  <word key="all_unresolved_and_assigned_to_me" js="0">Assigned to me and not Resolved</word>
+  <word key="conversation_length" js="0">Conversation length</word>
+  <word key="menu__vssupport_tickets_settings" js="0">Settings</word>
+  <word key="vssupport_settings" js="0">Settings</word>
+  <word key="vssupport_mail_ingres" js="0">VSSupport Email Ingress</word>
+  <word key="email_ingres" js="0">Email Ingres</word>
+  <word key="email_ingres_only_supports_imap_for_now" js="0">Currently only SMTP ingres is supported.</word>
+  <word key="php_imap_not_installed" js="0"><![CDATA[Your current installation of PHP does not seem to have the <a href="https://www.php.net/manual/en/imap.installation.php">imap extension</a> active. This extension is required to set up IMAP ingest.]]></word>
+  <word key="smtp_validate_cert" js="0">Validate server certificate</word>
+  <word key="smtp_inbox" js="0">SMTP Inbox</word>
+  <word key="smtp_delete_processed_mails" js="0">Delete successfully ingested emails</word>
+  <word key="imap_connection_failed" js="0">IMAP connection failed with the provided credentials: %s</word>
+  <word key="imap_mailbox_not_found" js="0">Specified mailbox was not found: %s</word>
+  <word key="core_smtp_impl_bug_error" js="0">Unfortunately, there currently is a typo in `system/Email/Outgoing/Smtp.php:221:16` (misspelled &quot;additionalHeaders&quot;). This prevents the whole ingest tracking from working, so unless you fix that manually and set the constant `I_MANUALLY_PATCHED_THE_CORE_SMTP_IMPLEMENTATION` or IVC releases a fix this option is unavailable.</word>
+  <word key="notifications__vssupport_Tickets" js="0">Support Tickets</word>
+  <word key="notifications__vssupport_Tickets_ticket_response" js="0">New Response</word>
+  <word key="notifications__vssupport_Tickets_ticket_response_desc" js="0">Issued whenever there is a new staff member response to a ticket.</word>
+  <word key="notification_ticket_response" js="0">New Response to Ticket #%d</word>
+  <word key="mailsub__vssupport_notification_ticket_response" js="0">New Response to Ticket #{$ticketId}</word>
+  <word key="emailtpl_notification_ticket_response" js="0">Ticket response notification</word>
+  <word key="mail_part__initiator_responded_to_ticket" js="0"><![CDATA[%s responded to your <a href="%s">Ticket #%d</a>:]]></word>
+  <word key="mail_part__here_is_the_link_to_ticket_if_not_recognized" js="0">Here is the link to the ticket in case your email client doesn't recognize it above:</word>
+  <word key="mail_part__here_is_the_link_to_ticket" js="0">Here is the link to the ticket:</word>
+  <word key="mail_part__do_not_respond_to_this_email" js="0">Do not respond to this email directly, it is autogenerated and the mailbox is not monitored. Your email response will be ignored.</word>
+  <word key="mailsub__vssupport_notification_ticket_created" js="0">Ticket #{$ticketId} Created</word>
+  <word key="emailtpl_notification_ticket_created" js="0">Ticket created confirmation</word>
+  <word key="mail_part__ticket_created" js="0"><![CDATA[Hey %s,<br />you have just created <a href="%s">Ticket #%d</a>:]]></word>
+  <word key="mailsub__vssupport_moderator_digest" js="0">Support Ticket Digest</word>
+  <word key="emailtpl_moderator_digest" js="0">Moderator digest</word>
+  <word key="mail_part__you_currently_have_n_open_tickets" js="0">You currently have {# [1:Ticket that is][?:Tickets that are]} assigned to you and open:</word>
+  <word key="mail_part__ticket_description" js="0"><![CDATA[Opened: %s - Last reply by: %s @ %s<br />Status: %s - Category: %s - Priority: %s]]></word>
+  <word key="mail_part__ticket_description_plain" js="0">Opened: %s - Last reply by: %s @ %s - Status: %s - Category: %s - Priority: %s</word>
+  <word key="sending_moderator_digest" js="0">Sending moderator daily digests...</word>
+  <word key="r__tickets" js="0">Can access Tickets?</word>
+  <word key="r__tickets_manage" js="0">Can manage Tickets?</word>
+  <word key="r__categories_manage" js="0">Can manage Categories?</word>
+  <word key="r__stati_manage" js="0">Can manage Stati?</word>
+  <word key="vssupport_pre_convert_notice" js="0">This conversion expects a fresh installation of the new support system. Specifically tickets might fail to convert if others are already present, because of collisions in the new hashes. For now hash collisions have to be manually resolved in the database, should they occur.</word>
+  <word key="convert_categories" js="0">Convert Categories</word>
+  <word key="_convert_categories" js="0">Categories</word>
+  <word key="convert_stati" js="0">Convert Stati</word>
+  <word key="_convert_stati" js="0">Stati</word>
+  <word key="convert_tickets" js="0">Convert Tickets</word>
+  <word key="_convert_tickets" js="0">Tickets</word>
+  <word key="convert_messages" js="0">Convert Messages</word>
+  <word key="_convert_messages" js="0">Messages</word>
+  <word key="convert_actions" js="0">Convert Actions</word>
+  <word key="_convert_actions" js="0">Actions</word>
+  <word key="vssupport_convert_failed_to_look_up_user" js="0">Failed to find a old member in the new database.</word>
+  <word key="ticket_prio_-2_name" js="0">Backlog</word>
+  <word key="ticket_prio_-1_name" js="0">Below Average</word>
+  <word key="ticket_prio_0_name" js="0">Normal</word>
+  <word key="ticket_prio_1_name" js="0">Important</word>
+  <word key="ticket_prio_2_name" js="0">Urgent</word>
+  <word key="ticket_category_1_name" js="0">Category 1</word>
+  <word key="ticket_category_2_name" js="0">Category 2</word>
+  <word key="ticket_status_0_name" js="0">New</word>
+  <word key="ticket_status_16_name" js="0">In Progress</word>
+  <word key="ticket_status_17_name" js="0">Halted</word>
+  <word key="ticket_status_18_name" js="0">Resolved</word>
+  <word key="ticket_status_19_name" js="0">Won't Fix</word>
+ </app>
+</language>

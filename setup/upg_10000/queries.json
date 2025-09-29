@@ -1,5 +1,5 @@
-[
-    {
+{
+    "1": {
         "method": "changeColumn",
         "params": [
             "vssupport_tickets",
@@ -18,7 +18,7 @@
             }
         ]
     },
-    {
+    "2": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -36,7 +36,7 @@
             }
         ]
     },
-    {
+    "3": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -54,7 +54,7 @@
             }
         ]
     },
-    {
+    "4": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -72,7 +72,7 @@
             }
         ]
     },
-    {
+    "5": {
         "method": "changeColumn",
         "params": [
             "vssupport_tickets",
@@ -91,7 +91,7 @@
             }
         ]
     },
-    {
+    "6": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -109,7 +109,7 @@
             }
         ]
     },
-    {
+    "7": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -127,7 +127,7 @@
             }
         ]
     },
-    {
+    "8": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -145,7 +145,7 @@
             }
         ]
     },
-    {
+    "9": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -163,7 +163,7 @@
             }
         ]
     },
-    {
+    "10": {
         "method": "createTable",
         "params": [
             {
@@ -255,7 +255,7 @@
             }
         ]
     },
-    {
+    "11": {
         "method": "createTable",
         "params": [
             {
@@ -287,7 +287,7 @@
             }
         ]
     },
-    {
+    "12": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -305,7 +305,7 @@
             }
         ]
     },
-    {
+    "13": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -323,7 +323,7 @@
             }
         ]
     },
-    {
+    "14": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -341,7 +341,7 @@
             }
         ]
     },
-    {
+    "15": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -359,7 +359,7 @@
             }
         ]
     },
-    {
+    "16": {
         "method": "addColumn",
         "params": [
             "vssupport_tickets",
@@ -377,7 +377,7 @@
             }
         ]
     },
-    {
+    "17": {
         "method": "addIndex",
         "params": [
             "vssupport_tickets",
@@ -393,7 +393,7 @@
             }
         ]
     },
-    {
+    "18": {
         "method": "createTable",
         "params": [
             {
@@ -507,7 +507,7 @@
             }
         ]
     },
-    {
+    "19": {
         "method": "changeColumn",
         "params": [
             "vssupport_tickets",
@@ -526,7 +526,7 @@
             }
         ]
     },
-    {
+    "20": {
         "method": "changeColumn",
         "params": [
             "vssupport_tickets",
@@ -545,7 +545,7 @@
             }
         ]
     },
-    {
+    "21": {
         "method": "changeColumn",
         "params": [
             "vssupport_tickets",
@@ -564,7 +564,7 @@
             }
         ]
     },
-    {
+    "22": {
         "method": "createTable",
         "params": [
             {
@@ -610,14 +610,14 @@
             }
         ]
     },
-    {
+    "23": {
         "method": "dropColumn",
         "params": [
             "vssupport_tickets",
             "last_update_by"
         ]
     },
-    {
+    "24": {
         "method": "addIndex",
         "params": [
             "vssupport_tickets",
@@ -633,14 +633,14 @@
             }
         ]
     },
-    {
+    "25": {
         "method": "dropIndex",
         "params": [
             "vssupport_tickets",
             "created"
         ]
     },
-    {
+    "26": {
         "method": "createTable",
         "params": [
             {
@@ -708,4 +708,4 @@
             }
         ]
     }
-]
+}
