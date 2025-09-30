@@ -57,6 +57,7 @@ $lang = array(
 	'editor__vssupport_TicketText' => 'Ticket Creation',
 	'respond_internal' => 'Add as Internal Note',
 	'respond_public' => 'Respond',
+	'respond_nomsg' => 'Update without Message',
 	'dont_change' => "Don't change",
 	'transfer_and_delete' => 'Transfer and Delete',
 	'current' => 'Current',

@@ -368,6 +368,7 @@ class tickets extends Controller
 		$db = Db::i();
 
 		$ticketId = intval($request->id);
+		if($request->submit == 'nomsg') unset($request->text);
 		$form = static::_createMessageForm($ticketId, false, null);
 
 		$ticket = query_one($db->select('*, HEX(hash) AS hash', 'vssupport_tickets', 'id = '.$ticketId));
@@ -512,13 +513,18 @@ class tickets extends Controller
 			{
 				$lockEl = $theme->getTemplate('forms', 'core', 'global')
 					->checkbox('lock', $ticket['flags'] & TicketFlags::Locked, label: 'ticket_lock', fancyToggle: true, tooltip: $lang->addToStack('ticket_lock_desc'));
-				$form->actionButtons[] = "<span style='user-select: none; vertical-align: center;'>$lockEl</span>";
+				$form->actionButtons[] = "<span style='user-select: none; align-self: center;' title=''>$lockEl</span>";
 			}
-			$form->actionButtons[] = '<span class="i-flex_91" style="flex-basis: 20ch;"></span>'; // spacer
-			$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
+
+			$submitButtons = '';
+			$submitButtons .= $theme->getTemplate('forms', 'core', 'global')
+				->button('respond_nomsg', 'submit', null, 'ipsButton ipsButton--secondary', ['tabindex' => '4', 'accesskey' => 's', 'name' => 'submit', 'value' => 'nomsg']);
+			$submitButtons .= $theme->getTemplate('forms', 'core', 'global')
 				->button('respond_internal', 'submit', null, 'ipsButton ipsButton--secondary', ['tabindex' => '3', 'accesskey' => 's', 'name' => 'submit', 'value' => 'internal']);
-			$form->actionButtons[] = $theme->getTemplate('forms', 'core', 'global')
+			$submitButtons .= $theme->getTemplate('forms', 'core', 'global')
 				->button('respond_public', 'submit', null, 'ipsButton ipsButton--primary', ['tabindex' => '2', 'accesskey' => 's', 'name' => 'submit', 'value' => 'public']);
+
+			$form->actionButtons[] = "<span class='i-margin-start_auto'>$submitButtons</span>";
 
 			$defaultReply = query_one($db->select('default_reply', 'vssupport_mod_preferences', 'member_id = '.$member->member_id));
 			if($defaultReply) $defaultReply = str_replace('{issuer_name}', $ticket['issuer_name'], $defaultReply);
