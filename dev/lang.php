@@ -75,6 +75,7 @@ $lang = array(
 	'all_new_and_assigned_to_me' => 'Assigned to me and New',
 	'all_unresolved_and_assigned_to_me' => 'Assigned to me and not Resolved',
 	'conversation_length' => 'Conversation length',
+	'other_tickets_by_this_issuer' => 'Other Tickets by this Issuer',
 
 	'menu__vssupport_tickets_settings' => 'Settings',
 	'vssupport_settings' => 'Settings',

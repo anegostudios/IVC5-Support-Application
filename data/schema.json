@@ -167,6 +167,16 @@
                 "length": [
                     null
                 ]
+            },
+            "email": {
+                "type": "key",
+                "name": "email",
+                "columns": [
+                    "issuer_email"
+                ],
+                "length": [
+                    250
+                ]
             }
         },
         "collation": "utf8mb4_unicode_ci",

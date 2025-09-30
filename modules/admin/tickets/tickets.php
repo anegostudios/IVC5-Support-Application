@@ -342,12 +342,19 @@ class tickets extends Controller
 			}
 		}
 
+		$totalCount = query_one($db->select('COUNT(*)', 'vssupport_tickets', ['issuer_email = ?', $ticket['issuer_email']]));
+		$tickets = query_all(
+			$db->select('t.id, t.subject, t.priority, t.created, t.category, t.status', ['vssupport_tickets', 't'], [['t.issuer_email = ?', $ticket['issuer_email']], ['t.id != '.$ticketId]], 't.created DESC', 10)
+			->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
+		);
+		$extraBlocks[] = $theme->getTemplate('tickets', 'vssupport')->profileBlockList('other_tickets_by_this_issuer', $tickets, $totalCount, $ticket['issuer_email']);
+
 		$output->title = $lang->addToStack('ticket').' #'.$ticketId.' - '.$ticket['subject'];
 		$bc = &$output->breadcrumb;
 		$bc[] = [URl::internal('app=vssupport&module=tickets&controller=tickets', seoTemplate: 'tickets_list'), $lang->addToStack('tickets')];
 		$bc[] = [null, $ticket['subject']];
 		$output->showTitle = false;
-		$output->output = $theme->getTemplate('tickets')->ticket($ticket, $actions, $form, $extraBlocks, $sortDir);
+		$output->output = $theme->getTemplate('tickets', 'vssupport')->ticket($ticket, $actions, $form, $extraBlocks, $sortDir);
 		$output->cssFiles = array_merge($output->cssFiles, $theme->css('global.css', location: 'global'), $theme->css('ticket.css'), $theme->css('hideBar.css'));
 
 		Ticket::markRead($ticketId, $member->member_id);

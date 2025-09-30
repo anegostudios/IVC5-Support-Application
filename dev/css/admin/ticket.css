@@ -12,7 +12,7 @@
 		flex-grow: 1;
 	}
 	#extra-blocks-container {
-		min-width: 50em;
+		min-width: 40em;
 	}
 	#extra-blocks-container>* {
 		position: sticky;

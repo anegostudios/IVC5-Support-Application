@@ -43,6 +43,6 @@ class Tickets extends Block
 			$db->select('t.id, t.subject, t.priority, t.created, t.category, t.status', ['vssupport_tickets', 't'], 't.issuer_id = '.($member->member_id), 't.created DESC', 10)
 			->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
 		);
-		return Theme::i()->getTemplate('tickets', 'vssupport', 'admin')->profileBlockList($tickets, $totalCount, $member);
+		return Theme::i()->getTemplate('tickets', 'vssupport', 'admin')->profileBlockList('tickets', $tickets, $totalCount, $member->email);
 	}
 }

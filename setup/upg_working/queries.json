@@ -1,0 +1,18 @@
+[
+    {
+        "method": "addIndex",
+        "params": [
+            "vssupport_tickets",
+            {
+                "type": "key",
+                "name": "email",
+                "columns": [
+                    "issuer_email"
+                ],
+                "length": [
+                    250
+                ]
+            }
+        ]
+    }
+]
