@@ -309,9 +309,10 @@ class tickets extends Controller
 		$sortDir = ($request->cookie['ticketSort'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
 
 		$actions = query_all(
-			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created '.$sortDir)
+			$db->select('a.created, a.kind, a.reference_id, a.initiator AS initiator_id, u.name AS initiator, m.text, m.flags, mt.direct_link, as.name AS assigned_to_name', ['vssupport_ticket_action_history', 'a'], where: 'a.ticket = '.$ticketId, order: 'a.created '.$sortDir)
 			->join(['core_members', 'u'], 'u.member_id = a.initiator')
 			->join(['vssupport_messages', 'm'], 'm.id = a.reference_id AND a.kind = '.ActionKind::Message)
+			->join(['vssupport_message_tracking', 'mt'], 'mt.message_id = m.id AND a.kind = '.ActionKind::Message)
 			->join(['core_members', 'as'], 'as.member_id = a.reference_id AND a.kind = '.ActionKind::Assigned)
 		);
 		

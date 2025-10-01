@@ -21,6 +21,8 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 		- Notifications / Emails for
 			- New responses
 			- Newly created tickets if the issuer is not logged in
+		- Email ingress
+			- Direct linking to original message for GMail
 	- Migration tool to transfer Invision Community 4 tickets 
 		- Categories (prev. Departments)
 		- Stati
@@ -115,7 +117,6 @@ Without leaving the ticket for most actions.
 - Allow notification merging
 - Migration: empty_local_data ?
 - Get the in system/Email/Outgoing/Smtp.php:221 that prevents settings custom `Message-id`'s fixed.
-- Link to imported email if gmail
 
 
 ## License

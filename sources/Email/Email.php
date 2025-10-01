@@ -91,7 +91,7 @@ class Email
 		$currentValidity = $boxStatus->uidvalidity;
 		$nextUid = $boxStatus->uidnext;
 
-		$oldValidity = $store->{static::STORAGE_IMAP_VALIDITY};
+		try { $oldValidity = $store->{static::STORAGE_IMAP_VALIDITY}; } catch(\OutOfRangeException) { $oldValidity = null; }
 
 		if($oldValidity && $oldValidity == $currentValidity) {
 			$lastUid = $store->{static::STORAGE_IMAP_NEXT_UID};
@@ -116,7 +116,10 @@ class Email
 			if(!str_starts_with($inReplyTo, '<') || strlen($inReplyTo) < (1 + Ticket::HASH_BYTE_LEN * 2 + 2)) continue;
 			$ticketHashHex = substr($inReplyTo, 1, Ticket::HASH_BYTE_LEN * 2); // :EmailResponseTracking
 
-			$ticket = query_one($db->select('id, issuer_id', 'vssupport_tickets', ['hash = UNHEX(?)', $ticketHashHex]));
+			$ticket = query_one(
+				$db->select('t.id, t.issuer_id, t.flags AS ticket_flags, s.flags AS status_flags', ['vssupport_tickets', 't'], ['t.hash = UNHEX(?)', $ticketHashHex])
+				->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
+			);
 			if(!$ticket) continue;
 
 			$structure = \imap_fetchstructure($conn, $overview->uid, FT_UID);
@@ -148,13 +151,14 @@ class Email
 			$body = $parser->parse($body);
 
 			$message = Message::insert($db, $ticket['id'], $body, MessageFlags::EmailIngest);
-			$db->insert('vssupport_ticket_action_history', [
-				'kind'         => ActionKind::Message,
-				'ticket'       => $ticket['id'],
-				'initiator'    => $issuer->member_id,
-				'reference_id' => $message->id,
-			]);
+			log_ticket_action($db, $ticket['id'], ActionKind::Message, $issuer->member_id, $message->id);
+			if(!($ticket['ticket_flags'] & TicketFlags::Locked) && $ticket['status_flags'] & StatusFlags::TicketResolved) {
+				// reopen ticket if its considered closed and not locked
+				$db->update('vssupport_tickets', 'status = '.TicketStatus::Open, 'id = '.$ticket['id']);
+				log_ticket_action($db, $ticket['id'], ActionKind::StatusChange, $issuer->member_id, TicketStatus::Open);
+			}
 
+			static::_maybeStoreMessageLinkImap($db, $config, $message->id, $overview->message_id);
 
 			if($markFlags) \imap_setflag_full($conn, $overview->uid, $markFlags, ST_UID);
 
@@ -173,6 +177,19 @@ class Email
 	public static function _formServerStringImap(array $config) : string
 	{
 		return '{'.$config['host'].'/imap'.($config['ssl'] ? '/ssl' : '').($config['tls'] ? '/tls' : '').($config['validate_cert'] ? '' : '/novalidate-cert').'}';
+	}
+
+	static function _maybeStoreMessageLinkImap(Db $db, array $config, int $dbMessageId, string $emailMessageId)
+	{
+		if(str_contains($config['host'], 'gmail.com')) {
+			// https://mail.google.com/mail/u/<emailAddress>/#search/rfc822msgid:<messageId>
+			//NOTE(Rennorb) It seems you MUST not encode the username ?
+			$emailMessageId = urlencode($emailMessageId);
+			$db->insert('vssupport_message_tracking', [
+				'message_id' => $dbMessageId,
+				'direct_link' => "https://mail.google.com/mail/u/{$config['user']}/#search/rfc822msgid:{$emailMessageId}",
+			]);
+		}
 	}
 
 	static function _parseEmailParts(array &$result, object $structure, string $idPrefix = '') : void

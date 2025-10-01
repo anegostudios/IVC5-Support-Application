@@ -647,5 +647,46 @@
                 ]
             }
         }
+    },
+    "vssupport_message_tracking": {
+        "name": "vssupport_message_tracking",
+        "columns": {
+            "message_id": {
+                "name": "message_id",
+                "type": "BIGINT",
+                "length": "20",
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            },
+            "direct_link": {
+                "name": "direct_link",
+                "type": "TEXT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        },
+        "indexes": {
+            "PRIMARY": {
+                "type": "primary",
+                "name": "PRIMARY",
+                "columns": [
+                    "message_id"
+                ],
+                "length": [
+                    null
+                ]
+            }
+        }
     }
 }

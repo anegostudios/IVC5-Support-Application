@@ -24,8 +24,14 @@ class EmailIngest extends Task
 	 */
 	public function execute() : mixed
 	{
-		$processedCount = Email::fetchIncoming();
-		return $processedCount === 0 ? NULL : "Processed $processedCount emails into messages";
+		try {
+			$processedCount = Email::fetchIncoming();
+			return $processedCount === 0 ? NULL : "Processed $processedCount emails into messages";
+		} catch(\Exception $ex) {
+			$te = new \IPS\Task\Exception($this, "Error: ".$ex);
+			$te->previous = $ex;
+			throw $te;
+		}
 	}
 	
 	/**
