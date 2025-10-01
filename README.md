@@ -24,6 +24,8 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 	- Migration tool to transfer Invision Community 4 tickets 
 		- Categories (prev. Departments)
 		- Stati
+			- Names
+			- Colors
 		- Tickets
 			- Attributes (Category, Priority, Status, Assigned Staff)
 			- Messages, including Internal Notes
@@ -56,11 +58,12 @@ If you have concerns, security related or otherwise, feel free to [contact us](h
 				- Set your default reply template
 				- Per device history flow direction
 		- Create / Edit / Delete Ticket Categories
-			- Preview translated names
+			- Change and Preview translated names
 			- Set per category disclaimers shown in frontend
 		- Create / Edit / Delete new Ticket Stati
 			- Some stati are builtin and cannot be removed
-			- Preview translated names
+			- Change and Preview translated names
+			- Custom Colors + Preview for Light- and Dark-mode
 		- ACP Profile block showing member ticket history
 		- Settings for email ingress (currently IMAP only)
 
@@ -98,7 +101,7 @@ Without leaving the ticket for most actions.
 	3. optionally configure email ingress,
 	4. place the frontend menu item for endusers to issue tickets.
 
-## TODO
+## TODO (backburner)
 
 - GitHub linking
 - GitLab linking
@@ -112,6 +115,7 @@ Without leaving the ticket for most actions.
 - Allow notification merging
 - Migration: empty_local_data ?
 - Get the in system/Email/Outgoing/Smtp.php:221 that prevents settings custom `Message-id`'s fixed.
+- Link to imported email if gmail
 
 
 ## License
