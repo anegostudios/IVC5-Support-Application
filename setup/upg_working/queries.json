@@ -14,5 +14,191 @@
                 ]
             }
         ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            {
+                "name": "color_light_bg_rgb",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            {
+                "name": "color_light_fg_rgb",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            "color_light_fg_rgb",
+            {
+                "name": "color_light_fg_rgb",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": "0xffffffff",
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            "color_light_bg_rgb",
+            {
+                "name": "color_light_bg_rgb",
+                "type": "INT",
+                "length": 10,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": "255",
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            "color_light_bg_rgb",
+            {
+                "name": "color_light_bg_rgb",
+                "type": "INT",
+                "length": 10,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": "3435973887",
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            "color_light_fg_rgb",
+            {
+                "name": "color_light_fg_rgb",
+                "type": "INT",
+                "length": 10,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": "255",
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            {
+                "name": "color_dark_bg_rgb",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": "858993663",
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "addColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            {
+                "name": "color_dark_fg_rgb",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            "color_dark_fg_rgb",
+            {
+                "name": "color_dark_fg_rgb",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": 0,
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_ticket_stati",
+            "color_dark_fg_rgb",
+            {
+                "name": "color_dark_fg_rgb",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": "4294967295",
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            }
+        ]
     }
 ]

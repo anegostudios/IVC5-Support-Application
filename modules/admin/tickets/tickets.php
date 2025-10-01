@@ -13,6 +13,7 @@ use IPS\Helpers\Form;
 use IPS\Http\Url;
 use IPS\Request;
 use IPS\vssupport\ActionKind;
+use IPS\vssupport\Color;
 use IPS\vssupport\Email;
 use IPS\vssupport\Message;
 use IPS\vssupport\MessageFlags;
@@ -158,11 +159,10 @@ class tickets extends Controller
 				HTML;
 			},
 			'status' => function($val, $row) {
-				return Member::loggedIn()->language()->addToStack("ticket_status_{$val}_name");
+				return Theme::i()->getTemplate('tickets', 'vssupport', 'global')->ticketLabel('status', $val);
 			},
 			'priority' => function($val, $row) {
-				$text = Member::loggedIn()->language()->addToStack("ticket_prio_{$val}_name", options: ['escape' => 1]);
-				return "<span class='prio-label prio-$val'>$text</span>";
+				return Theme::i()->getTemplate('tickets', 'vssupport', 'global')->ticketLabel('prio', $val);
 			},
 			'created' => function($val, $row) {
 				$name = htmlspecialchars($row['issuer_name'], ENT_DISALLOWED, 'UTF-8', FALSE);

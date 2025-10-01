@@ -469,13 +469,61 @@
                 "values": []
             },
             "flags": {
+                "allow_null": false,
+                "auto_increment": false,
+                "comment": "",
+                "decimals": null,
+                "default": "0",
+                "length": 3,
                 "name": "flags",
                 "type": "TINYINT",
-                "length": 3,
+                "unsigned": true,
+                "values": []
+            },
+            "color_light_bg_rgb": {
+                "name": "color_light_bg_rgb",
+                "type": "INT",
+                "length": 10,
                 "decimals": null,
                 "values": [],
                 "allow_null": false,
-                "default": 0,
+                "default": "3435973887",
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            },
+            "color_light_fg_rgb": {
+                "name": "color_light_fg_rgb",
+                "type": "INT",
+                "length": 10,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": "255",
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            },
+            "color_dark_bg_rgb": {
+                "name": "color_dark_bg_rgb",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": "858993663",
+                "comment": "",
+                "unsigned": true,
+                "auto_increment": false
+            },
+            "color_dark_fg_rgb": {
+                "name": "color_dark_fg_rgb",
+                "type": "INT",
+                "length": null,
+                "decimals": null,
+                "values": null,
+                "allow_null": false,
+                "default": "4294967295",
                 "comment": "",
                 "unsigned": true,
                 "auto_increment": false
@@ -497,23 +545,43 @@
         "inserts": [
             {
                 "id": "0",
-                "flags": "0"
+                "flags": "0",
+                "color_light_bg_rgb": "3435973887",
+                "color_light_fg_rgb": "255",
+                "color_dark_bg_rgb": "858993663",
+                "color_dark_fg_rgb": "4294967295"
             },
             {
                 "id": "16",
-                "flags": "0"
+                "flags": "0",
+                "color_light_bg_rgb": "3435973887",
+                "color_light_fg_rgb": "255",
+                "color_dark_bg_rgb": "858993663",
+                "color_dark_fg_rgb": "4294967295"
             },
             {
                 "id": "17",
-                "flags": "0"
+                "flags": "0",
+                "color_light_bg_rgb": "3435973887",
+                "color_light_fg_rgb": "255",
+                "color_dark_bg_rgb": "858993663",
+                "color_dark_fg_rgb": "4294967295"
             },
             {
                 "id": "18",
-                "flags": "1"
+                "flags": "1",
+                "color_light_bg_rgb": "3435973887",
+                "color_light_fg_rgb": "255",
+                "color_dark_bg_rgb": "858993663",
+                "color_dark_fg_rgb": "4294967295"
             },
             {
                 "id": "19",
-                "flags": "1"
+                "flags": "1",
+                "color_light_bg_rgb": "3435973887",
+                "color_light_fg_rgb": "255",
+                "color_dark_bg_rgb": "858993663",
+                "color_dark_fg_rgb": "4294967295"
             }
         ]
     },

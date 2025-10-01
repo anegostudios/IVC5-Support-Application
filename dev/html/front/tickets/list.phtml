@@ -1,4 +1,5 @@
 <ips:template parameters="$tickets"/>
+<style>{{$return .= \IPS\vssupport\Color::getLabelColorCssBlock();}}</style>
 <div style="text-align: right">
 	{{$createLink = \IPS\Http\Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');}}
 	{template="button" app="core" group="forms" location="global" params="'ticket_create', 'link', $createLink, 'ipsButton ipsButton--primary', ['tabindex' => 1, 'accesskey' => 'c']"}
@@ -13,8 +14,8 @@
 <div class="i-flex i-flex-direction_column i-gap_1">
 	{{foreach $tickets as $ticket}}
 		<a class="ipsBox i-padding_2 ticket{{if $ticket['read']}} read{{endif}}" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&hash={$ticket['hash']}" seoTemplate="tickets_view_hash"}">
-			<h3>{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}} {$ticket['subject']}</h3>
-			<h3 class="i-color_soft i-flex">{template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}<span class="i-margin-start_auto">{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html(true);}}</span></h3>
+			<h3>{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}<i class="fa-solid fa-lock"></i> {{endif}}{$ticket['subject']}</h3>
+			<h3 class="i-color_soft i-flex">{template="ticketLabel" location="global" group="tickets" params="'status', $ticket['status']"}&nbsp;{template="ticketLabel" location="global" group="tickets" params="'prio', $ticket['priority']"}<span class="i-margin-start_auto">{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html();}}</span></h3>
 		</a>
 	{{endforeach}}
 </div>

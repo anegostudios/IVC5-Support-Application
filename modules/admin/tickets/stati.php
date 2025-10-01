@@ -10,7 +10,7 @@ use IPS\Helpers;
 use IPS\Http\Url;
 use IPS\Lang;
 use IPS\Request;
-use IPS\Session;
+use IPS\vssupport\Color;
 use IPS\vssupport\StatusFlags;
 use IPS\vssupport\TicketStatus;
 
@@ -38,7 +38,6 @@ class stati extends Controller
 	{
 		$lang = Member::loggedIn()->language();
 		$output = Output::i();
-		$theme = Theme::i();
 
 		/* Some advanced search links may bring us here */
 		$output->bypassCsrfKeyCheck = true;
@@ -47,7 +46,7 @@ class stati extends Controller
 		//$table->langPrefix = 'stati_';
 		$table->keyField = 'id';
 
-		$table->include = ['name', 'is_closing_status', 'tickets_count'];
+		$table->include = ['preview', 'is_closing_status', 'tickets_count'];
 
 		$table->joins['tickets_count'] = [
 			'select'=> 'tickets_count',
@@ -56,8 +55,17 @@ class stati extends Controller
 			'type'  => 'LEFT'
 		];
 
-		$table->parsers['name'] = function($val, $row) {
-			return Member::loggedIn()->language()->addToStack("ticket_status_{$row['id']}_name");
+		$table->extraHtml = '<style>.label-test-light { background-color: white !important; padding: 0.25em; } .label-test-dark { background-color: #222222 !important; padding: 0.25em; }</style>';
+
+		$table->parsers['preview'] = function($val, $row) {
+			$label = Theme::i()->getTemplate('tickets', 'vssupport', 'global')->ticketLabel('status', $row['id']);
+			$html = "<div><div class='label-test-light'>$label</div><div class='label-test-dark'>$label</div></div>";
+			$lightBg = Color::toRgbaHexString($row['color_light_bg_rgb']);
+			$lightFg = Color::toRgbaHexString($row['color_light_fg_rgb']);
+			$darkBg  = Color::toRgbaHexString($row['color_dark_bg_rgb']);
+			$darkFg  = Color::toRgbaHexString($row['color_dark_fg_rgb']);
+			$style = "<style>.label-test-light .status-{$row['id']} { background-color: #$lightBg; color: #$lightFg } .label-test-dark .status-{$row['id']} { background-color: #$darkBg; color: #$darkFg }</style>";
+			return $html.$style;
 		};
 		$table->parsers['is_closing_status'] = function($val, $row) {
 			$ico = ($row['flags'] & StatusFlags::TicketResolved) ? 'fa-check': 'fa-times';
@@ -95,6 +103,7 @@ class stati extends Controller
 			return $buttons;
 		};
 
+		$output->addCssFiles('global.css', 'vssupport', 'global');
 		$output->title = $lang->addToStack('stati');
 		$output->breadcrumb[] = [null, $lang->addToStack('stati')];
 		$output->output .= $table;
@@ -110,14 +119,36 @@ class stati extends Controller
 
 		$form = new Helpers\Form(submitLang: $editing ? 'save' : 'status_add');
 		$form->add(new Helpers\Form\Translatable('name', required: true, options: ['app' => 'vssupport', 'key' => $editing ? "ticket_status_{$statusId}_name" : null]));
-		$isClosingStatus = false;
+		$currentValues = [
+			'closing' => false,
+			'color_light_bg_rgb' => 'cccccc',
+			'color_dark_bg_rgb' => '333333',
+		];
 		if($editing && !$request->form_submitted) {
-			$isClosingStatus = boolval(query_one($db->select('flags', 'vssupport_ticket_stati', 'id = '.$statusId)) & StatusFlags::TicketResolved);
+			$currentValues = query_one($db->select('color_light_bg_rgb, color_dark_bg_rgb, flags', 'vssupport_ticket_stati', 'id = '.$statusId));
+			$currentValues['color_light_bg_rgb'] = substr(Color::toRgbaHexString($currentValues['color_light_bg_rgb']), 0, 6);
+			$currentValues['color_dark_bg_rgb'] = substr(Color::toRgbaHexString($currentValues['color_dark_bg_rgb']), 0, 6);
+			$currentValues['closing'] = boolval($currentValues['flags'] & StatusFlags::TicketResolved);
 		}
-		$form->add(new Helpers\Form\YesNo('is_closing_status', defaultValue: $isClosingStatus, required: true, options: ['disabled' => $editing && $statusId <= TicketStatus::__MAX_BUILTIN ]));
+		$form->add(new Helpers\Form\YesNo('is_closing_status', defaultValue: $currentValues['closing'], required: true, options: ['disabled' => $editing && $statusId <= TicketStatus::__MAX_BUILTIN ]));
+
+		$form->add(new Helpers\Form\Color('label_light_bg', $currentValues['color_light_bg_rgb'], true));
+		$form->add(new Helpers\Form\Color('label_dark_bg', $currentValues['color_dark_bg_rgb'], true));
 
 		if($values = $form->values()) {
-			$data = ['flags' => $values['is_closing_status'] ? StatusFlags::TicketResolved : 0];
+			$lightBg = Color::fromColorInputString($values['label_light_bg']);
+			$lightFg = Color::isLightColor($lightBg >> 24, ($lightBg >> 16) & 0xff, ($lightBg >> 8) & 0xff) ? 0x0000_00ff : 0xffff_ffff;
+
+			$darkBg = Color::fromColorInputString($values['label_dark_bg']);
+			$darkFg = Color::isLightColor($darkBg >> 24, ($darkBg >> 16) & 0xff, ($darkBg >> 8) & 0xff) ? 0x0000_00ff : 0xffff_ffff;
+
+			$data = [
+				'flags' => $values['is_closing_status'] ? StatusFlags::TicketResolved : 0,
+				'color_light_bg_rgb' => $lightBg,
+				'color_light_fg_rgb' => $lightFg,
+				'color_dark_bg_rgb'  => $darkBg,
+				'color_dark_fg_rgb'  => $darkFg,
+			];
 			if($editing) {
 				$db->update('vssupport_ticket_stati', $data, 'id = '.$statusId);
 			}
@@ -125,6 +156,8 @@ class stati extends Controller
 				$statusId = $db->insert('vssupport_ticket_stati', $data);
 			}
 			Lang::saveCustom('vssupport', "ticket_status_{$statusId}_name", $values['name']);
+
+			Color::updateLabelColorCssBlock($db);
 
 			$output->redirect(Url::internal('app=vssupport&module=tickets&controller=stati'), $editing ? 'saved' : 'created');
 			return;

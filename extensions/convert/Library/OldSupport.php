@@ -5,6 +5,7 @@ use \IPS\convert\Library as CoreLibrary;
 use IPS\Db;
 use IPS\Lang;
 use IPS\vssupport\ActionKind;
+use IPS\vssupport\Color;
 use IPS\vssupport\MessageFlags;
 use IPS\vssupport\TicketFlags;
 use IPS\vssupport\TicketStatus;
@@ -218,7 +219,16 @@ class OldSupport extends CoreLibrary
 			$newId = substr($mergeCandidate, /*ticket_status_*/ 14, /*_name*/ -5);
 		}
 		else {
-			$newId = $db->insert('vssupport_ticket_stati', []);
+			$newData = [];
+			if(!empty($row['status_color'])) { // seems to be null most of the time
+				$colorBg = Color::fromColorInputString('#'.$row['color_status']);
+				$colorFg = Color::isLightColor($colorBg >> 24, ($colorBg >> 16) & 0xff, ($colorBg >> 8) & 0xff) ? 0x0000_00ff : 0xffff_ffff;
+				$newData['color_light_bg_rgb'] = $colorBg;
+				$newData['color_light_fg_rgb'] = $colorFg;
+				$newData['color_dark_bg_rgb'] = $colorBg;
+				$newData['color_dark_fg_rgb'] = $colorFg;
+			}
+			$newId = $db->insert('vssupport_ticket_stati', $newData);
 
 			$word_key = "ticket_status_{$newId}_name";
 			$valuesFolded = "(?, 'vssupport', '{$word_key}', ?, ?, ?)";

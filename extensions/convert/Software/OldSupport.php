@@ -189,7 +189,7 @@ class OldSupport extends ConverterSoftware
 		$currentLang = Member::loggedIn()->language();
 		$langMap = [];
 
-		$q = $this->fetch(['nexus_support_statuses', 's'], 'status_id', null, 's.status_id, IFNULL(w.word_default, s.status_name) AS word_default, w.word_custom')
+		$q = $this->fetch(['nexus_support_statuses', 's'], 'status_id', null, 's.status_id, IFNULL(w.word_default, s.status_name) AS word_default, w.word_custom, s.status_color')
 			//:TranslatedField
 			->join(['core_sys_lang', 'l'], ["l.lang_short = ?", $currentLang->short])
 			->join(['core_sys_lang_words', 'w'], "w.lang_id = l.lang_id AND w.word_key = CONCAT('nexus_status_', s.status_id, '_admin')");

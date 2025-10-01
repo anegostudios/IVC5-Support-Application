@@ -46,7 +46,7 @@ class tickets extends Controller
 
 		$tickets = query_all(
 			// :ReadMarkerTimestamps
-			$db->select('t.id, t.subject, t.priority, t.created, t.flags, HEX(t.hash) AS hash, t.category, FROM_UNIXTIME((mark.item_app_key_2 << 32) | mark.item_app_key_3) >= la.last_update_at AS `read`', ['vssupport_tickets', 't'], 't.issuer_id = '.($member->member_id ?? 0).' AND !(s.flags & '.StatusFlags::TicketResolved.')')
+			$db->select('t.id, t.subject, t.status, t.priority, t.created, t.flags, HEX(t.hash) AS hash, t.category, FROM_UNIXTIME((mark.item_app_key_2 << 32) | mark.item_app_key_3) >= la.last_update_at AS `read`', ['vssupport_tickets', 't'], 't.issuer_id = '.($member->member_id ?? 0).' AND !(s.flags & '.StatusFlags::TicketResolved.')')
 			->join(['vssupport_ticket_stati', 's'], 's.id = t.status')
 			->join($db->select('ticket, max(created) as last_update_at', ['vssupport_ticket_action_history', 'la'], group: 'ticket'), 'la.ticket = t.id') //NOTE(Rennorb): Due to the extremely questionable implementation of the query joiner this _has to be_ a select object...
 			->join(['core_item_markers', 'mark'], "mark.item_app = 'vssupport' AND mark.item_member_id = {$member->member_id} AND mark.item_app_key_1 = t.id")

@@ -1,33 +1,35 @@
-/* Prio labels */
-/* TODO(Rennorb) @visual: [data-ips-scheme="light"] / dark .. */
-:root {
-	--ticket-prio-bg--2: #444;
-	--ticket-prio-fg--2: #999;
-	--ticket-prio-bg--1: #444;
-	--ticket-prio-fg--1: #999;
-	--ticket-prio-bg-0: #444;
-	--ticket-prio-fg-0: #999;
-	--ticket-prio-bg-1: #faa;
-	--ticket-prio-fg-1: #999;
-	--ticket-prio-bg-2: #f44;
-	--ticket-prio-fg-2: #fdd;
-}
+/* labels */
 
-.prio--2 { --ticket-prio-bg: var(--ticket-prio-bg--2); --ticket-prio-fg: var(--ticket-prio-fg--2); }
-.prio--1 { --ticket-prio-bg: var(--ticket-prio-bg--1); --ticket-prio-fg: var(--ticket-prio-fg--1); }
-.prio-0 { --ticket-prio-bg: var(--ticket-prio-bg-0); --ticket-prio-fg: var(--ticket-prio-fg-0); }
-.prio-1 { --ticket-prio-bg: var(--ticket-prio-bg-1); --ticket-prio-fg: var(--ticket-prio-fg-1); }
-.prio-2 { --ticket-prio-bg: var(--ticket-prio-bg-2); --ticket-prio-fg: var(--i-color_hard); }
-.prio-label {
+.prio-label, .status-label {
 	display: inline-block;
 	padding: 0 .25em;
   height: 1.2em;
   line-height: 1;
   border-radius: .125em;
-	background-color: var(--ticket-prio-bg);
-	color: var(--ticket-prio-fg);
 	white-space: nowrap;
 }
+
+[data-ips-scheme="dark"] {
+	--tick-prio-c--2-bg: #333; --tick-prio-c--2-fg: #ccc;
+	--tick-prio-c--1-bg: #333; --tick-prio-c--1-fg: #ccc;
+	--tick-prio-c-0-bg: #727272; --tick-prio-c-0-fg: #222;
+	--tick-prio-c-1-bg: #cec549; --tick-prio-c-1-fg: #333;
+	--tick-prio-c-2-bg: #860d0d; --tick-prio-c-2-fg: #ccc;
+}
+[data-ips-scheme="light"] {
+	--tick-prio-c--2-bg: #efefef; --tick-prio-c--2-fg: #333;
+	--tick-prio-c--1-bg: #efefef; --tick-prio-c--1-fg: #333;
+	--tick-prio-c-0-bg: #888888; --tick-prio-c-0-fg: #333;
+	--tick-prio-c-1-bg: #cec549; --tick-prio-c-1-fg: #333;
+	--tick-prio-c-2-bg: #860d0d; --tick-prio-c-2-fg: #333;
+}
+
+.prio-label.prio--2 { background-color: var(--tick-prio-c--2-bg); color: var(--tick-prio-c--2-fg); }
+.prio-label.prio--1 { background-color: var(--tick-prio-c--1-bg); color: var(--tick-prio-c--1-fg); }
+.prio-label.prio-0 { background-color: var(--tick-prio-c-0-bg); color: var(--tick-prio-c-0-fg); }
+.prio-label.prio-1 { background-color: var(--tick-prio-c-1-bg); color: var(--tick-prio-c-1-fg); }
+.prio-label.prio-2 { background-color: var(--tick-prio-c-2-bg); color: var(--tick-prio-c-2-fg); }
+
 
 /* Message coloring */
 .ticket-message.message-issuer { --message-color: #358ef4; }

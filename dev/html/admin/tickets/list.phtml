@@ -1,4 +1,5 @@
 <ips:template parameters="$table"/>
+<style>{{$return .= \IPS\vssupport\Color::getLabelColorCssBlock();}}</style>
 <div id="ticket-list-wrapper" style="overflow-y: auto;">
 	{$table|raw}
 </div>
