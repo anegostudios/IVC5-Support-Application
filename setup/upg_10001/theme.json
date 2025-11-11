@@ -1,0 +1,31 @@
+{
+    "html": {
+        "added": [
+            "global\/tickets\/ticketLabel"
+        ],
+        "edited": [
+            "global\/tickets\/action",
+            "admin\/tickets\/list",
+            "front\/tickets\/list",
+            "admin\/tickets\/profileBlockList",
+            "admin\/tickets\/ticket",
+            "front\/tickets\/ticket"
+        ],
+        "removed": [
+            "global\/tickets\/priorityLabel"
+        ]
+    },
+    "css": {
+        "added": [],
+        "edited": [
+            "global\/global.css",
+            "admin\/ticket.css"
+        ],
+        "removed": []
+    },
+    "resources": {
+        "added": [],
+        "edited": [],
+        "removed": []
+    }
+}

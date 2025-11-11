@@ -1,0 +1,15 @@
+{
+    "normal": {
+        "added": [
+            "respond_nomsg",
+            "other_tickets_by_this_issuer"
+        ],
+        "edited": [],
+        "removed": []
+    },
+    "js": {
+        "added": [],
+        "edited": [],
+        "removed": []
+    }
+}

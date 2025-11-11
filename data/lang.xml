@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <language>
- <app key="vssupport" version="10000">
+ <app key="vssupport" version="10001">
   <word key="__app_vssupport" js="0">VS Support</word>
   <word key="menutab__vssupport" js="0">VS Support</word>
   <word key="menutab__vssupport_icon" js="0">medkit</word>
@@ -57,6 +57,7 @@
   <word key="editor__vssupport_TicketText" js="0">Ticket Creation</word>
   <word key="respond_internal" js="0">Add as Internal Note</word>
   <word key="respond_public" js="0">Respond</word>
+  <word key="respond_nomsg" js="0">Update without Message</word>
   <word key="dont_change" js="0">Don't change</word>
   <word key="transfer_and_delete" js="0">Transfer and Delete</word>
   <word key="current" js="0">Current</word>
@@ -75,6 +76,7 @@
   <word key="all_new_and_assigned_to_me" js="0">Assigned to me and New</word>
   <word key="all_unresolved_and_assigned_to_me" js="0">Assigned to me and not Resolved</word>
   <word key="conversation_length" js="0">Conversation length</word>
+  <word key="other_tickets_by_this_issuer" js="0">Other Tickets by this Issuer</word>
   <word key="menu__vssupport_tickets_settings" js="0">Settings</word>
   <word key="vssupport_settings" js="0">Settings</word>
   <word key="vssupport_mail_ingres" js="0">VSSupport Email Ingress</word>

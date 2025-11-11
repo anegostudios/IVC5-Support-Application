@@ -1,5 +1,5 @@
-[
-    {
+{
+    "1": {
         "method": "addIndex",
         "params": [
             "vssupport_tickets",
@@ -15,7 +15,7 @@
             }
         ]
     },
-    {
+    "2": {
         "method": "addColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -33,7 +33,7 @@
             }
         ]
     },
-    {
+    "3": {
         "method": "addColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -51,7 +51,7 @@
             }
         ]
     },
-    {
+    "4": {
         "method": "changeColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -70,7 +70,7 @@
             }
         ]
     },
-    {
+    "5": {
         "method": "changeColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -89,7 +89,7 @@
             }
         ]
     },
-    {
+    "6": {
         "method": "changeColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -108,7 +108,7 @@
             }
         ]
     },
-    {
+    "7": {
         "method": "changeColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -127,7 +127,7 @@
             }
         ]
     },
-    {
+    "8": {
         "method": "addColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -145,7 +145,7 @@
             }
         ]
     },
-    {
+    "9": {
         "method": "addColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -163,7 +163,7 @@
             }
         ]
     },
-    {
+    "10": {
         "method": "changeColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -182,7 +182,7 @@
             }
         ]
     },
-    {
+    "11": {
         "method": "changeColumn",
         "params": [
             "vssupport_ticket_stati",
@@ -201,7 +201,7 @@
             }
         ]
     },
-    {
+    "12": {
         "method": "createTable",
         "params": [
             {
@@ -247,4 +247,4 @@
             }
         ]
     }
-]
+}

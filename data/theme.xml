@@ -2,18 +2,18 @@
 <theme name="Default" author_name="Invision Power Services, Inc" author_url="https://www.invisioncommunity.com">
  <template template_group="tickets" template_name="action" template_data="$action" template_location="global" template_app="vssupport"><![CDATA[{{if $action['kind'] === \IPS\vssupport\ActionKind::Message}}
 	<div class="ipsBox ticket-message {$action['classes']}">
-		<div class="ipsBox__header i-padding-end_2"><span class="i-flex_91 message-author">{$action['initiator']}</span><span class="i-font-size_-2 i-color_soft i-flex_00"><i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($action['created'])->html(true);}}</span></div>
+		<div class="ipsBox__header i-padding-end_2"><span class="i-flex_91 message-author">{$action['initiator']}</span>{{if !empty($action['direct_link'])}}&nbsp;<a rel="external nofollow noopener noreferrer alternate" href="{$action['direct_link']}">{lang="link"}</a>{{endif}}<span class="i-font-size_-2 i-color_soft i-flex_00"><i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($action['created'])->html();}}</span></div>
 		<div class="i-padding_2">{$action['text']|raw}</div>
 	</div>
 {{else}}
 	<div class="i-padding-inline_2 i-color_soft i-flex i-gap_1">
 		<span class="i-flex_91">
 		{{switch($action['kind']): case \IPS\vssupport\ActionKind::PriorityChange:}}
-			{lang="priority_changed_to"}&nbsp;{template="priorityLabel" location="global" group="tickets" params="$action['reference_id']"}
+			{lang="priority_changed_to"}&nbsp;{template="ticketLabel" location="global" group="tickets" params="'prio', $action['reference_id']"}
 		{{break; case \IPS\vssupport\ActionKind::CategoryChange:}}
 			{lang="category_changed_to"}&nbsp;{lang="ticket_category_{$action['reference_id']}_name"}
 		{{break; case \IPS\vssupport\ActionKind::StatusChange:}}
-			{lang="status_changed_to"}&nbsp;{lang="ticket_status_{$action['reference_id']}_name"}
+			{lang="status_changed_to"}&nbsp;{template="ticketLabel" location="global" group="tickets" params="'status', $action['reference_id']"}
 		{{break; case \IPS\vssupport\ActionKind::Assigned:}}
 			{{if $action['reference_id']}}
 				{lang="ticket_assigned_to"}&nbsp;{$action['assigned_to_name']}
@@ -41,7 +41,8 @@
 {{endif}}]]></template>
  <template template_group="tickets" template_name="actionContextInfo" template_data="$action" template_location="admin" template_app="vssupport"><![CDATA[<span class="i-font-size_-2 i-color_soft i-flex_00">{$action['initiator']} - <i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($action['created'])->html(true);}}</span>]]></template>
  <template template_group="tickets" template_name="actionContextInfo" template_data="$action" template_location="front" template_app="vssupport"><![CDATA[<span class="i-font-size_-2 i-color_soft i-flex_00"><i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($action['created'])->html(true);}}</span>]]></template>
- <template template_group="tickets" template_name="list" template_data="$table" template_location="admin" template_app="vssupport"><![CDATA[<div id="ticket-list-wrapper" style="overflow-y: auto;">
+ <template template_group="tickets" template_name="list" template_data="$table" template_location="admin" template_app="vssupport"><![CDATA[<style>{{$return .= \IPS\vssupport\Color::getLabelColorCssBlock();}}</style>
+<div id="ticket-list-wrapper" style="overflow-y: auto;">
 	{$table|raw}
 </div>
 <style>
@@ -90,7 +91,8 @@
 		open(anchorEl.href, '_blank', 'noopener');
 	})
 </script>]]></template>
- <template template_group="tickets" template_name="list" template_data="$tickets" template_location="front" template_app="vssupport"><![CDATA[<div style="text-align: right">
+ <template template_group="tickets" template_name="list" template_data="$tickets" template_location="front" template_app="vssupport"><![CDATA[<style>{{$return .= \IPS\vssupport\Color::getLabelColorCssBlock();}}</style>
+<div style="text-align: right">
 	{{$createLink = \IPS\Http\Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');}}
 	{template="button" app="core" group="forms" location="global" params="'ticket_create', 'link', $createLink, 'ipsButton ipsButton--primary', ['tabindex' => 1, 'accesskey' => 'c']"}
 </div>
@@ -104,8 +106,8 @@
 <div class="i-flex i-flex-direction_column i-gap_1">
 	{{foreach $tickets as $ticket}}
 		<a class="ipsBox i-padding_2 ticket{{if $ticket['read']}} read{{endif}}" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&hash={$ticket['hash']}" seoTemplate="tickets_view_hash"}">
-			<h3>{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}} {$ticket['subject']}</h3>
-			<h3 class="i-color_soft i-flex">{template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}<span class="i-margin-start_auto">{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html(true);}}</span></h3>
+			<h3>{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}<i class="fa-solid fa-lock"></i> {{endif}}{$ticket['subject']}</h3>
+			<h3 class="i-color_soft i-flex">{template="ticketLabel" location="global" group="tickets" params="'status', $ticket['status']"}&nbsp;{template="ticketLabel" location="global" group="tickets" params="'prio', $ticket['priority']"}<span class="i-margin-start_auto">{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html();}}</span></h3>
 		</a>
 	{{endforeach}}
 </div>]]></template>
@@ -116,22 +118,25 @@
 		{{endforeach}}
 	</ul>
 </div>]]></template>
- <template template_group="tickets" template_name="priorityLabel" template_data="$priority" template_location="global" template_app="vssupport"><![CDATA[<span class="prio-label prio-{$priority}">{lang="ticket_prio_{$priority}_name"}</span>]]></template>
- <template template_group="tickets" template_name="profileBlockList" template_data="$tickets, $totalCount, $member" template_location="admin" template_app="vssupport"><![CDATA[<div id="user-tickets-box" class="ipsBox">
-	<h2 class="ipsBox__header"><i class="fa-solid fa-medkit ipsBox__header-icon"></i>{lang="tickets"}</h2>
+ <template template_group="tickets" template_name="profileBlockList" template_data="$titleLang, $tickets, $totalCount, $memberEmail" template_location="admin" template_app="vssupport"><![CDATA[<div id="user-tickets-box" class="ipsBox">
+	<h2 class="ipsBox__header"><i class="fa-solid fa-medkit ipsBox__header-icon"></i>{lang="$titleLang"}</h2>
 	<div>
-		{{foreach $tickets as $ticket}}
-		<a class="ticket i-padding_2 i-padding-block_1 i-display_block i-color_hard" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&id={$ticket['id']}"}">
-			<h3 class="i-flex">{$ticket['subject']}&nbsp;<span class="i-color_soft">#{$ticket['id']}</span><span class="i-margin-start_auto">{lang="ticket_status_{$ticket['status']}_name"}</span></h3>
-			<p class="i-color_soft i-flex">{lang="ticket_category_{$ticket['category']}_name"}<span class="i-margin-start_auto">{$ticket['created']}</span></p>
-		</a>
-		{{endforeach}}
-	</div>
-	{{if $totalCount > 1}}
-	<div class="ipsViewAll">
-		<a href="{url="app=vssupport&module=tickets&controller=tickets&advanced_search_submitted=1&issuer_email={$member->email}"}">{lang="show_all"}</a>
-	</div>
+		{{if !empty($tickets)}}
+			{{foreach $tickets as $ticket}}
+			<a class="ticket i-padding_2 i-padding-block_1 i-display_block i-color_hard" href="{url="app=vssupport&module=tickets&controller=tickets&do=view&id={$ticket['id']}"}">
+				<h3 class="i-flex">{$ticket['subject']}&nbsp;<span class="i-color_soft">#{$ticket['id']}</span><span class="i-margin-start_auto">{lang="ticket_status_{$ticket['status']}_name"}</span></h3>
+				<p class="i-color_soft i-flex">{lang="ticket_category_{$ticket['category']}_name"}<span class="i-margin-start_auto">{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html(short: true);}}</span></p>
+			</a>
+			{{endforeach}}
+		</div>
+		{{if $totalCount > 1}}
+		<div class="ipsViewAll">
+			<a href="{url="app=vssupport&module=tickets&controller=tickets&advanced_search_submitted=1&issuer_email={$memberEmail}"}">{lang="show_all"}</a>
+		{{endif}}
+	{{else}}
+		<p class="i-color_soft i-padding_2 i-text-align_center">{lang="no_results"}</p>
 	{{endif}}
+	</div>
 </div>
 <style>
 #user-tickets-box a.ticket:nth-child(n+2) { border-top: 1px solid var(--i-background_4); }
@@ -165,9 +170,10 @@
 	<div class="i-flex_91"></div>
 	<div>{template="controlStrip" group="global" app="core" params="$buttons"}</div>
 </div>]]></template>
- <template template_group="tickets" template_name="ticket" template_data="$ticket, $actions, $form, $extraBlocks, $sortDir" template_location="admin" template_app="vssupport"><![CDATA[<h2 class="ipsTitle ipsTitle--h2 i-flex"><span>{lang="ticket"} #{$ticket['id']} - {$ticket['subject']}</span><button id="change-history-sort" style="align-self: flex-start; margin-left: auto;" class="ipsButton i-padding_1 i-font-size_3" title="{lang='change_history_direction'}" click="javascript:void(0)"><i class="fa fa-sort-numeric-{$sortDir}"></i></button></h2>
-<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_category_{$ticket['category']}_name"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}, {lang="ticket_status_{$ticket['status']}_name"}{{if $ticket['assigned_to']}}, {lang="assigned_to"}:&nbsp;{$ticket['assigned_to_name']}{{endif}}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}}</h3>
-<h4 class="ipsTitle ipsTitle--h4">{$ticket['issuer_name']} - {$ticket['issuer_email']} <span class="i-color_soft">started <i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html();}}</span></h4>
+ <template template_group="tickets" template_name="ticket" template_data="$ticket, $actions, $form, $extraBlocks, $sortDir" template_location="admin" template_app="vssupport"><![CDATA[<style>{{$return .= \IPS\vssupport\Color::getLabelColorCssBlock();}}</style>
+<h2 class="ipsTitle ipsTitle--h2 i-flex"><span>{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}<i class="fa-solid fa-lock"></i>&nbsp;{{endif}}{$ticket['subject']}<span class="i-color_soft i-font-size_3">&nbsp;#{$ticket['id']}</span></span><button id="change-history-sort" style="align-self: flex-start; margin-left: auto;" class="ipsButton i-padding_1 i-font-size_3" title="{lang='change_history_direction'}" click="javascript:void(0)"><i class="fa fa-sort-numeric-{$sortDir}"></i></button></h2>
+<hr class="ipsHr"/>
+<h4 class="ipsTitle--h4 i-color_soft i-margin-bottom_3"><span class="i-color_contrast">{template="ticketLabel" location="global" group="tickets" params="'status', $ticket['status']"}</span> started <i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html();}} in <span class="i-color_contrast">{lang="ticket_category_{$ticket['category']}_name"}</span> by <span class="i-color_contrast">{{$return .= htmlspecialchars($ticket['issuer_name'] ?? $ticket['issuer_email'], ENT_DISALLOWED, 'UTF-8', FALSE);}}</span>{{if $ticket['assigned_to']}}, assigned to <span class="i-color_contrast">{$ticket['assigned_to_name']}</span>{{endif}}, <span class="i-color_contrast">{template="ticketLabel" location="global" group="tickets" params="'prio', $ticket['priority']"}</span></h4>
 <div id="tick-main-wrap">
 	<div id="tick-hist-wrap" style="display: flex; flex-direction: column; gap: 1em;">
 		{{if $sortDir === 'asc'}}
@@ -208,9 +214,10 @@
 	}
 }
 </script>]]></template>
- <template template_group="tickets" template_name="ticket" template_data="$ticket, $actions, $form" template_location="front" template_app="vssupport"><![CDATA[{{$createLink = \IPS\Http\Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');}}
-<h2 class="ipsTitle ipsTitle--h2">{lang="ticket"} #{$ticket['id']} - {$ticket['subject']}{template="button" app="core" group="forms" location="global" params="'ticket_create', 'link', $createLink, 'ipsButton ipsButton--primary i-font-size_1 i-float_end', ['tabindex' => 1, 'accesskey' => 'c']"}</h2>
-<h3 class="ipsTitle ipsTitle--h3">{lang="ticket_category_{$ticket['category']}_name"} {template="priorityLabel" location="global" group="tickets" params="$ticket['priority']"}, {lang="ticket_status_{$ticket['status']}_name"}{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}&nbsp;<i class="fa-solid fa-lock"></i>{{endif}} <small class="i-color_soft i-font-size_-1">started <i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html(true);}}</small></h3>
+ <template template_group="tickets" template_name="ticket" template_data="$ticket, $actions, $form" template_location="front" template_app="vssupport"><![CDATA[<style>{{$return .= \IPS\vssupport\Color::getLabelColorCssBlock();}}</style>
+{{$createLink = \IPS\Http\Url::internal('app=vssupport&module=tickets&controller=tickets&do=create', seoTemplate: 'tickets_create');}}
+<h2 class="ipsTitle ipsTitle--h2">{{if $ticket['flags'] & \IPS\vssupport\TicketFlags::Locked}}<i class="fa-solid fa-lock"></i> {{endif}}{$ticket['subject']} <span class="i-color_soft i-font-size_3">#{$ticket['id']}</span> {template="button" app="core" group="forms" location="global" params="'ticket_create', 'link', $createLink, 'ipsButton ipsButton--primary i-font-size_1 i-float_end', ['tabindex' => 1, 'accesskey' => 'c']"}</h2>
+<h3 class="ipsTitle--h3">{lang="ticket_category_{$ticket['category']}_name"} {template="ticketLabel" location="global" group="tickets" params="'prio', $ticket['priority']"}, {template="ticketLabel" location="global" group="tickets" params="'status', $ticket['status']"} <small class="i-color_soft i-font-size_-1">started <i class="fa-solid fa-clock"></i>&nbsp;{{$return .= \IPS\vssupport\format_local_date_time($ticket['created'])->html(true);}}</small></h3>
 <div style="display: flex; flex-direction: column; gap: 1em;">
 	{{foreach $actions as $action}}
 		{template="action" location="global" group="tickets" params="$action"}
@@ -221,36 +228,39 @@
 		{$form|raw}
 	{{endif}}
 </div>]]></template>
- <css css_location="global" css_app="vssupport" css_attributes="" css_path="." css_name="global.css"><![CDATA[/* Prio labels */
-/* TODO(Rennorb) @visual: [data-ips-scheme="light"] / dark .. */
-:root {
-	--ticket-prio-bg--2: #444;
-	--ticket-prio-fg--2: #999;
-	--ticket-prio-bg--1: #444;
-	--ticket-prio-fg--1: #999;
-	--ticket-prio-bg-0: #444;
-	--ticket-prio-fg-0: #999;
-	--ticket-prio-bg-1: #faa;
-	--ticket-prio-fg-1: #999;
-	--ticket-prio-bg-2: #f44;
-	--ticket-prio-fg-2: #fdd;
-}
+ <template template_group="tickets" template_name="ticketLabel" template_data="$prefix, $id" template_location="global" template_app="vssupport"><![CDATA[<span class="{$prefix}-label {$prefix}-{$id}">{lang="ticket_{$prefix}_{$id}_name"}</span>]]></template>
+ <css css_location="global" css_app="vssupport" css_attributes="" css_path="." css_name="global.css"><![CDATA[/* labels */
 
-.prio--2 { --ticket-prio-bg: var(--ticket-prio-bg--2); --ticket-prio-fg: var(--ticket-prio-fg--2); }
-.prio--1 { --ticket-prio-bg: var(--ticket-prio-bg--1); --ticket-prio-fg: var(--ticket-prio-fg--1); }
-.prio-0 { --ticket-prio-bg: var(--ticket-prio-bg-0); --ticket-prio-fg: var(--ticket-prio-fg-0); }
-.prio-1 { --ticket-prio-bg: var(--ticket-prio-bg-1); --ticket-prio-fg: var(--ticket-prio-fg-1); }
-.prio-2 { --ticket-prio-bg: var(--ticket-prio-bg-2); --ticket-prio-fg: var(--i-color_hard); }
-.prio-label {
+.prio-label, .status-label {
 	display: inline-block;
 	padding: 0 .25em;
   height: 1.2em;
   line-height: 1;
   border-radius: .125em;
-	background-color: var(--ticket-prio-bg);
-	color: var(--ticket-prio-fg);
 	white-space: nowrap;
 }
+
+[data-ips-scheme="dark"] {
+	--tick-prio-c--2-bg: #333; --tick-prio-c--2-fg: #ccc;
+	--tick-prio-c--1-bg: #333; --tick-prio-c--1-fg: #ccc;
+	--tick-prio-c-0-bg: #727272; --tick-prio-c-0-fg: #222;
+	--tick-prio-c-1-bg: #cec549; --tick-prio-c-1-fg: #333;
+	--tick-prio-c-2-bg: #860d0d; --tick-prio-c-2-fg: #ccc;
+}
+[data-ips-scheme="light"] {
+	--tick-prio-c--2-bg: #efefef; --tick-prio-c--2-fg: #333;
+	--tick-prio-c--1-bg: #efefef; --tick-prio-c--1-fg: #333;
+	--tick-prio-c-0-bg: #888888; --tick-prio-c-0-fg: #333;
+	--tick-prio-c-1-bg: #cec549; --tick-prio-c-1-fg: #333;
+	--tick-prio-c-2-bg: #860d0d; --tick-prio-c-2-fg: #333;
+}
+
+.prio-label.prio--2 { background-color: var(--tick-prio-c--2-bg); color: var(--tick-prio-c--2-fg); }
+.prio-label.prio--1 { background-color: var(--tick-prio-c--1-bg); color: var(--tick-prio-c--1-fg); }
+.prio-label.prio-0 { background-color: var(--tick-prio-c-0-bg); color: var(--tick-prio-c-0-fg); }
+.prio-label.prio-1 { background-color: var(--tick-prio-c-1-bg); color: var(--tick-prio-c-1-fg); }
+.prio-label.prio-2 { background-color: var(--tick-prio-c-2-bg); color: var(--tick-prio-c-2-fg); }
+
 
 /* Message coloring */
 .ticket-message.message-issuer { --message-color: #358ef4; }
@@ -300,7 +310,7 @@
 		flex-grow: 1;
 	}
 	#extra-blocks-container {
-		min-width: 50em;
+		min-width: 40em;
 	}
 	#extra-blocks-container>* {
 		position: sticky;
@@ -321,7 +331,7 @@
 	gap: .5em;
 }
 
-.ipsSubmitRow>* {
+.ipsSubmitRow>[title] {
 	margin-top: 1.25em;
 }
 
