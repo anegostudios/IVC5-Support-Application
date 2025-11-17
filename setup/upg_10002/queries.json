@@ -1,0 +1,12 @@
+{
+    "1": {
+        "method": "update",
+        "params": [
+            "vssupport_ticket_stati",
+            {
+                "id": 0
+            },
+            "id = 1"
+        ]
+    }
+}

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <language>
- <app key="vssupport" version="10001">
+ <app key="vssupport" version="10002">
   <word key="__app_vssupport" js="0">VS Support</word>
   <word key="menutab__vssupport" js="0">VS Support</word>
   <word key="menutab__vssupport_icon" js="0">medkit</word>
