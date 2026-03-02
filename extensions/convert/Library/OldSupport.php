@@ -78,7 +78,7 @@ class OldSupport extends CoreLibrary
 						'step_method'  => 'convertTickets',
 						'ips_rows'     => $db->select('COUNT(*)', 'vssupport_tickets'),
 						'source_rows'  => ['table' => $v['table'], 'where' => $v['where']],
-						'per_cycle'    => 200,
+						'per_cycle'    => 100,
 						'dependencies' => ['convertCategories', 'convertStati'],
 						'link_type'    => 'vssupport_tickets',
 					];
@@ -90,7 +90,7 @@ class OldSupport extends CoreLibrary
 						'step_method'  => 'convertMessages',
 						'ips_rows'     => $db->select('COUNT(*)', 'vssupport_messages'),
 						'source_rows'  => ['table' => $v['table'], 'where' => $v['where']],
-						'per_cycle'    => 200,
+						'per_cycle'    => 100,
 						'dependencies' => ['convertTickets'],
 						'link_type'    => 'vssupport_messages',
 					];
@@ -102,7 +102,7 @@ class OldSupport extends CoreLibrary
 						'step_method'  => 'convertActions',
 						'ips_rows'     => $db->select('COUNT(*)', 'vssupport_ticket_action_history'),
 						'source_rows'  => ['table' => $v['table'], 'where' => $v['where']],
-						'per_cycle'    => 200,
+						'per_cycle'    => 100,
 						'dependencies' => ['convertTickets'],
 						'link_type'    => 'vssupport_ticket_actions',
 					];
@@ -167,7 +167,7 @@ class OldSupport extends CoreLibrary
 
 		$mergeCandidate = query_one($db->select('w.word_key', ['core_sys_lang_words', 'w'], [
 			["word_app = 'vssupport'"],
-			['lang_short = ?', $currentLang->short],
+			['lang_id = ?', $currentLang->id],
 			['word_default = ?', $row['word_default']],
 			['word_custom = ?', $row['word_custom']]
 		]));
@@ -178,26 +178,26 @@ class OldSupport extends CoreLibrary
 			$newId = $db->insert('vssupport_ticket_categories', []);
 
 			$word_key = "ticket_category_{$newId}_name";
-			$valuesFolded = "(?, 'vssupport', '{$word_key}', ?, ?, ?)";
-			$binds = [$currentLang->id, $row['word_default'], $row['word_custom'], $row['word_custom'] !== null];
+			$valuesFolded = "(?, 'vssupport', '{$word_key}', ?, ?, 0)";
+			$binds = [$currentLang->id, $row['word_default'], $row['word_custom']];
 
 			$extraLangs = $remoteDatabase->select('l.lang_short, IFNULL(w.word_default, d.dpt_name) AS word_default, w.word_custom', ['nexus_support_departments', 'd'], ['d.dpt_id = ?', $row['dpt_id']])
-				->join(['core_sys_lang_words', 'w'], ["w.lang_id != ? AND w.word_key = CONCAT('nexus_department_', d.dpt_id)", $row['lang_id']])
-				->join(['core_sys_lang', 'l'], "l.lang_id = w.lang_id");
+				->join(['core_sys_lang_words', 'w'], ["w.lang_id != ? AND w.word_key = CONCAT('nexus_department_', d.dpt_id)", $row['lang_id']], 'JOIN')
+				->join(['core_sys_lang', 'l'], "l.lang_id = w.lang_id", 'JOIN');
 			foreach($extraLangs as $extraRow) {
 				$localLanguage = static::mapLanguage($db, $localLanguageMap, $extraRow['lang_short']);
 				if(!$localLanguage) {
-					$valuesFolded .= ", (?, 'vssupport', '{$word_key}', ?, ?, ?)";
-					array_push($binds, $localLanguage, $extraRow['word_default'], $extraRow['word_custom'], $extraRow['word_custom'] !== null);
+					$valuesFolded .= ", (?, 'vssupport', '{$word_key}', ?, ?, 0)";
+					array_push($binds, $localLanguage, $extraRow['word_default'], $extraRow['word_custom']);
 				}
 				//TODO(Rennorb) @debug: Log missing language
 			}
 
 			$db->preparedQuery(<<<SQL
-				INSERT INTO core_sys_lang_words (lang_id, word_app, word_key, word_default, word_custom, word_is_custom)
-					VALUES ($valuesFolded)
+				INSERT INTO core_sys_lang_words (lang_id, word_app, word_key, word_default, word_custom, word_export)
+					VALUES $valuesFolded
 				ON DUPLICATE KEY UPDATE
-					word_default = VALUES(word_default), word_custom = VALUES(word_custom), word_is_custom = VALUES(word_is_custom)
+					word_default = VALUES(word_default), word_custom = VALUES(word_custom), word_export = VALUES(word_export)
 			SQL, $binds);
 		}
 		$this->software->app->addLink($newId, $row['dpt_id'], 'vssupport_ticket_categories');
@@ -211,7 +211,7 @@ class OldSupport extends CoreLibrary
 
 		$mergeCandidate = query_one($db->select('w.word_key', ['core_sys_lang_words', 'w'], [
 			["word_app = 'vssupport'"],
-			['lang_short = ?', $currentLang->short],
+			['lang_id = ?', $currentLang->id],
 			['word_default = ?', $row['word_default']],
 			['word_custom = ?', $row['word_custom']]
 		]));
@@ -231,26 +231,26 @@ class OldSupport extends CoreLibrary
 			$newId = $db->insert('vssupport_ticket_stati', $newData);
 
 			$word_key = "ticket_status_{$newId}_name";
-			$valuesFolded = "(?, 'vssupport', '{$word_key}', ?, ?, ?)";
-			$binds = [$currentLang->id, $row['word_default'], $row['word_custom'], $row['word_custom'] !== null];
+			$valuesFolded = "(?, 'vssupport', '{$word_key}', ?, ?, 0)";
+			$binds = [$currentLang->id, $row['word_default'], $row['word_custom']];
 
 			$extraLangs = $remoteDatabase->select('l.lang_short, IFNULL(w.word_default, s.status_name) AS word_default, w.word_custom', ['nexus_support_statuses', 's'], ['s.status_id = ?', $row['status_id']])
-				->join(['core_sys_lang_words', 'w'], ["w.lang_id != ? AND w.word_key = CONCAT('nexus_status_', s.status_id, '_admin')", $row['lang_id']])
-				->join(['core_sys_lang', 'l'], "l.lang_id = w.lang_id");
+				->join(['core_sys_lang_words', 'w'], ["w.lang_id != ? AND w.word_key = CONCAT('nexus_status_', s.status_id, '_admin')", $row['lang_id']], 'JOIN')
+				->join(['core_sys_lang', 'l'], "l.lang_id = w.lang_id", 'JOIN');
 			foreach($extraLangs as $extraRow) {
 				$localLanguage = static::mapLanguage($db, $localLanguageMap, $extraRow['lang_short']);
 				if(!$localLanguage) {
-					$valuesFolded .= ", (?, 'vssupport', '{$word_key}', ?, ?, ?)";
-					array_push($binds, $localLanguage, $extraRow['word_default'], $extraRow['word_custom'], $extraRow['word_custom'] !== null);
+					$valuesFolded .= ", (?, 'vssupport', '{$word_key}', ?, ?, 0)";
+					array_push($binds, $localLanguage, $extraRow['word_default'], $extraRow['word_custom']);
 				}
 				//TODO(Rennorb) @debug: Log missing language
 			}
 
 			$db->preparedQuery(<<<SQL
-				INSERT INTO core_sys_lang_words (lang_id, word_app, word_key, word_default, word_custom, word_is_custom)
-					VALUES ($valuesFolded)
+				INSERT INTO core_sys_lang_words (lang_id, word_app, word_key, word_default, word_custom, word_export)
+					VALUES $valuesFolded
 				ON DUPLICATE KEY UPDATE
-					word_default = VALUES(word_default), word_custom = VALUES(word_custom), word_is_custom = VALUES(word_is_custom)
+					word_default = VALUES(word_default), word_custom = VALUES(word_custom), word_export = VALUES(word_export)
 			SQL, $binds);
 		}
 		
@@ -350,7 +350,7 @@ class OldSupport extends CoreLibrary
 
 			case 'staff':
 				$kind = ActionKind::Assigned;
-				$referenceId = $this->mapUserByEmail($db, $row['rlog_new'], $row['new_staff_email']);
+				$referenceId = !$row['rlog_new'] ? null : $this->mapUserByEmail($db, $row['rlog_new'], $row['new_staff_email']);
 				break;
 
 			case 'purchase':

@@ -131,6 +131,8 @@ $lang = array(
 	'_convert_messages' => 'Messages',
 	'convert_actions' => 'Convert Actions',
 	'_convert_actions' => 'Actions',
+	'convert_staff_preferences' => 'Convert Staff Preferences',
+	'_convert_staff_preferences' => 'Staff Preferences',
 
 	'vssupport_convert_failed_to_look_up_user' => 'Failed to find a old member in the new database.',
 

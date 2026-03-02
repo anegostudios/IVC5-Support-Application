@@ -225,28 +225,28 @@
                 "values": []
             },
             "text": {
-                "allow_null": false,
-                "auto_increment": false,
-                "comment": "",
-                "decimals": null,
-                "default": null,
-                "length": 0,
                 "name": "text",
-                "type": "TEXT",
+                "type": "MEDIUMTEXT",
+                "length": 0,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": null,
+                "comment": "",
                 "unsigned": false,
-                "values": []
+                "auto_increment": false
             },
             "text_searchable": {
-                "allow_null": false,
-                "auto_increment": false,
-                "comment": "",
-                "decimals": null,
-                "default": null,
-                "length": 0,
                 "name": "text_searchable",
-                "type": "TEXT",
+                "type": "MEDIUMTEXT",
+                "length": 0,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": null,
+                "comment": "",
                 "unsigned": false,
-                "values": []
+                "auto_increment": false
             },
             "flags": {
                 "name": "flags",

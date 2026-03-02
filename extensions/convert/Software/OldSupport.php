@@ -170,10 +170,15 @@ class OldSupport extends ConverterSoftware
 		$currentLang = Member::loggedIn()->language();
 		$langMap = [];
 
+		// For whatever reason this locale key might change. Might be OS dependent, but either way just fall back to the first that exists if 
+		// the current one does not exist in the old data. :LangKeyMismatch
+		$langKey = query_one($this->db->select('lang_short', 'core_sys_lang', ['lang_short = ?', $currentLang->short]))
+			?: query_one($this->db->select('lang_short', 'core_sys_lang', null, 'lang_id ASC', 1));
+
 		$q = $this->fetch(['nexus_support_departments', 'd'], 'dpt_id', null, 'd.dpt_id, l.lang_id, IFNULL(w.word_default, d.dpt_name) AS word_default, w.word_custom')
 			// Default stati don't actually use the database rows, but use translation keys (just as we do), so we need to fallback to those.
 			// :TranslatedField
-			->join(['core_sys_lang', 'l'], ["l.lang_short = ?", $currentLang->short])
+			->join(['core_sys_lang', 'l'], ["l.lang_short = ?", $langKey])
 			->join(['core_sys_lang_words', 'w'], "w.lang_id = l.lang_id AND w.word_key = CONCAT('nexus_department_', d.dpt_id)");
 		foreach($q as $row) {
 			$libraryClass->convertCategory($currentLang, $langMap, $row, $this->db);
@@ -189,9 +194,14 @@ class OldSupport extends ConverterSoftware
 		$currentLang = Member::loggedIn()->language();
 		$langMap = [];
 
-		$q = $this->fetch(['nexus_support_statuses', 's'], 'status_id', null, 's.status_id, IFNULL(w.word_default, s.status_name) AS word_default, w.word_custom, s.status_color')
+		// For whatever reason this locale key might change. Might be OS dependent, but either way just fall back to the first that exists if 
+		// the current one does not exist in the old data. :LangKeyMismatch
+		$langKey = query_one($this->db->select('lang_short', 'core_sys_lang', ['lang_short = ?', $currentLang->short]))
+			?: query_one($this->db->select('lang_short', 'core_sys_lang', null, 'lang_id ASC', 1));
+
+		$q = $this->fetch(['nexus_support_statuses', 's'], 'status_id', null, 's.status_id, l.lang_id, IFNULL(w.word_default, s.status_name) AS word_default, w.word_custom, s.status_color')
 			//:TranslatedField
-			->join(['core_sys_lang', 'l'], ["l.lang_short = ?", $currentLang->short])
+			->join(['core_sys_lang', 'l'], ["l.lang_short = ?", $langKey])
 			->join(['core_sys_lang_words', 'w'], "w.lang_id = l.lang_id AND w.word_key = CONCAT('nexus_status_', s.status_id, '_admin')");
 		foreach($q as $row) {
 			$libraryClass->convertStatus($currentLang, $langMap, $row, $this->db);
@@ -206,7 +216,7 @@ class OldSupport extends ConverterSoftware
 
 		$severityDelta = 1 + query_one($this->db->select('MAX(sev_position) - MIN(sev_position)', 'nexus_support_severities'));
 
-		$q = $this->fetch(['nexus_support_requests', 'r'], 'r_id', null, 'r.*, m.name AS member_name, m.email AS member_email, sm.email AS staff_email, s.sev_position')
+		$q = $this->fetch(['nexus_support_requests', 'r'], 'r_id', null, "r.*, IFNULL(m.name, CONCAT('<unknown_user_#', r.r_member, '>')) AS member_name, IFNULL(m.email, CONCAT('unknown_user+', r.r_member, '@localhost')) AS member_email, sm.email AS staff_email, s.sev_position")
 			->join(['core_members', 'm'], 'm.member_id = r.r_member')
 			->join(['core_members', 'sm'], 'sm.member_id = r.r_staff')
 			->join(['nexus_support_severities', 's'], 's.sev_id = r.r_severity');
@@ -221,7 +231,7 @@ class OldSupport extends ConverterSoftware
 		$libraryClass = $this->getLibrary();
 		$libraryClass::setKey('reply_id');
 
-		$q = $this->fetch(['nexus_support_replies', 'r'], 'reply_id', null, 'r.*, m.email AS member_email')
+		$q = $this->fetch(['nexus_support_replies', 'r'], 'reply_id', null, "r.*, IFNULL(m.email, CONCAT('unknown_user+', r.reply_member, '@localhost')) AS member_email")
 			->join(['core_members', 'm'], 'm.member_id = r.reply_member');
 		foreach($q as $row) {
 			$libraryClass->convertMessage($row);
@@ -236,7 +246,7 @@ class OldSupport extends ConverterSoftware
 
 		$severityDelta = 1 + query_one($this->db->select('MAX(sev_position) - MIN(sev_position)', 'nexus_support_severities'));
 
-		$q = $this->fetch(['nexus_support_request_log', 'l'], 'rlog_id', null, 'l.*, m.email AS member_email, s.sev_position, nsm.email AS new_staff_email')
+		$q = $this->fetch(['nexus_support_request_log', 'l'], 'rlog_id', null, "l.*, IFNULL(m.email, CONCAT('unknown_user+', l.rlog_member, '@localhost')) AS member_email, s.sev_position, nsm.email AS new_staff_email")
 			->join(['core_members', 'm'], 'm.member_id = l.rlog_member')
 			->join(['nexus_support_severities', 's'], "l.rlog_action = 'severity' AND s.sev_id = l.rlog_new")
 			->join(['core_members', 'nsm'], "l.rlog_action = 'staff' AND nsm.member_id = l.rlog_new");

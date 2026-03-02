@@ -1,0 +1,40 @@
+[
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_messages",
+            "text_searchable",
+            {
+                "name": "text_searchable",
+                "type": "MEDIUMTEXT",
+                "length": 0,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    },
+    {
+        "method": "changeColumn",
+        "params": [
+            "vssupport_messages",
+            "text",
+            {
+                "name": "text",
+                "type": "MEDIUMTEXT",
+                "length": 0,
+                "decimals": null,
+                "values": [],
+                "allow_null": false,
+                "default": null,
+                "comment": "",
+                "unsigned": false,
+                "auto_increment": false
+            }
+        ]
+    }
+]
